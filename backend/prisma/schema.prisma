@@ -6,17 +6,17 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 // User Roles based on platform participants
 enum UserRole {
-  FARMER          // Primary producers
-  BUYER           // Institutional buyers, Retailers
-  COOPERATIVE     // Community procurement groups
-  ADMIN           // Platform administrators
-  LOGISTICS       // Logistics partners (future scope)
+  FARMER
+  BUYER
+  COOPERATIVE
+  ADMIN
+  LOGISTICS
 }
 
 // Verification types
@@ -26,7 +26,7 @@ enum VerificationType {
 }
 
 model User {
-  id                String   @id @default(uuid())
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
   phoneNumber       String   @unique
   email             String?  @unique
   passwordHash      String
@@ -36,23 +36,18 @@ model User {
   fullName          String?
   
   // Localization for Indian context
-  preferredLanguage String   @default("en") // e.g., "en", "hi", "ta", "te"
+  preferredLanguage String   @default("en")
   
   isVerified        Boolean  @default(false)
   isActive          Boolean  @default(true)
   
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
-  // Relations (Placeholder for future modules)
-  // products Product[]
-  // orders Order[]
-  // disputes Dispute[]
 }
 
 // For handling OTPs during Registration and Login (SMS/Email)
 model VerificationCode {
-  id        String           @id @default(uuid())
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
   contact   String           // The phone number or email address
   code      String
   type      VerificationType

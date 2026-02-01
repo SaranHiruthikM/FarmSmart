@@ -1,0 +1,44 @@
+import mongoose, { Document, Schema } from 'mongoose';
+
+export enum UserRole {
+  FARMER = 'FARMER',
+  BUYER = 'BUYER',
+  COOPERATIVE = 'COOPERATIVE',
+  ADMIN = 'ADMIN',
+  LOGISTICS = 'LOGISTICS'
+}
+
+export interface IUser extends Document {
+  phoneNumber: string;
+  email?: string;
+  passwordHash: string;
+  role: UserRole;
+  fullName?: string;
+  preferredLanguage: string;
+  isVerified: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const UserSchema: Schema = new Schema(
+  {
+    phoneNumber: { type: String, required: true, unique: true },
+    email: { type: String, unique: true, sparse: true }, // sparse allows multiple nulls
+    passwordHash: { type: String, required: true },
+    role: { 
+      type: String, 
+      enum: Object.values(UserRole), 
+      default: UserRole.FARMER 
+    },
+    fullName: { type: String },
+    preferredLanguage: { type: String, default: 'en' },
+    isVerified: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+  },
+  {
+    timestamps: true, // Automatically manages createdAt and updatedAt
+  }
+);
+
+export default mongoose.model<IUser>('User', UserSchema);
