@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // switch to "mysql" if you use MySQL
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FARMER
+  BUYER
+  ADMIN
+}
+
+enum CropQuality {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum CropStatus {
+  AVAILABLE
+  SOLD
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String    @unique
+  password   String
+  role       Role      @default(FARMER)
+  language   String    @default("English")
+  isVerified Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  crops      Crop[]
+  bids       Bid[]     @relation("BuyerBids")
+  ratingsGiven    Rating[] @relation("RatingsGiven")
+  ratingsReceived Rating[] @relation("RatingsReceived")
+  disputes   Dispute[]
+  otps       EmailOTP[]
+
+  @@index([role])
+}
+
+model EmailOTP {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Crop {
+  id           Int         @id @default(autoincrement())
+  farmerId     Int
+  cropName     String
+  quantity     Int
+  unit         String      @default("KG")
+  pricePerUnit Decimal
+  quality      CropQuality
+  location     String?
+  description  String?
+  status       CropStatus  @default(AVAILABLE)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  farmer       User        @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  bids         Bid[]
+
+  @@index([cropName])
+  @@index([location])
+}
+
+model Bid {
+  id        Int       @id @default(autoincrement())
+  cropId    Int
+  buyerId   Int
+  bidAmount Decimal
+  notes     String?
+  status    BidStatus @default(PENDING)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  crop      Crop      @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  buyer     User      @relation("BuyerBids", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@index([cropId])
+  @@index([buyerId])
+}
+
+model Rating {
+  id           Int      @id @default(autoincrement())
+  scorerId     Int
+  targetUserId Int
+  score        Int
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  scorer       User     @relation("RatingsGiven", fields: [scorerId], references: [id], onDelete: Cascade)
+  target       User     @relation("RatingsReceived", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@index([targetUserId])
+}
+
+model Dispute {
+  id        Int           @id @default(autoincrement())
+  orderId   Int
+  userId    Int
+  reason    String
+  status    DisputeStatus @default(OPEN)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
