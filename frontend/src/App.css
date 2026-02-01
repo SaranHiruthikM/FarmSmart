@@ -1,42 +1,156 @@
-#root {
-  max-width: 1280px;
+/* ================================================================
+   DESIGN SYSTEM TOKENS — STRICT (Do NOT modify)
+================================================================ */
+
+:root {
+  /* Brand Colors */
+  --color-primary: #1E7F5C;
+  --color-primary-dark: #166A4C;
+  --color-primary-light: #E6F4EF;
+
+  --color-secondary: #F4A261;
+  --color-secondary-light: #FCE8D8;
+
+  /* Neutral */
+  --color-bg: #F9FAFB;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+
+  /* Typography (Inter only) */
+  --text-xl: 20px;
+  --text-lg: 16px;
+  --text-md: 14px;
+  --text-sm: 12px;
+
+  /* Spacing (8px grid) */
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+
+  /* Radius */
+  --radius: 8px;
+}
+
+/* ================================================================
+   Global Layout
+================================================================ */
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--color-text-primary);
+}
+
+/* Page container */
+.page-layout {
+  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--space-lg);
+}
+
+.page-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.page-subtitle {
+  font-size: var(--text-md);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+/* ================================================================
+   Card Component
+================================================================ */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+/* ================================================================
+   Buttons
+================================================================ */
+
+.button {
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: var(--text-md);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.button-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.button-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.button-secondary {
+  background: var(--color-secondary-light);
+  color: var(--color-primary);
+}
+
+/* ================================================================
+   Inputs
+================================================================ */
+
+.input-block {
+  margin-bottom: var(--space-md);
+}
+
+.input-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+  display: block;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: var(--text-md);
+}
+
+/* ================================================================
+   Fallback Menu Grid
+================================================================ */
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.grid-item {
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm);
+  border-radius: var(--radius);
+  cursor: pointer;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.grid-item:hover {
+  background: var(--color-primary-light);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.grid-item-label {
+  margin-top: var(--space-xs);
+  font-size: var(--text-sm);
 }
