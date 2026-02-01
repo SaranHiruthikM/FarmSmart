@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Roles based on platform participants
+enum UserRole {
+  FARMER          // Primary producers
+  BUYER           // Institutional buyers, Retailers
+  COOPERATIVE     // Community procurement groups
+  ADMIN           // Platform administrators
+  LOGISTICS       // Logistics partners (future scope)
+}
+
+// Verification types
+enum VerificationType {
+  PHONE
+  EMAIL
+}
+
+model User {
+  id                String   @id @default(uuid())
+  phoneNumber       String   @unique
+  email             String?  @unique
+  passwordHash      String
+  
+  role              UserRole @default(FARMER)
+  
+  fullName          String?
+  
+  // Localization for Indian context
+  preferredLanguage String   @default("en") // e.g., "en", "hi", "ta", "te"
+  
+  isVerified        Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations (Placeholder for future modules)
+  // products Product[]
+  // orders Order[]
+  // disputes Dispute[]
+}
+
+// For handling OTPs during Registration and Login (SMS/Email)
+model VerificationCode {
+  id        String           @id @default(uuid())
+  contact   String           // The phone number or email address
+  code      String
+  type      VerificationType
+  expiresAt DateTime
+  createdAt DateTime         @default(now())
+
+  @@index([contact])
+}
+
