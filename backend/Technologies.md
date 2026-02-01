@@ -3,9 +3,14 @@
 ## Backend
 - **Runtime**: Node.js
 - **Language**: TypeScript
-- **Database**: PostgreSQL
-- **ORM**: Prisma
+- **Database**: MongoDB
+- **ORM/ODM**: Mongoose
 - **Package Manager**: NPM
+
+## Frontend
+- **Framework**: React (Vite)
+- **Language**: JavaScript/JSX (currently)
 
 ## Infrastructure
 - **Version Control**: Git
+
