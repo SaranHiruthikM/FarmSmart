@@ -1,0 +1,32 @@
+[
+  {
+    "code": "hi",
+    "name": "Hindi",
+    "native": "हिंदी",
+    "rtl": false
+  },
+  {
+    "code": "ta",
+    "name": "Tamil",
+    "native": "தமிழ்",
+    "rtl": false
+  },
+  {
+    "code": "ml",
+    "name": "Malayalam",
+    "native": "മലയാളം",
+    "rtl": false
+  },
+  {
+    "code": "te",
+    "name": "Telugu",
+    "native": "తెలుగు",
+    "rtl": false
+  },
+  {
+    "code": "kn",
+    "name": "Kannada",
+    "native": "ಕನ್ನಡ",
+    "rtl": false
+  }
+]
