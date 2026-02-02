@@ -1,0 +1,7 @@
+{
+  "sms": true,
+  "call": false,
+  "priceAlerts": true,
+  "auctionAlerts": true,
+  "deliveryAlerts": true
+}
