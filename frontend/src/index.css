@@ -1,10 +1,22 @@
 @import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --color-primary: #166534;        /* --primary-green (Green 800) */
+  --color-primary-light: #22c55e;  /* --primary-green-light (Green 500) */
+  --color-primary-dark: #14532d;   /* --primary-green-dark (Green 900) */
+  
+  --color-secondary: #991b1b;      /* --secondary-red (Red 800) */
+  --color-secondary-light: #ef4444;/* --secondary-red-light (Red 500) */
+  
+  --color-accent: #525252;         /* --accent-grey */
+  --color-text-dark: #171717;      /* --text-dark */
+  --color-white: #FFFFFF;
+  --color-neutral-light: #F5F5F5;
+
+  --font-sans: "Inter", sans-serif;
+}
 
 body {
   font-family: "Inter", sans-serif;
-  background-color: white;
+  background-color: var(--color-white);
 }
