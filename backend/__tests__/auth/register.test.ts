@@ -1,15 +1,10 @@
 import request from 'supertest';
-import express from 'express';
-import { register } from '../../src/controllers/authController';
+import app from '../../src/app';
 import User from '../../src/models/User';
 import { testUsers } from '../fixtures/testData';
 import '../setup/testSetup';
 
-const app = express();
-app.use(express.json());
-app.post('/api/auth/register', register);
-
-describe('POST /api/auth/register - Comprehensive Tests', () => {
+describe('POST /auth/register - Comprehensive Tests', () => {
   
   describe('✓ Successful Registration Cases', () => {
     
@@ -24,7 +19,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -47,7 +42,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -62,7 +57,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -77,7 +72,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -92,7 +87,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -111,7 +106,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/auth/register')
+          .post('/auth/register')
           .send(userData);
 
         expect(response.status).toBe(201);
@@ -127,7 +122,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -147,7 +142,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -167,7 +162,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(400);
@@ -181,7 +176,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(400);
@@ -190,7 +185,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
 
     it('should return 400 if both are missing', async () => {
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send({});
 
       expect(response.status).toBe(400);
@@ -204,7 +199,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(400);
@@ -218,7 +213,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(400);
@@ -233,7 +228,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(400);
@@ -248,7 +243,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(400);
@@ -262,7 +257,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(400);
@@ -276,13 +271,13 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response1 = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response1.status).toBe(201);
 
       const response2 = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response2.status).toBe(409);
@@ -300,7 +295,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
     });
 
@@ -311,7 +306,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(409);
@@ -326,7 +321,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -343,7 +338,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -358,7 +353,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -373,7 +368,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -391,7 +386,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -405,7 +400,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect([201, 400]).toContain(response.status);
@@ -418,7 +413,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);
@@ -433,7 +428,7 @@ describe('POST /api/auth/register - Comprehensive Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send(userData);
 
       expect(response.status).toBe(201);

@@ -1,38 +1,24 @@
-import request from 'supertest';
-import express from 'express';
 import mongoose from 'mongoose';
-import { register, login } from '../../src/controllers/authController';
+import request from 'supertest';
+import app from '../../src/app';
 import { testUsers, loginAttempts } from '../fixtures/testData';
 import '../setup/testSetup';
 
-const app = express();
-app.use(express.json());
-app.post('/api/auth/register', register);
-app.post('/api/auth/login', login);
-
-describe('POST /api/auth/login - Comprehensive Tests', () => {
+describe('POST /auth/login - Comprehensive Tests', () => {
+  let testPhone: string;
   
   beforeEach(async () => {
-    // Clean database before each test
-    try {
-      const collections = Object.keys(mongoose.connection.collections);
-      for (const collectionName of collections) {
-        const collection = mongoose.connection.collections[collectionName];
-        await collection.deleteMany({});
-      }
-    } catch (error) {
-      console.error('Error cleaning database:', error);
-    }
+    testPhone = '99' + Math.floor(10000000 + Math.random() * 90000000).toString(); // Logic to valid Indian phone length but random
 
     // Create UNIQUE test user for login tests (different from register tests)
     await request(app)
-      .post('/api/auth/register')
+      .post('/auth/register')
       .send({
-        phoneNumber: '9999999999',  // ← UNIQUE phone number
+        phoneNumber: testPhone,
         password: 'TestPassword123!',
         role: 'FARMER',
         fullName: 'Test Farmer',
-        email: 'test@farm.com',
+        email: `test${testPhone}@farm.com`,
       });
   });
 
@@ -40,9 +26,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
     
     it('should login user with valid phone and password', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',  // ← UNIQUE phone number
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
@@ -51,14 +37,14 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
       expect(response.body.message).toContain('successful');
       expect(response.body.data.user).toBeDefined();
       expect(response.body.data.token).toBeDefined();
-      expect(response.body.data.user.phoneNumber).toBe('9999999999');
+      expect(response.body.data.user.phoneNumber).toBe(testPhone);
     });
 
     it('should return user object with correct fields', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
@@ -67,16 +53,16 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
       const user = response.body.data.user;
       
       expect(user._id).toBeDefined();
-      expect(user.phoneNumber).toBe('9999999999');
+      expect(user.phoneNumber).toBe(testPhone);
       expect(user.role).toBe('FARMER');
       expect(user.fullName).toBe('Test Farmer');
     });
 
     it('should return valid JWT token', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
@@ -91,9 +77,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return token with userId and role in payload', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
@@ -108,9 +94,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should not return password in response', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
@@ -122,9 +108,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return token with 7-day expiration', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
@@ -144,9 +130,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
     
     it('should return 401 for wrong password', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'WrongPassword123!',
         });
 
@@ -157,7 +143,7 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return 401 for non-existent user', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
           phoneNumber: '1111111111',
           password: 'TestPassword123!',
@@ -169,14 +155,14 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should not reveal if user exists or password is wrong', async () => {
       const wrongPasswordResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'WrongPassword123!',
         });
 
       const nonExistentUserResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
           phoneNumber: '1111111111',
           password: 'TestPassword123!',
@@ -188,9 +174,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should not return user data on authentication failure', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'WrongPassword123!',
         });
 
@@ -201,9 +187,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should not return token on authentication failure', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'WrongPassword123!',
         });
 
@@ -217,7 +203,7 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
     
     it('should return 400 if phone number is missing', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
           password: 'TestPassword123!',
         });
@@ -229,9 +215,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return 400 if password is missing', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
         });
 
       expect(response.status).toBe(400);
@@ -240,7 +226,7 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return 400 for missing both fields', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({});
 
       expect(response.status).toBe(400);
@@ -249,7 +235,7 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return 400 if phone number is empty string', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
           phoneNumber: '',
           password: 'TestPassword123!',
@@ -261,9 +247,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return 400 if password is empty string', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: '',
         });
 
@@ -273,7 +259,7 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should reject null phone number', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
           phoneNumber: null,
           password: 'TestPassword123!',
@@ -285,9 +271,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should reject undefined password', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: undefined,
         });
 
@@ -300,9 +286,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
     
     it('should be case-sensitive for password', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'testpassword123!',
         });
 
@@ -312,9 +298,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should reject password with minor character differences', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123',
         });
 
@@ -324,9 +310,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should handle very long password gracefully', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'a'.repeat(1000),
         });
 
@@ -336,7 +322,7 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should handle special characters in password', async () => {
       await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send({
           phoneNumber: '8888888888',
           password: '!@#$%^&*()_+-={}',
@@ -344,7 +330,7 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
         });
 
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
           phoneNumber: '8888888888',
           password: '!@#$%^&*()_+-={}',
@@ -359,7 +345,7 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
     
     beforeEach(async () => {
       await request(app)
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send({
           phoneNumber: '7777777777',
           password: 'BuyerPass123!',
@@ -370,14 +356,14 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should login different users independently', async () => {
       const farmer = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
       const buyer = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
           phoneNumber: '7777777777',
           password: 'BuyerPass123!',
@@ -393,14 +379,14 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return correct role for each user', async () => {
       const farmerLogin = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
       const buyerLogin = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
           phoneNumber: '7777777777',
           password: 'BuyerPass123!',
@@ -412,9 +398,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should prevent cross-user login with wrong credentials', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'BuyerPass123!',
         });
 
@@ -427,9 +413,9 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
     
     it('should handle numeric phone number', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: 9999999999,
+          phoneNumber: Number(testPhone),
           password: 'TestPassword123!',
         });
 
@@ -440,17 +426,17 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
     it('should handle login after multiple failed attempts', async () => {
       for (let i = 0; i < 3; i++) {
         await request(app)
-          .post('/api/auth/login')
+          .post('/auth/login')
           .send({
-            phoneNumber: '9999999999',
+            phoneNumber: testPhone,
             password: 'WrongPassword123!',
           });
       }
 
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
@@ -460,16 +446,16 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
 
     it('should return consistent response format', async () => {
       const response1 = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
       const response2 = await request(app)
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          phoneNumber: '9999999999',
+          phoneNumber: testPhone,
           password: 'TestPassword123!',
         });
 
@@ -477,3 +463,4 @@ describe('POST /api/auth/login - Comprehensive Tests', () => {
     });
   });
 });
+
