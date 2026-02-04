@@ -23,7 +23,7 @@ const Sidebar = () => {
         { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
         { label: "Crop Listing & Marketplace", icon: Store, path: "/dashboard/marketplace" },
         { label: "Price Comparison & Insights", icon: TrendingUp, path: "/dashboard/insights" },
-        { label: "Demand Forecasting", icon: LineChart, path: "/dashboard/forecasting" },
+        { label: "Demand Forecasting", icon: LineChart, path: "/dashboard/forecast" },
         { label: "Quality-Based Pricing", icon: Award, path: "/dashboard/pricing" },
         { label: "Negotiation & Bidding", icon: Handshake, path: "/dashboard/negotiation" },
         { label: "Orders & Transactions", icon: Receipt, path: "/dashboard/orders" },

@@ -9,6 +9,7 @@ import Marketplace from "./pages/Marketplace";
 import CropDetails from "./pages/CropDetails";
 import CropListingForm from "./pages/CropListingForm";
 import PriceInsights from "./pages/PriceInsights";
+import DemandForecast from "./pages/DemandForecast";
 
 function App() {
   return (
@@ -28,6 +29,9 @@ function App() {
 
         {/* Price Insights */}
         <Route path="insights" element={<PriceInsights />} />
+
+        {/* Demand Forecast */}
+        <Route path="forecast" element={<DemandForecast />} />
 
         {/* Farmer Crop Management */}
         <Route path="add-crop" element={<CropListingForm />} />
