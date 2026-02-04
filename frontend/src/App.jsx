@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import authService from "./services/auth.service";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -11,13 +12,22 @@ import CropListingForm from "./pages/CropListingForm";
 import PriceInsights from "./pages/PriceInsights";
 import DemandForecast from "./pages/DemandForecast";
 
+// Protected Route Wrapper for Public Pages (Login/Register)
+// If authenticated, redirect to dashboard.
+const PublicRoute = ({ children }) => {
+  if (authService.isAuthenticated()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+};
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/otp" element={<Otp />} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+      <Route path="/otp" element={<PublicRoute><Otp /></PublicRoute>} />
 
       {/* Dashboard Routes */}
       <Route path="/dashboard" element={<DashboardLayout />}>
