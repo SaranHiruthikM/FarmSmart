@@ -81,7 +81,10 @@ const DemandForecast = () => {
                             ))}
                         </select>
                     </div>
-                    <PrimaryButton className="py-3 px-6 text-xs uppercase tracking-widest" onClick={() => { }}>
+                    <PrimaryButton
+                        className="h-[52px] px-8 text-xs font-black uppercase tracking-widest rounded-2xl whitespace-nowrap"
+                        onClick={() => { }}
+                    >
                         <RefreshCw className="w-4 h-4 mr-2" /> Refresh Data
                     </PrimaryButton>
                 </div>
@@ -98,12 +101,12 @@ const DemandForecast = () => {
                             <p className="text-xs text-accent font-bold uppercase tracking-widest">Current stock requirements</p>
                         </div>
                         <div className={`px-4 py-2 rounded-2xl flex items-center gap-2 border shadow-sm ${demandData.demandLevel === 'High' ? 'bg-green-50 text-green-700 border-green-100' :
-                                demandData.demandLevel === 'Medium' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
-                                    'bg-red-50 text-red-700 border-red-100'
+                            demandData.demandLevel === 'Medium' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                                'bg-red-50 text-red-700 border-red-100'
                             }`}>
                             <div className={`w-2 h-2 rounded-full animate-pulse ${demandData.demandLevel === 'High' ? 'bg-green-600' :
-                                    demandData.demandLevel === 'Medium' ? 'bg-yellow-600' :
-                                        'bg-red-600'
+                                demandData.demandLevel === 'Medium' ? 'bg-yellow-600' :
+                                    'bg-red-600'
                                 }`}></div>
                             <span className="text-sm font-black uppercase tracking-widest">{demandData.demandLevel} Demand</span>
                         </div>
@@ -157,8 +160,8 @@ const DemandForecast = () => {
                                     {demandData.sellRecommendation.action}
                                 </h2>
                                 <div className={`p-2 rounded-xl backdrop-blur-md ${demandData.sellRecommendation.trend === 'up' ? 'bg-green-500/20 text-green-400' :
-                                        demandData.sellRecommendation.trend === 'down' ? 'bg-red-500/20 text-red-400' :
-                                            'bg-blue-500/20 text-blue-400'
+                                    demandData.sellRecommendation.trend === 'down' ? 'bg-red-500/20 text-red-400' :
+                                        'bg-blue-500/20 text-blue-400'
                                     }`}>
                                     {demandData.sellRecommendation.trend === 'up' ? <ArrowUp className="w-6 h-6" /> :
                                         demandData.sellRecommendation.trend === 'down' ? <ArrowDown className="w-6 h-6" /> :

@@ -1,10 +1,9 @@
-function PrimaryButton({ children, onClick, disabled }) {
+function PrimaryButton({ children, onClick, disabled, className = "" }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className="
-        w-full py-2.5 mt-2
+      className={`
         bg-primary
         text-white
         font-medium
@@ -14,7 +13,9 @@ function PrimaryButton({ children, onClick, disabled }) {
         hover:shadow-lg
         transition
         disabled:opacity-50
-      "
+        flex items-center justify-center
+        ${className}
+      `}
     >
       {children}
     </button>
