@@ -39,8 +39,8 @@ const CropCard = ({ crop, onDelete }) => {
                 {/* Grade Badge */}
                 <div className="absolute top-3 right-3">
                     <span className={`px-3 py-1 text-[10px] font-black tracking-widest uppercase rounded-full shadow-sm border ${crop.qualityGrade === 'A' ? 'bg-green-100 text-green-700 border-green-200' :
-                            crop.qualityGrade === 'B' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                                'bg-red-100 text-red-700 border-red-200'
+                        crop.qualityGrade === 'B' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                            'bg-red-100 text-red-700 border-red-200'
                         }`}>
                         Grade {crop.qualityGrade}
                     </span>
@@ -65,9 +65,14 @@ const CropCard = ({ crop, onDelete }) => {
                     </div>
                     <div className="space-y-1">
                         <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Price / {crop.unit}</p>
-                        <div className="flex items-center text-sm font-black text-primary">
-                            <BadgeIndianRupee className="w-3.5 h-3.5 mr-1" />
-                            <span>₹{crop.basePrice}</span>
+                        <div className="flex flex-col">
+                            <div className="flex items-center text-sm font-black text-primary">
+                                <BadgeIndianRupee className="w-3.5 h-3.5 mr-1" />
+                                <span>₹{crop.finalPrice || crop.basePrice}</span>
+                            </div>
+                            {crop.finalPrice !== crop.basePrice && (
+                                <span className="text-[9px] text-accent font-medium line-through decoration-red-400/50">₹{crop.basePrice} base</span>
+                            )}
                         </div>
                     </div>
                 </div>

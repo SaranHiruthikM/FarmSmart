@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import InputField from "../common/InputField";
 import PrimaryButton from "../common/PrimaryButton";
-import { Loader2, Info, MapPin, Scale, BadgeIndianRupee } from "lucide-react";
+import { Loader2, Info, MapPin, Scale, BadgeIndianRupee, TrendingUp, HelpCircle } from "lucide-react";
+import qualityService from "../../services/quality.service";
 
 const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) => {
     const [formData, setFormData] = useState({
@@ -18,11 +19,27 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
         },
     });
 
+    const [priceImpact, setPriceImpact] = useState(null);
+
     useEffect(() => {
         if (initialData) {
             setFormData(initialData);
         }
     }, [initialData]);
+
+    useEffect(() => {
+        const calculateImpact = async () => {
+            if (formData.basePrice) {
+                const impact = await qualityService.getPriceImpact(formData.qualityGrade, formData.basePrice);
+                setPriceImpact(impact);
+            } else {
+                setPriceImpact(null);
+            }
+        };
+        calculateImpact();
+    }, [formData.qualityGrade, formData.basePrice]);
+
+    const hints = qualityService.getGradeHints();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -126,29 +143,66 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
                 </div>
                 <div>
                     <label className="block text-xs font-black text-accent uppercase tracking-widest mb-4">Select Quality Grade</label>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         {['A', 'B', 'C'].map((grade) => (
-                            <label key={grade} className={`relative flex flex-col items-center justify-center p-4 border-2 rounded-2xl cursor-pointer transition-all group ${formData.qualityGrade === grade
+                            <div key={grade} className="space-y-3">
+                                <label className={`relative flex flex-col items-center justify-center p-6 border-2 rounded-2xl cursor-pointer transition-all group ${formData.qualityGrade === grade
                                     ? 'border-primary bg-primary/5 shadow-inner'
                                     : 'border-neutral-light hover:border-primary/30'
-                                }`}>
-                                <input
-                                    type="radio"
-                                    name="qualityGrade"
-                                    value={grade}
-                                    checked={formData.qualityGrade === grade}
-                                    onChange={handleChange}
-                                    className="sr-only"
-                                />
-                                <span className={`text-2xl font-black ${formData.qualityGrade === grade ? 'text-primary' : 'text-accent opacity-50'}`}>
-                                    {grade}
-                                </span>
-                                <span className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${formData.qualityGrade === grade ? 'text-primary' : 'text-accent'}`}>
-                                    Grade {grade}
-                                </span>
-                            </label>
+                                    }`}>
+                                    <input
+                                        type="radio"
+                                        name="qualityGrade"
+                                        value={grade}
+                                        checked={formData.qualityGrade === grade}
+                                        onChange={handleChange}
+                                        className="sr-only"
+                                    />
+                                    <span className={`text-3xl font-black ${formData.qualityGrade === grade ? 'text-primary' : 'text-accent opacity-50'}`}>
+                                        {grade}
+                                    </span>
+                                    <span className={`text-[10px] font-black uppercase tracking-[0.2em] mt-2 ${formData.qualityGrade === grade ? 'text-primary' : 'text-accent'}`}>
+                                        Grade {grade}
+                                    </span>
+                                </label>
+                                <div className="flex items-start gap-2 px-2">
+                                    <HelpCircle className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
+                                    <p className="text-[11px] text-accent font-medium leading-relaxed">
+                                        {hints[grade]}
+                                    </p>
+                                </div>
+                            </div>
                         ))}
                     </div>
+
+                    {/* Price Preview */}
+                    {priceImpact && (
+                        <div className="mt-8 p-6 bg-green-50 rounded-[2rem] border-2 border-primary/20 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
+                            <div className="absolute top-0 right-0 p-8 opacity-5">
+                                <TrendingUp className="w-24 h-24" />
+                            </div>
+                            <div className="space-y-1 relative z-10 text-center md:text-left">
+                                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Quality Price Adjustment</h4>
+                                <div className="flex items-baseline gap-2 justify-center md:justify-start">
+                                    <span className="text-3xl font-black text-text-dark">₹{priceImpact.finalPrice}</span>
+                                    <span className="text-xs text-accent font-bold uppercase">per {formData.unit}</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-8 relative z-10">
+                                <div className="text-center">
+                                    <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1">Base Price</p>
+                                    <p className="font-bold text-text-dark">₹{priceImpact.basePrice}</p>
+                                </div>
+                                <div className="w-px h-8 bg-primary/20"></div>
+                                <div className="text-center">
+                                    <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1">Impact</p>
+                                    <p className={`font-black ${priceImpact.percentage > 0 ? 'text-green-600' : priceImpact.percentage < 0 ? 'text-red-500' : 'text-text-dark'}`}>
+                                        {priceImpact.percentage > 0 ? '+' : ''}{priceImpact.percentage}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

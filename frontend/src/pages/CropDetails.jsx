@@ -114,8 +114,8 @@ const CropDetails = () => {
                                     <p className="text-xl text-accent font-medium">{crop.variety || 'Standard Variety'}</p>
                                 </div>
                                 <div className={`px-4 py-2 rounded-2xl text-sm font-black shadow-sm flex items-center gap-2 ${crop.qualityGrade === 'A' ? 'bg-green-50 text-green-700 border border-green-100' :
-                                        crop.qualityGrade === 'B' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100' :
-                                            'bg-red-50 text-red-700 border border-red-100'
+                                    crop.qualityGrade === 'B' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100' :
+                                        'bg-red-50 text-red-700 border border-red-100'
                                     }`}>
                                     <ShieldCheck className="w-4 h-4" />
                                     GRADE {crop.qualityGrade}
@@ -125,11 +125,21 @@ const CropDetails = () => {
 
                         <div className="grid grid-cols-2 gap-8 py-8 border-y border-neutral-light/50">
                             <div className="space-y-1">
-                                <p className="text-xs font-bold text-accent uppercase tracking-widest">Base Price / {crop.unit}</p>
-                                <div className="flex items-baseline text-4xl font-black text-primary">
-                                    <span className="text-2xl mr-0.5">₹</span>
-                                    {crop.basePrice}
-                                    <span className="text-lg text-accent font-medium ml-1">/{crop.unit}</span>
+                                <p className="text-xs font-bold text-accent uppercase tracking-widest">Market Price / {crop.unit}</p>
+                                <div className="flex flex-col">
+                                    <div className="flex items-baseline text-4xl font-black text-primary">
+                                        <span className="text-2xl mr-0.5">₹</span>
+                                        {crop.finalPrice || crop.basePrice}
+                                        <span className="text-lg text-accent font-medium ml-1">/{crop.unit}</span>
+                                    </div>
+                                    {crop.finalPrice !== crop.basePrice && (
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-xs text-accent font-bold line-through">₹{crop.basePrice}</span>
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${crop.qualityGrade === 'A' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                {crop.qualityGrade === 'A' ? '+15% Grade A Bonus' : '-10% Grade C Adjustment'}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div className="space-y-1">
