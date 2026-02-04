@@ -2,6 +2,6 @@
   "sms": true,
   "call": false,
   "priceAlerts": true,
-  "auctionAlerts": false,
+  "auctionAlerts": true,
   "deliveryAlerts": true
 }
