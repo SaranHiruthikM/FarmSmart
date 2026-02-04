@@ -10,6 +10,7 @@ import CropDetails from "./pages/CropDetails";
 import CropListingForm from "./pages/CropListingForm";
 import PriceInsights from "./pages/PriceInsights";
 import DemandForecast from "./pages/DemandForecast";
+import QualityPricing from "./pages/QualityPricing";
 
 function App() {
   return (
@@ -32,6 +33,9 @@ function App() {
 
         {/* Demand Forecast */}
         <Route path="forecast" element={<DemandForecast />} />
+
+        {/* Quality Based Pricing */}
+        <Route path="pricing" element={<QualityPricing />} />
 
         {/* Farmer Crop Management */}
         <Route path="add-crop" element={<CropListingForm />} />

@@ -1,6 +1,14 @@
 // LocalStorage-based mock service for Frontend-only mode
 const STORAGE_KEY = "farm_crops";
 
+const getPriceImpact = (grade, basePrice) => {
+    const price = parseFloat(basePrice);
+    let multiplier = 1;
+    if (grade === 'A') multiplier = 1.15;
+    else if (grade === 'C') multiplier = 0.9;
+    return parseFloat((price * multiplier).toFixed(2));
+};
+
 // Helper to get crops from storage
 const getStoredCrops = () => {
     const crops = localStorage.getItem(STORAGE_KEY);
@@ -22,6 +30,7 @@ if (!localStorage.getItem(STORAGE_KEY)) {
             quantity: 500,
             unit: "kg",
             basePrice: 85,
+            finalPrice: 97.75,
             qualityGrade: "A",
             location: { state: "Punjab", district: "Amritsar", village: "Rayya" },
             farmer: "f1",
@@ -36,6 +45,7 @@ if (!localStorage.getItem(STORAGE_KEY)) {
             quantity: 120,
             unit: "kg",
             basePrice: 40,
+            finalPrice: 40,
             qualityGrade: "B",
             location: { state: "Maharashtra", district: "Nashik", village: "Pimpalgaon" },
             farmer: "f2",
@@ -55,6 +65,7 @@ const cropService = {
         const newCrop = {
             ...cropData,
             _id: Math.random().toString(36).substr(2, 9),
+            finalPrice: getPriceImpact(cropData.qualityGrade, cropData.basePrice),
             farmer: user.id,
             farmerName: user.name,
             isActive: true,
@@ -71,7 +82,8 @@ const cropService = {
         const crops = getStoredCrops();
         const index = crops.findIndex(c => c._id === id);
         if (index !== -1) {
-            crops[index] = { ...crops[index], ...cropData };
+            const finalPrice = getPriceImpact(cropData.qualityGrade || crops[index].qualityGrade, cropData.basePrice || crops[index].basePrice);
+            crops[index] = { ...crops[index], ...cropData, finalPrice };
             saveCrops(crops);
             return crops[index];
         }
@@ -102,6 +114,12 @@ const cropService = {
     getAllCrops: async (filters = {}) => {
         let crops = getStoredCrops().filter(c => c.isActive);
 
+        // Ensure finalPrice exists for all
+        crops = crops.map(c => ({
+            ...c,
+            finalPrice: c.finalPrice || c.basePrice
+        }));
+
         if (filters.name) {
             crops = crops.filter(c => c.name.toLowerCase().includes(filters.name.toLowerCase()));
         }
@@ -119,7 +137,12 @@ const cropService = {
     getCropById: async (id) => {
         const crops = getStoredCrops();
         const crop = crops.find(c => c._id === id);
-        if (crop) return crop;
+        if (crop) {
+            return {
+                ...crop,
+                finalPrice: crop.finalPrice || crop.basePrice
+            };
+        }
         throw new Error("Crop not found");
     },
 
@@ -127,7 +150,10 @@ const cropService = {
     getMyCrops: async () => {
         const user = JSON.parse(localStorage.getItem("user") || '{"id": "u123", "name": "Vimal Sabari", "role": "farmer"}');
         const crops = getStoredCrops();
-        return crops.filter(c => c.farmer === user.id);
+        return crops.filter(c => c.farmer === user.id).map(c => ({
+            ...c,
+            finalPrice: c.finalPrice || c.basePrice
+        }));
     },
 };
 
