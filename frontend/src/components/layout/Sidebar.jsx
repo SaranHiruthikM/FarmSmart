@@ -53,8 +53,8 @@ const Sidebar = () => {
                             key={item.path}
                             to={item.path}
                             className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 font-medium text-sm group ${isActive
-                                    ? "bg-primary text-white shadow-md shadow-green-200"
-                                    : "text-[#5C715E] hover:bg-green-100/50 hover:text-primary-dark"
+                                ? "bg-primary text-white shadow-md shadow-green-200"
+                                : "text-[#5C715E] hover:bg-green-100/50 hover:text-primary-dark"
                                 }`}
                         >
                             <item.icon className={`w-5 h-5 ${isActive ? "text-white" : "text-[#8CA38D] group-hover:text-primary"}`} />

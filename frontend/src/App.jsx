@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Marketplace from "./pages/Marketplace";
 import CropDetails from "./pages/CropDetails";
 import CropListingForm from "./pages/CropListingForm";
+import PriceInsights from "./pages/PriceInsights";
 
 function App() {
   return (
@@ -24,6 +25,9 @@ function App() {
         {/* Marketplace */}
         <Route path="marketplace" element={<Marketplace />} />
         <Route path="marketplace/:id" element={<CropDetails />} />
+
+        {/* Price Insights */}
+        <Route path="insights" element={<PriceInsights />} />
 
         {/* Farmer Crop Management */}
         <Route path="add-crop" element={<CropListingForm />} />
