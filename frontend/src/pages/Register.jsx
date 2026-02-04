@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout } from "lucide-react";
+import authService from "../services/auth.service";
 import AuthCard from "../components/common/AuthCard"; // Keeping for reference if needed elsewhere, but not using here.
 
 const Register = () => {
@@ -14,7 +15,7 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (!name || !phone || !password) {
       setError("Please fill in all fields");
@@ -24,11 +25,23 @@ const Register = () => {
     setIsLoading(true);
     setError("");
 
-    // Simulate network delay
-    setTimeout(() => {
-      // Mock register success
-      navigate("/otp");
-    }, 800);
+    try {
+      await authService.register({
+        fullName: name,
+        phoneNumber: phone,
+        password: password,
+        role: role.toUpperCase(), // Backend expects uppercase Role enum
+        // preferredLanguage: 'en' // Defaulting to en, could expand if UI supports it
+      });
+
+      // Navigate to OTP page
+      navigate("/otp", { state: { phoneNumber: phone } });
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

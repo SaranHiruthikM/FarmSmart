@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import users from "../../mock/users.json"; // Assuming we pull user data, or just mock it here
+import { useNavigate } from "react-router-dom";
+import authService from "../../services/auth.service";
 
 const Header = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
+    const navigate = useNavigate();
+    const user = authService.getCurrentUser();
 
     // Close on click outside
     const notifRef = useRef(null);
@@ -19,6 +22,11 @@ const Header = () => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    const handleLogout = () => {
+        authService.logout();
+        navigate("/login");
+    };
 
     return (
         <header className="h-20 bg-[#FAF9F6] border-b border-[#EAEAEA] flex items-center justify-between px-8 shrink-0 relative bg-opacity-80 backdrop-blur-sm z-20">
@@ -76,8 +84,8 @@ const Header = () => {
                         className="flex items-center gap-3 focus:outline-none"
                     >
                         <div className="w-10 h-10 rounded-full bg-green-100 border-2 border-white shadow-sm flex items-center justify-center overflow-hidden">
-                            {/* Placeholder Avatar */}
-                            <img src="https://ui-avatars.com/api/?name=Farm+User&background=166534&color=fff" alt="User" />
+                            {/* Placeholder Avatar - could be dynamic too if user has image */}
+                            <img src={`https://ui-avatars.com/api/?name=${user?.fullName || 'Farm User'}&background=166534&color=fff`} alt="User" />
                         </div>
                     </button>
 
@@ -90,8 +98,8 @@ const Header = () => {
                                 className="absolute right-0 top-full mt-2 w-72 bg-[#FAF9F6] rounded-2xl shadow-xl border border-[#EAEAEA] overflow-hidden origin-top-right p-2"
                             >
                                 <div className="p-4 border-b border-[#EAEAEA]/60 mb-2">
-                                    <h4 className="font-bold text-[#2D362E]">Suresh Kumar</h4>
-                                    <p className="text-xs text-[#8CA38D] font-medium mt-0.5">+91 98765 43210</p>
+                                    <h4 className="font-bold text-[#2D362E]">{user?.fullName || "User"}</h4>
+                                    <p className="text-xs text-[#8CA38D] font-medium mt-0.5">{user?.phoneNumber || ""}</p>
                                 </div>
 
                                 <div className="space-y-1">
@@ -105,7 +113,10 @@ const Header = () => {
                                         <ChevronRight className="w-4 h-4 text-[#C0C0C0]" />
                                     </button>
 
-                                    <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white hover:shadow-sm text-[#5C715E] hover:text-red-600 transition-all group">
+                                    <button 
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white hover:shadow-sm text-[#5C715E] hover:text-red-600 transition-all group"
+                                    >
                                         <div className="flex items-center gap-3">
                                             <div className="p-1.5 bg-green-100/50 rounded-lg group-hover:bg-red-50 transition-colors">
                                                 <LogOut className="w-4 h-4" />

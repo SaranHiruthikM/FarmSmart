@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Default to localhost for development if no env var is set
-const API_URL = "http://localhost:5000/api";
+// Use environment variable or default to localhost:3000
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const api = axios.create({
     baseURL: API_URL,

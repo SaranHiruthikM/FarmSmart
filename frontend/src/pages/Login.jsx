@@ -2,20 +2,22 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Leaf, Phone, Lock, ArrowRight, Loader2 } from "lucide-react";
-import users from "../mock/users.json";
+import authService from "../services/auth.service";
 import LanguageSelector from "../components/common/LanguageSelector";
 import loginImage from "../assets/Images/loginPageImage.jpg";
 
 const Login = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("farmer");
+  // Backend doesn't require role for login, but frontend has it in state. 
+  // We'll keep it to avoid UI changes, even if unused in API call or maybe passed if backend supports it later.
+  const [role, setRole] = useState("farmer"); 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!phone || !password) {
       setError("Please fill in all fields");
@@ -25,23 +27,20 @@ const Login = () => {
     setIsLoading(true);
     setError("");
 
-    // Simulate network delay for better UX feel
-    setTimeout(() => {
-      const user = users.find(
-        (u) =>
-          u.phone === phone &&
-          u.password === password &&
-          u.role === role
-      );
-
-      if (!user) {
-        setError("Invalid credentials. Please check your details.");
-        setIsLoading(false);
-        return;
-      }
-
-      navigate("/otp");
-    }, 800);
+    try {
+      await authService.login({
+        phoneNumber: phone,
+        password: password
+      });
+      
+      // Navigate to OTP page instead of Dashboard, passing phone number
+      navigate("/otp", { state: { phoneNumber: phone } });
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Invalid credentials. Please check your details.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

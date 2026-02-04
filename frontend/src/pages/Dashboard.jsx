@@ -1,13 +1,17 @@
 import React from "react";
 import { TrendingUp, Users, DollarSign, ShoppingBag } from "lucide-react";
+import authService from "../services/auth.service";
 
 const Dashboard = () => {
+  const user = authService.getCurrentUser();
+  const firstName = user?.fullName?.split(' ')[0] || "Farmer";
+
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
       <div>
         <h1 className="text-3xl font-bold text-[#1a1f1b]">Dashboard</h1>
-        <p className="text-[#5C715E] mt-1">Welcome back, Suresh! Here's what's happening today.</p>
+        <p className="text-[#5C715E] mt-1">Welcome back, {firstName}! Here's what's happening today.</p>
       </div>
 
       {/* Stats Grid */}
