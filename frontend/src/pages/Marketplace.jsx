@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import cropService from "../services/crop.service";
 import CropCard from "../components/marketplace/CropCard";
 import InputField from "../components/common/InputField";
-import { Loader2, Search, Filter } from "lucide-react";
+import { Loader2, Search, Filter, Plus } from "lucide-react";
 
 const Marketplace = () => {
     const [crops, setCrops] = useState([]);
@@ -44,13 +45,31 @@ const Marketplace = () => {
         fetchCrops();
     };
 
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this listing?")) {
+            try {
+                await cropService.deleteCrop(id);
+                setCrops(crops.filter(crop => crop._id !== id));
+            } catch (error) {
+                console.error("Failed to delete crop", error);
+                alert("Failed to delete crop");
+            }
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-text-dark">Marketplace</h1>
-                    <p className="text-accent mt-1">Discover fresh crops directly from farmers.</p>
+                    <h1 className="text-4xl font-black text-text-dark tracking-tight">Marketplace</h1>
+                    <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">Discover fresh crops directly from farmers.</p>
                 </div>
+                <Link
+                    to="/dashboard/add-crop"
+                    className="flex items-center gap-2 px-8 py-3.5 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:bg-green-600 hover:-translate-y-1 transition-all text-sm tracking-wider"
+                >
+                    <Plus className="w-5 h-5 stroke-[3px]" /> ADD NEW CROP
+                </Link>
             </div>
 
             {/* Filters */}
@@ -102,7 +121,11 @@ const Marketplace = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {crops.map((crop) => (
-                        <CropCard key={crop._id} crop={crop} />
+                        <CropCard
+                            key={crop._id}
+                            crop={crop}
+                            onDelete={() => handleDelete(crop._id)}
+                        />
                     ))}
                 </div>
             )}

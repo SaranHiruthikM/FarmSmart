@@ -24,7 +24,7 @@ const CropListingForm = () => {
         } catch (error) {
             console.error("Failed to load crop", error);
             alert("Failed to load crop details");
-            navigate("/dashboard/my-crops");
+            navigate("/dashboard/marketplace");
         } finally {
             setFetching(false);
         }
@@ -40,7 +40,7 @@ const CropListingForm = () => {
                 await cropService.createCrop(formData);
                 alert("Crop listed successfully!");
             }
-            navigate("/dashboard/my-crops");
+            navigate("/dashboard/marketplace");
         } catch (error) {
             console.error("Failed to save crop", error);
             alert("Failed to save crop. Please try again.");

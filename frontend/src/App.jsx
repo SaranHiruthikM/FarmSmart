@@ -7,7 +7,6 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import Marketplace from "./pages/Marketplace";
 import CropDetails from "./pages/CropDetails";
-import MyCrops from "./pages/MyCrops";
 import CropListingForm from "./pages/CropListingForm";
 
 function App() {
@@ -27,8 +26,7 @@ function App() {
         <Route path="marketplace/:id" element={<CropDetails />} />
 
         {/* Farmer Crop Management */}
-        <Route path="my-crops" element={<MyCrops />} />
-        <Route path="my-crops/new" element={<CropListingForm />} />
+        <Route path="add-crop" element={<CropListingForm />} />
         <Route path="my-crops/edit/:id" element={<CropListingForm />} />
 
         {/* Fallback for dashboard */}
