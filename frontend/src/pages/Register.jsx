@@ -34,8 +34,8 @@ const Register = () => {
         // preferredLanguage: 'en' // Defaulting to en, could expand if UI supports it
       });
 
-      // Navigate to dashboard on success (token is stored by service)
-      navigate("/dashboard");
+      // Navigate to OTP page
+      navigate("/otp", { state: { phoneNumber: phone } });
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Registration failed. Please try again.");

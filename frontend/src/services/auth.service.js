@@ -1,27 +1,32 @@
 import api from "./api";
 
 const authService = {
-  // Register user
+  // Register user (now returns need for OTP)
   register: async (userData) => {
     // userData matches backend expectation: 
     // { phoneNumber, password, role, fullName, email (optional), preferredLanguage (optional) }
     const response = await api.post("/auth/register", userData);
-    if (response.data.data && response.data.data.token) {
-      localStorage.setItem("token", response.data.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
-    }
+    // Note: No token here anymore. Just status.
     return response.data;
   },
 
-  // Login user
+  // Login user (now returns need for OTP)
   login: async (credentials) => {
     // credentials: { phoneNumber, password }
     const response = await api.post("/auth/login", credentials);
-    if (response.data.data && response.data.data.token) {
-      localStorage.setItem("token", response.data.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
-    }
+    // Note: No token here anymore. Just status.
     return response.data;
+  },
+
+  // Verify OTP (Check code and get token)
+  verify: async (verifyData) => {
+      // verifyData: { contact, code }
+      const response = await api.post("/auth/verify", verifyData);
+      if (response.data.data && response.data.data.token) {
+        localStorage.setItem("token", response.data.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.data.user));
+      }
+      return response.data;
   },
 
   // Logout user

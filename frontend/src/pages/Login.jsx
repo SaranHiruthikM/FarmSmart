@@ -33,8 +33,8 @@ const Login = () => {
         password: password
       });
       
-      // Backend auth successful. Navigate to dashboard directly as backend logic doesn't enforce OTP verification step currently.
-      navigate("/dashboard");
+      // Navigate to OTP page instead of Dashboard, passing phone number
+      navigate("/otp", { state: { phoneNumber: phone } });
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Invalid credentials. Please check your details.");
