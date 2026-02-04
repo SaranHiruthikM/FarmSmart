@@ -1,8 +1,15 @@
 import { MapPin, Scale, BadgeIndianRupee, ChevronRight, Edit, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import authService from "../../services/auth.service";
 
 const CropCard = ({ crop, onDelete }) => {
     const navigate = useNavigate();
+    
+    // Check ownership
+    const currentUser = authService.getCurrentUser();
+    const currentUserId = currentUser?._id || currentUser?.id;
+    // crop.farmer is the ID string from our service transformation
+    const isOwner = currentUser && (currentUser.role === "FARMER" || currentUser.role === "farmer") && crop.farmer === currentUserId;
 
     const handleCardClick = () => {
         navigate(`/dashboard/marketplace/${crop._id}`);
@@ -75,24 +82,29 @@ const CropCard = ({ crop, onDelete }) => {
 
                 {/* Action Area */}
                 <div className="mt-auto flex gap-2">
-                    <button
-                        onClick={handleEdit}
-                        className="p-2.5 bg-neutral-light/50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-                        title="Edit Listing"
-                    >
-                        <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                        onClick={handleDelete}
-                        className="p-2.5 bg-neutral-light/50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                        title="Delete Listing"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </button>
+                    {isOwner ? (
+                        <>
+                            <button
+                                onClick={handleEdit}
+                                className="p-2.5 bg-neutral-light/50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                title="Edit Listing"
+                            >
+                                <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="p-2.5 bg-neutral-light/50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                                title="Delete Listing"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </>
+                    ) : null}
+                    
                     <div
                         className="flex-1 flex items-center justify-between px-4 py-2.5 bg-neutral-light/50 text-text-dark text-xs font-black uppercase tracking-widest rounded-xl group-hover:bg-primary group-hover:text-white transition-all group/btn"
                     >
-                        View Details
+                        {isOwner ? "View Details" : "Buy / Bid"}
                         <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                     </div>
                 </div>

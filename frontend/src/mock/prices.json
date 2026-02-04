@@ -1,148 +1,36 @@
 {
-    "crops": [
-        {
-            "id": "tomato",
-            "name": "Tomato",
-            "currentPrice": {
-                "avg": 42,
-                "low": 35,
-                "high": 55,
-                "bestMarket": "Nashik Mandi"
-            },
-            "historical": [
-                {
-                    "date": "2024-01-20",
-                    "price": 38
-                },
-                {
-                    "date": "2024-01-25",
-                    "price": 40
-                },
-                {
-                    "date": "2024-01-30",
-                    "price": 45
-                },
-                {
-                    "date": "2024-02-04",
-                    "price": 42
-                }
-            ],
-            "mandis": [
-                {
-                    "name": "Nashik Mandi",
-                    "price": 44,
-                    "distance": "12 km",
-                    "isBest": true
-                },
-                {
-                    "name": "Pimpalgaon Mandi",
-                    "price": 40,
-                    "distance": "25 km",
-                    "isBest": false
-                },
-                {
-                    "name": "Lasalgaon Mandi",
-                    "price": 38,
-                    "distance": "45 km",
-                    "isBest": false
-                }
-            ]
-        },
-        {
-            "id": "rice",
-            "name": "Basmati Rice",
-            "currentPrice": {
-                "avg": 85,
-                "low": 75,
-                "high": 110,
-                "bestMarket": "Amritsar Mandi"
-            },
-            "historical": [
-                {
-                    "date": "2024-01-20",
-                    "price": 80
-                },
-                {
-                    "date": "2024-01-25",
-                    "price": 82
-                },
-                {
-                    "date": "2024-01-30",
-                    "price": 88
-                },
-                {
-                    "date": "2024-02-04",
-                    "price": 85
-                }
-            ],
-            "mandis": [
-                {
-                    "name": "Amritsar Mandi",
-                    "price": 90,
-                    "distance": "5 km",
-                    "isBest": true
-                },
-                {
-                    "name": "Tarn Taran Mandi",
-                    "price": 82,
-                    "distance": "20 km",
-                    "isBest": false
-                },
-                {
-                    "name": "Gurdaspur Mandi",
-                    "price": 80,
-                    "distance": "50 km",
-                    "isBest": false
-                }
-            ]
-        },
-        {
-            "id": "onion",
-            "name": "Onion",
-            "currentPrice": {
-                "avg": 25,
-                "low": 18,
-                "high": 35,
-                "bestMarket": "Lasalgaon Mandi"
-            },
-            "historical": [
-                {
-                    "date": "2024-01-20",
-                    "price": 20
-                },
-                {
-                    "date": "2024-01-25",
-                    "price": 22
-                },
-                {
-                    "date": "2024-01-30",
-                    "price": 28
-                },
-                {
-                    "date": "2024-02-04",
-                    "price": 25
-                }
-            ],
-            "mandis": [
-                {
-                    "name": "Lasalgaon Mandi",
-                    "price": 30,
-                    "distance": "15 km",
-                    "isBest": true
-                },
-                {
-                    "name": "Pune Mandi",
-                    "price": 22,
-                    "distance": "120 km",
-                    "isBest": false
-                },
-                {
-                    "name": "Solapur Mandi",
-                    "price": 20,
-                    "distance": "200 km",
-                    "isBest": false
-                }
-            ]
-        }
-    ]
+  "crops": [
+    {
+       "id": "1", 
+       "name": "Tomato",
+       "currentPrice": 45,
+       "unit": "kg",
+       "mandis": [
+           { "name": "Azadpur", "price": 45, "distance": "12km" },
+           { "name": "Ghazipur", "price": 42, "distance": "25km" }
+       ],
+       "historical": [
+           { "date": "2023-10-01", "price": 38 },
+           { "date": "2023-10-02", "price": 40 },
+           { "date": "2023-10-03", "price": 45 },
+           { "date": "2023-10-04", "price": 44 },
+           { "date": "2023-10-05", "price": 46 }
+       ]
+    },
+    {
+        "id": "2", 
+        "name": "Potato",
+        "currentPrice": 22,
+        "unit": "kg",
+        "mandis": [
+            { "name": "Azadpur", "price": 22, "distance": "12km" },
+            { "name": "Okhla", "price": 24, "distance": "15km" }
+        ],
+        "historical": [
+            { "date": "2023-10-01", "price": 20 },
+            { "date": "2023-10-02", "price": 21 },
+            { "date": "2023-10-03", "price": 22 }
+        ]
+     }
+  ]
 }
