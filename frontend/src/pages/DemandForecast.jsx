@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import priceService from "../services/price.service";
 import recommendationService from "../services/recommendation.service";
 import {
@@ -20,6 +21,7 @@ import {
 import PrimaryButton from "../components/common/PrimaryButton";
 
 const DemandForecast = () => {
+    const navigate = useNavigate();
     const [selectedCrop, setSelectedCrop] = useState("tomato");
     const [location, setLocation] = useState("Coimbatore");
     const [demandData, setDemandData] = useState(null);
@@ -176,7 +178,10 @@ const DemandForecast = () => {
                             </p>
                         </div>
 
-                        <button className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-green-600 transition-all shadow-lg shadow-primary/20">
+                        <button
+                            onClick={() => navigate("/dashboard/marketplace")}
+                            className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-green-600 transition-all shadow-lg shadow-primary/20"
+                        >
                             List my inventory
                             <ChevronRight className="w-4 h-4" />
                         </button>
