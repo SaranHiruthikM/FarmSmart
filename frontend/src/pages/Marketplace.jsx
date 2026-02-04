@@ -8,6 +8,7 @@ import { Loader2, Search, Filter, Plus } from "lucide-react";
 const Marketplace = () => {
     const [crops, setCrops] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState({
         name: "",
         state: "",
@@ -64,48 +65,59 @@ const Marketplace = () => {
                     <h1 className="text-4xl font-black text-text-dark tracking-tight">Marketplace</h1>
                     <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">Discover fresh crops directly from farmers.</p>
                 </div>
-                <Link
-                    to="/dashboard/add-crop"
-                    className="flex items-center gap-2 px-8 py-3.5 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:bg-green-600 hover:-translate-y-1 transition-all text-sm tracking-wider"
-                >
-                    <Plus className="w-5 h-5 stroke-[3px]" /> ADD NEW CROP
-                </Link>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={`flex items-center gap-2 px-6 py-3.5 border-2 font-black rounded-2xl transition-all text-sm tracking-wider ${showFilters ? 'bg-neutral-light border-neutral-light text-text-dark' : 'bg-white border-neutral-light text-secondary hover:border-primary/50 hover:text-primary'}`}
+                    >
+                        <Filter className="w-5 h-5" /> 
+                        {showFilters ? "HIDE FILTERS" : "SHOW FILTERS"}
+                    </button>
+                    <Link
+                        to="/dashboard/add-crop"
+                        className="flex items-center gap-2 px-8 py-3.5 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:bg-green-600 hover:-translate-y-1 transition-all text-sm tracking-wider"
+                    >
+                        <Plus className="w-5 h-5 stroke-[3px]" /> ADD NEW CROP
+                    </Link>
+                </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-neutral-light">
-                <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <InputField
-                        label="Search Crop"
-                        name="name"
-                        value={filters.name}
-                        onChange={handleFilterChange}
-                        placeholder="e.g. Rice"
-                    />
-                    <InputField
-                        label="State"
-                        name="state"
-                        value={filters.state}
-                        onChange={handleFilterChange}
-                        placeholder="Filter by State"
-                    />
-                    <InputField
-                        label="District"
-                        name="district"
-                        value={filters.district}
-                        onChange={handleFilterChange}
-                        placeholder="Filter by District"
-                    />
-                    <div className="mb-4">
-                        <button
-                            type="submit"
-                            className="w-full py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-green-600 transition flex items-center justify-center gap-2"
-                        >
-                            <Search className="w-4 h-4" /> Search
-                        </button>
-                    </div>
-                </form>
-            </div>
+            {showFilters && (
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-neutral-light animate-in slide-in-from-top-2 duration-200">
+                    <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <InputField
+                            label="Search Crop"
+                            name="name"
+                            value={filters.name}
+                            onChange={handleFilterChange}
+                            placeholder="e.g. Rice"
+                        />
+                        <InputField
+                            label="State"
+                            name="state"
+                            value={filters.state}
+                            onChange={handleFilterChange}
+                            placeholder="Filter by State"
+                        />
+                        <InputField
+                            label="District"
+                            name="district"
+                            value={filters.district}
+                            onChange={handleFilterChange}
+                            placeholder="Filter by District"
+                        />
+                        <div className="mb-4">
+                            <button
+                                type="submit"
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-white font-bold rounded-xl hover:bg-secondary-dark transition shadow-lg shadow-secondary/20"
+                            >
+                                <Search className="w-4 h-4" /> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
 
             {/* Content */}
             {loading ? (

@@ -1,99 +1,34 @@
 {
-    "demandData": [
-        {
-            "cropId": "tomato",
-            "cropName": "Tomato",
-            "demandLevel": "High",
-            "explanation": "Demand is high based on recent market activity and local festival seasons.",
-            "sellRecommendation": {
-                "action": "Sell Now",
-                "reason": "Prices are at a 30-day peak and expected to stabilize soon.",
-                "trend": "up"
-            }
-        },
-        {
-            "cropId": "rice",
-            "cropName": "Basmati Rice",
-            "demandLevel": "Medium",
-            "explanation": "Stable demand observed in northern markets. Export requests are steady.",
-            "sellRecommendation": {
-                "action": "Wait",
-                "reason": "Wait for 2 weeks. Prices are expected to rise by 5-8% due to inventory shortages.",
-                "trend": "steady"
-            }
-        },
-        {
-            "cropId": "onion",
-            "cropName": "Onion",
-            "demandLevel": "Low",
-            "explanation": "Oversupply in local mandis has lowered the demand for new stock.",
-            "sellRecommendation": {
-                "action": "Wait",
-                "reason": "Hold stock if possible. Prices are currently at a seasonal low.",
-                "trend": "down"
-            }
-        }
-    ],
-    "cropRecommendations": [
-        {
-            "location": "Nashik",
-            "suggestions": [
-                {
-                    "name": "Grapes",
-                    "reason": "High export demand",
-                    "suitability": "95%"
-                },
-                {
-                    "name": "Pomegranate",
-                    "reason": "Stable market price",
-                    "suitability": "88%"
-                },
-                {
-                    "name": "Soybean",
-                    "reason": "Low maintenance, high yield",
-                    "suitability": "82%"
-                }
-            ]
-        },
-        {
-            "location": "Amritsar",
-            "suggestions": [
-                {
-                    "name": "Wheat",
-                    "reason": "Seasonal demand",
-                    "suitability": "98%"
-                },
-                {
-                    "name": "Mustard",
-                    "reason": "Rising oil prices",
-                    "suitability": "90%"
-                },
-                {
-                    "name": "Green Peas",
-                    "reason": "Quick cash crop",
-                    "suitability": "85%"
-                }
-            ]
-        },
-        {
-            "location": "Coimbatore",
-            "suggestions": [
-                {
-                    "name": "Turmeric",
-                    "reason": "High medicinal demand",
-                    "suitability": "92%"
-                },
-                {
-                    "name": "Coconut",
-                    "reason": "Consistent yearly income",
-                    "suitability": "96%"
-                },
-                {
-                    "name": "Banana",
-                    "reason": "Local market stability",
-                    "suitability": "89%"
-                }
-            ]
-        }
-    ]
+  "demandData": [
+    { 
+        "cropId": "1", 
+        "cropName": "Tomato", 
+        "currentDemand": "High",
+        "projectedDemand": "Very High",
+        "priceTrend": "+15%"
+    },
+    { 
+        "cropId": "2", 
+        "cropName": "Potato", 
+        "currentDemand": "Moderate",
+        "projectedDemand": "High",
+        "priceTrend": "+5%"
+    }
+  ],
+  "cropRecommendations": [
+     { 
+         "location": "Punjab", 
+         "suggestions": [
+             { "name": "Wheat", "confidence": "95%" },
+             { "name": "Rice", "confidence": "90%" }
+         ] 
+     },
+     { 
+        "location": "Tamil Nadu", 
+        "suggestions": [
+            { "name": "Paddy", "confidence": "92%" },
+            { "name": "Groundnut", "confidence": "85%" }
+        ] 
+    }
+  ]
 }

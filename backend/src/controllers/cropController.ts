@@ -61,10 +61,13 @@ export const listCrops = async (req: Request, res: Response): Promise<any> => {
   const filter: any = { isActive: true };
 
   if (name) filter.name = new RegExp(name as string, "i");
-  if (state) filter["location.state"] = state;
-  if (district) filter["location.district"] = district;
+  if (state) filter["location.state"] = new RegExp(state as string, "i");
+  if (district) filter["location.district"] = new RegExp(district as string, "i");
 
-  const crops = await Crop.find(filter).sort({ createdAt: -1 });
+  const crops = await Crop.find(filter)
+    .sort({ createdAt: -1 })
+    .populate("farmerId", "fullName phoneNumber");
+    
   res.json(crops);
 };
 
@@ -72,7 +75,9 @@ export const listCrops = async (req: Request, res: Response): Promise<any> => {
  * GET /crops/:id
  */
 export const getCropById = async (req: Request, res: Response): Promise<any> => {
-  const crop = await Crop.findById(req.params.id);
+  const crop = await Crop.findById(req.params.id)
+    .populate("farmerId", "fullName phoneNumber");
+
   if (!crop) return res.status(404).json({ message: "Crop not found" });
   res.json(crop);
 };

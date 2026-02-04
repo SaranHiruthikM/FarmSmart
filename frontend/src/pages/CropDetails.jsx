@@ -17,12 +17,16 @@ const CropDetails = () => {
                 const data = await cropService.getCropById(id);
                 setCrop(data);
 
-                // Get user from localStorage to determine role/ownership
                 const userData = JSON.parse(localStorage.getItem("user") || "{}");
-                if (userData.role === "farmer" && data.farmer === userData.id) {
-                    setUserRole("owner");
-                } else if (userData.role === "farmer") {
-                    setUserRole("farmer");
+                // Backend uses _id, mock used id. Support both.
+                const userId = userData._id || userData.id;
+                
+                if (userData.role === "FARMER" || userData.role === "farmer") { // Check both case just in case
+                     if (data.farmer === userId) {
+                        setUserRole("owner");
+                     } else {
+                        setUserRole("farmer");
+                     }
                 } else {
                     setUserRole("buyer");
                 }
