@@ -11,6 +11,16 @@ function Otp() {
 
   const handleVerify = () => {
     if (otp === "123456") {
+      // Mock login success by saving a dummy user
+      const mockUser = {
+        id: "u123",
+        name: "Vimal Sabari",
+        role: "farmer",
+        phone: "9876543210"
+      };
+      localStorage.setItem("user", JSON.stringify(mockUser));
+      localStorage.setItem("token", "mock-jwt-token");
+
       navigate("/dashboard");
     } else {
       alert("Invalid OTP");
