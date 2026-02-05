@@ -7,6 +7,7 @@ export interface ICrop extends Document {
   quantity: number;             // in kg / quintal
   unit: "kg" | "quintal" | "ton";
   basePrice: number;            // expected price per unit
+  finalPrice: number;           // calculated price after quality multiplier
   qualityGrade: "A" | "B" | "C";
   location: {
     state: string;
@@ -43,6 +44,11 @@ const CropSchema = new Schema<ICrop>(
       required: true,
     },
     basePrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    finalPrice: {
       type: Number,
       required: true,
       min: 0,
