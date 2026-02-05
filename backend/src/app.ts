@@ -1,7 +1,10 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+
 import authRoutes from './routes/authRoutes';
 import cropRoutes from './routes/cropRoutes';
+import pricesRoutes from './routes/prices.routes';
+
 import qualityRoutes from './routes/qualityRoutes';
 import { sendResponse } from './utils/response';
 
@@ -15,6 +18,15 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/crops', cropRoutes);
 app.use('/quality', qualityRoutes);
+
+/**
+ * Price Comparison & Market Insights
+ * Endpoints:
+ *  GET /prices/current?crop=
+ *  GET /prices/history?crop=&location=
+ *  GET /prices/compare?crop=&location=
+ */
+app.use('/prices', pricesRoutes);
 
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
