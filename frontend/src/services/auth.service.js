@@ -29,6 +29,13 @@ const authService = {
     return response.data;
   },
 
+  // Resend OTP
+  resend: async (resendData) => {
+    // resendData: { contact }
+    const response = await api.post("/auth/resend", resendData);
+    return response.data;
+  },
+
   // Logout user
   logout: () => {
     localStorage.removeItem("token");

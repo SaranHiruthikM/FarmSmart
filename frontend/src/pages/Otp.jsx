@@ -63,14 +63,13 @@ function Otp() {
 
     setLoading(true);
     try {
-      // Assuming a resend method exists or we use the login method again
-      // await authService.login({ contact: phoneNumber });
+      await authService.resend({ contact: phoneNumber });
       setResendTimer(30);
       setCanResend(false);
       setOtp("");
       setError("");
-      // Success toast or message could be added here
     } catch (err) {
+      console.error(err);
       setError("Failed to resend OTP. Please try again.");
     } finally {
       setLoading(false);
