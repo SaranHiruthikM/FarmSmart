@@ -186,3 +186,30 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
         sendResponse(res, 500, "Internal Server Error");
     }
 };
+
+export const resendOtp = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { contact } = req.body;
+        
+        if (!contact) {
+             sendResponse(res, 400, "Contact is required");
+             return;
+        }
+
+        // 1. Check if user exists
+        const user = await User.findOne({ phoneNumber: contact });
+        if (!user) {
+             sendResponse(res, 404, "User not found");
+             return;
+        }
+
+        // 2. Generate and Save OTP
+        await saveOTP(contact, VerificationType.PHONE);
+
+        sendResponse(res, 200, "OTP resent successfully");
+
+    } catch (error) {
+        console.error("Resend OTP Error:", error);
+        sendResponse(res, 500, "Internal Server Error");
+    }
+};
