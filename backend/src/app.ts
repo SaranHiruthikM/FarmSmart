@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import cropRoutes from './routes/cropRoutes';
+import qualityRoutes from './routes/qualityRoutes';
 import { sendResponse } from './utils/response';
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 // Routes
 app.use('/auth', authRoutes);
 app.use('/crops', cropRoutes);
+app.use('/quality', qualityRoutes);
 
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
