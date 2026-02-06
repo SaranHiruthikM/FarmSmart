@@ -115,8 +115,8 @@ export const getNegotiationById = async (
 ): Promise<any> => {
     try {
         const negotiation = await Negotiation.findById(req.params.id)
-            .populate("cropId", "name")
-            .populate("buyerId farmerId", "fullName");
+            .populate("cropId", "name location")
+            .populate("buyerId farmerId", "fullName phoneNumber");
 
         if (!negotiation)
             return res.status(404).json({ message: "Not found" });
