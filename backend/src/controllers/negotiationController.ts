@@ -49,14 +49,25 @@ export const respondToNegotiation = async (
         if (!negotiation)
             return res.status(404).json({ message: "Not found" });
 
-        if (negotiation.farmerId.toString() !== req.user!.id) {
+        if (
+            negotiation.farmerId.toString() !== req.user!.id &&
+            negotiation.buyerId.toString() !== req.user!.id
+        ) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
+        const isFarmer = negotiation.farmerId.toString() === req.user!.id;
+        const offerBy = isFarmer ? "FARMER" : "BUYER";
+
         if (action === "ACCEPT") {
             negotiation.status = "ACCEPTED";
-            negotiation.agreedPrice = pricePerUnit;
-            negotiation.agreedQuantity = quantity;
+            // If accepting, we use the price/qty from the LAST offer, or the ones passed in?
+            // Usually you accept the *other person's* offer.
+            // But for simplicity, let's trust the body provided, or verify against last offer.
+            //Ideally strict validation: if accepting, use last offer's details.
+            const lastOffer = negotiation.offers[negotiation.offers.length - 1];
+            negotiation.agreedPrice = lastOffer.pricePerUnit;
+            negotiation.agreedQuantity = lastOffer.quantity;
         }
 
         if (action === "REJECT") {
@@ -65,7 +76,7 @@ export const respondToNegotiation = async (
 
         if (action === "COUNTER") {
             negotiation.offers.push({
-                by: "FARMER",
+                by: offerBy,
                 pricePerUnit,
                 quantity,
                 message,
@@ -115,8 +126,8 @@ export const getNegotiationById = async (
 ): Promise<any> => {
     try {
         const negotiation = await Negotiation.findById(req.params.id)
-            .populate("cropId", "name")
-            .populate("buyerId farmerId", "fullName");
+            .populate("cropId", "name location")
+            .populate("buyerId farmerId", "fullName phoneNumber");
 
         if (!negotiation)
             return res.status(404).json({ message: "Not found" });

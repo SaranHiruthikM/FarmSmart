@@ -6,7 +6,7 @@ import cropRoutes from './routes/cropRoutes';
 import pricesRoutes from './routes/prices.routes';
 import negotiationRoutes from './routes/negotiationRoutes';
 import orderRoutes from './routes/orderRoutes';
-
+import reviewRoutes from './routes/reviewRoutes';
 import qualityRoutes from './routes/qualityRoutes';
 import { sendResponse } from './utils/response';
 
@@ -27,6 +27,7 @@ app.use('/auth', authRoutes);
 app.use('/crops', cropRoutes);
 app.use('/negotiations', negotiationRoutes);
 app.use('/orders', orderRoutes);
+app.use('/reviews', reviewRoutes);
 app.use('/quality', qualityRoutes);
 
 /**

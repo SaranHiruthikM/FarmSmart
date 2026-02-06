@@ -98,7 +98,7 @@ export const listCrops = async (req: Request, res: Response): Promise<any> => {
 
     const crops = await Crop.find(filter)
       .sort({ createdAt: -1 })
-      .populate("farmerId", "fullName phoneNumber");
+      .populate("farmerId", "fullName phoneNumber averageRating reviewCount");
 
     res.json(crops);
   } catch (error) {
@@ -112,7 +112,7 @@ export const listCrops = async (req: Request, res: Response): Promise<any> => {
 export const getCropById = async (req: Request, res: Response): Promise<any> => {
   try {
     const crop = await Crop.findById(req.params.id)
-      .populate("farmerId", "fullName phoneNumber");
+      .populate("farmerId", "fullName phoneNumber averageRating reviewCount");
 
     if (!crop) return res.status(404).json({ message: "Crop not found" });
     res.json(crop);

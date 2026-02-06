@@ -25,6 +25,10 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<any>
       return res.status(400).json({ message: "Only accepted negotiations can create orders" });
     }
 
+    if (!negotiation.agreedPrice || !negotiation.agreedQuantity) {
+      return res.status(400).json({ message: "Negotiation missing agreed price or quantity" });
+    }
+
     const pricePerUnit = negotiation.agreedPrice;
     const quantity = negotiation.agreedQuantity;
     const totalAmount = pricePerUnit * quantity;
@@ -91,7 +95,12 @@ export const getMyOrders = async (req: AuthRequest, res: Response): Promise<any>
       return res.status(403).json({ message: "Role not supported for this endpoint" });
     }
 
-    const orders = await Order.find(filter).sort({ createdAt: -1 });
+    const orders = await Order.find(filter)
+      .populate("cropId", "name")
+      .populate("buyerId", "fullName role")
+      .populate("farmerId", "fullName role")
+      .sort({ createdAt: -1 });
+
     return res.json(orders);
   } catch (error) {
     return res.status(500).json({ message: "Server error" });
