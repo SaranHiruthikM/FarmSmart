@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import cropService from "../services/crop.service";
-import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info } from "lucide-react";
+import notificationService from "../services/notification.service";
+import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info, Bell } from "lucide-react";
 import PrimaryButton from "../components/common/PrimaryButton";
 
 const CropDetails = () => {
@@ -10,6 +11,8 @@ const CropDetails = () => {
     const [crop, setCrop] = useState(null);
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState("buyer"); // In real app, get from auth context
+    const [alertPrice, setAlertPrice] = useState("");
+    const [alertSuccess, setAlertSuccess] = useState(false);
 
     useEffect(() => {
         const fetchCrop = async () => {
@@ -20,13 +23,13 @@ const CropDetails = () => {
                 const userData = JSON.parse(localStorage.getItem("user") || "{}");
                 // Backend uses _id, mock used id. Support both.
                 const userId = userData._id || userData.id;
-                
+
                 if (userData.role === "FARMER" || userData.role === "farmer") { // Check both case just in case
-                     if (data.farmer === userId) {
+                    if (data.farmer === userId) {
                         setUserRole("owner");
-                     } else {
+                    } else {
                         setUserRole("farmer");
-                     }
+                    }
                 } else {
                     setUserRole("buyer");
                 }
@@ -38,6 +41,18 @@ const CropDetails = () => {
         };
         fetchCrop();
     }, [id]);
+
+    const handleSetAlert = async () => {
+        if (!alertPrice) return;
+        try {
+            await notificationService.createPriceAlert(id, alertPrice);
+            setAlertSuccess(true);
+            setTimeout(() => setAlertSuccess(false), 3000);
+            setAlertPrice("");
+        } catch (error) {
+            console.error("Failed to set alert", error);
+        }
+    };
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center py-32 space-y-4">
@@ -167,6 +182,38 @@ const CropDetails = () => {
                                     <p className="text-accent font-medium text-sm">{crop.location?.village || 'Village Area'}</p>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Price Alert Setup Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-black text-accent uppercase tracking-widest">Price Alert Setup</h3>
+                            <div className="flex items-end gap-3 p-4 bg-yellow-50/50 rounded-2xl border border-yellow-100">
+                                <div className="flex-1 space-y-1">
+                                    <label className="text-xs font-bold text-yellow-700">Notify me when price reaches (≥)</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                                        <input
+                                            type="number"
+                                            value={alertPrice}
+                                            onChange={(e) => setAlertPrice(e.target.value)}
+                                            placeholder={crop.finalPrice || crop.basePrice}
+                                            className="w-full pl-7 pr-4 py-2 border border-yellow-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none bg-white text-sm font-semibold"
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleSetAlert}
+                                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-xl flex items-center gap-2 transition-colors mb-[1px]"
+                                >
+                                    <Bell className="w-4 h-4" />
+                                    Set Alert
+                                </button>
+                            </div>
+                            {alertSuccess && (
+                                <p className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg inline-block animate-pulse">
+                                    Price alert set successfully!
+                                </p>
+                            )}
                         </div>
 
                         <div className="pt-6 flex gap-4">

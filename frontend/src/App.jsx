@@ -12,6 +12,8 @@ import CropListingForm from "./pages/CropListingForm";
 import PriceInsights from "./pages/PriceInsights";
 import DemandForecast from "./pages/DemandForecast";
 import QualityPricing from "./pages/QualityPricing";
+import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
 
 // Protected Route Wrapper for Public Pages (Login/Register)
 // If authenticated, redirect to dashboard.
@@ -50,6 +52,10 @@ function App() {
         {/* Farmer Crop Management */}
         <Route path="add-crop" element={<CropListingForm />} />
         <Route path="my-crops/edit/:id" element={<CropListingForm />} />
+
+        {/* Notifications & Settings */}
+        <Route path="notifications" element={<Notifications />} />
+        <Route path="settings" element={<Settings />} />
 
         {/* Fallback for dashboard */}
         <Route path="*" element={<div className="p-10 text-center text-gray-500">Page under construction</div>} />
