@@ -10,7 +10,9 @@ import {
     ExternalLink,
     ChevronDown,
     CircleDashed,
-    Box
+    Box,
+    AlertTriangle,
+    X
 } from "lucide-react";
 import authService from "../../services/auth.service";
 import orderService from "../../services/order.service";
@@ -54,6 +56,13 @@ const OrderStatus = () => {
     const [reviewComment, setReviewComment] = useState("");
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+    // Dispute State
+    const [showDisputeModal, setShowDisputeModal] = useState(false);
+    const [disputeReason, setDisputeReason] = useState("");
+    const [disputeDescription, setDisputeDescription] = useState("");
+    const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
+    const [existingDispute, setExistingDispute] = useState(mockDisputeService.getDisputeByOrderId(orderId));
 
     const currentStatusIndex = statuses.findIndex(s => s.id === currentStatus);
 
@@ -101,6 +110,30 @@ const OrderStatus = () => {
         } finally {
             setIsSubmittingReview(false);
         }
+    };
+
+    const handleSubmitDispute = (e) => {
+        e.preventDefault();
+        if (!disputeReason || !disputeDescription) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        setIsSubmittingDispute(true);
+        setTimeout(() => {
+            const dispute = mockDisputeService.createDispute({
+                orderId: orderId,
+                raisedBy: user?.fullName || "User",
+                raisedByRole: user?.role?.toUpperCase() || "BUYER",
+                farmerName: orderDetails.farmer,
+                reason: disputeReason,
+                description: disputeDescription
+            });
+            setExistingDispute(dispute);
+            setIsSubmittingDispute(false);
+            setShowDisputeModal(false);
+            alert("Dispute raised successfully! Our team will contact you shortly.");
+        }, 1000);
     };
 
     return (
@@ -270,8 +303,23 @@ const OrderStatus = () => {
                             </div>
                         </div>
 
-                        <button className="w-full py-4 bg-neutral-light text-secondary rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-red-50 hover:text-secondary-light transition-all border-2 border-transparent hover:border-secondary-light/20">
-                            NEED HELP? RAISE DISPUTE
+                        <button
+                            onClick={() => {
+                                if (isFarmer) {
+                                    alert("Only Buyers can raise a dispute for this order.");
+                                    return;
+                                }
+                                if (!existingDispute) setShowDisputeModal(true);
+                            }}
+                            disabled={!!existingDispute}
+                            className={`w-full py-4 rounded-2xl font-black text-xs tracking-widest uppercase transition-all border-2 ${existingDispute
+                                ? "bg-amber-50 text-amber-600 border-amber-100 cursor-not-allowed"
+                                : isFarmer
+                                    ? "bg-neutral-light text-accent cursor-not-allowed opacity-50"
+                                    : "bg-neutral-light text-secondary hover:bg-red-50 hover:text-secondary-light hover:border-secondary-light/20 border-transparent"
+                                }`}
+                        >
+                            {existingDispute ? "DISPUTE RAISED" : "NEED HELP? RAISE DISPUTE"}
                         </button>
                     </div>
 
@@ -346,6 +394,74 @@ const OrderStatus = () => {
                             <p className="text-accent font-medium">Your feedback has been published on the seller's profile.</p>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Raise Dispute Modal */}
+            {showDisputeModal && (
+                <div className="fixed inset-0 bg-text-dark/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-8 border-b-2 border-neutral-light flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-red-50 rounded-2xl text-red-600">
+                                    <AlertTriangle className="w-6 h-6" />
+                                </div>
+                                <h2 className="text-2xl font-black text-text-dark tracking-tight">Raise Dispute</h2>
+                            </div>
+                            <button
+                                onClick={() => setShowDisputeModal(false)}
+                                className="p-2 hover:bg-neutral-light rounded-xl transition-colors text-accent"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmitDispute} className="p-8 space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-accent uppercase tracking-widest ml-1">Reason for Dispute</label>
+                                <select
+                                    required
+                                    value={disputeReason}
+                                    onChange={(e) => setDisputeReason(e.target.value)}
+                                    className="w-full p-4 bg-neutral-light/30 rounded-2xl border-2 border-neutral-light focus:border-primary outline-none transition-all font-bold text-text-dark"
+                                >
+                                    <option value="">Select a reason</option>
+                                    <option value="Quality Issue">Quality Issue</option>
+                                    <option value="Quantity Mismatch">Quantity Mismatch</option>
+                                    <option value="Late Delivery">Late Delivery</option>
+                                    <option value="Payment Issue">Payment Issue</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-accent uppercase tracking-widest ml-1">Detail Description</label>
+                                <textarea
+                                    required
+                                    value={disputeDescription}
+                                    onChange={(e) => setDisputeDescription(e.target.value)}
+                                    placeholder="Please describe the issue in detail..."
+                                    className="w-full p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light focus:border-primary outline-none transition-all min-h-[150px] font-medium"
+                                />
+                            </div>
+
+                            <div className="flex gap-4 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDisputeModal(false)}
+                                    className="flex-1 py-4 bg-neutral-light text-accent rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-neutral-light/50 transition-all"
+                                >
+                                    CANCEL
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmittingDispute}
+                                    className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-red-700 transition-all shadow-lg shadow-red-200 disabled:opacity-50"
+                                >
+                                    {isSubmittingDispute ? "SUBMITTING..." : "SUBMIT DISPUTE"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>
