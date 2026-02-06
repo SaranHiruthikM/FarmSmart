@@ -14,7 +14,7 @@ const ReviewSchema = new Schema<IReview>(
     orderId: {
       type: Schema.Types.ObjectId,
       ref: "Order",
-      required: true,
+      required: false, // Changed to false to allow direct seller reviews
       index: true,
     },
     reviewerId: {

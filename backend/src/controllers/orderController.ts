@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { Order } from "../models/Order";
 import { Negotiation } from "../models/Negotiation";
+import { Crop } from "../models/Crop";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 const ALLOWED_ORDER_STATUSES = ["CREATED", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED"] as const;
@@ -33,6 +34,26 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<any>
     const quantity = negotiation.agreedQuantity;
     const totalAmount = pricePerUnit * quantity;
 
+    // Prevent Duplicate Orders for the same negotiation
+    const existingOrder = await Order.findOne({ negotiationId: negotiation._id });
+    if (existingOrder) {
+        // ... existing code ...
+        const populatedExisting = await Order.findById(existingOrder._id)
+          .populate("cropId", "name")
+          .populate("buyerId", "fullName role")
+          .populate("farmerId", "fullName role");
+        return res.status(200).json(populatedExisting);
+    }
+
+    // NEW: Check and Update Stock
+    const crop = await Crop.findById(negotiation.cropId);
+    if (!crop) {
+        return res.status(404).json({ message: "Crop associated with negotiation not found" });
+    }
+    if (crop.quantity < quantity) {
+        return res.status(400).json({ message: `Insufficient stock. Current available: ${crop.quantity}` });
+    }
+
     const order = await Order.create({
       negotiationId: negotiation._id,
       cropId: negotiation.cropId,
@@ -45,7 +66,19 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<any>
       status: [{ status: "CREATED", timestamp: new Date() }],
     });
 
-    return res.status(201).json(order);
+    // Reduce stock
+    crop.quantity -= quantity;
+    if (crop.quantity < 0) crop.quantity = 0;
+    // Optional: if (crop.quantity === 0) crop.isActive = false; 
+    await crop.save();
+
+    // Populate Response Data immediatly so UI doesn't flicker "Unknown Crop"
+    const populatedOrder = await Order.findById(order._id)
+      .populate("cropId", "name")
+      .populate("buyerId", "fullName role phoneNumber")
+      .populate("farmerId", "fullName role phoneNumber");
+
+    return res.status(201).json(populatedOrder);
   } catch (error: any) {
     if (error.name === "ValidationError" || error.name === "CastError") {
       return res.status(400).json({ message: error.message });
@@ -61,8 +94,8 @@ export const getOrderById = async (req: AuthRequest, res: Response): Promise<any
   try {
     const order = await Order.findById(req.params.id)
       .populate("cropId", "name")
-      .populate("buyerId", "fullName role")
-      .populate("farmerId", "fullName role");
+      .populate("buyerId", "fullName role phoneNumber")
+      .populate("farmerId", "fullName role phoneNumber");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });

@@ -21,14 +21,15 @@ export const raiseDispute = async (
         const dispute = await Dispute.create({
             orderId,
             raisedBy: req.user!.id,
-            raisedByRole: req.user!.role,
+            raisedByRole: req.user!.role.toUpperCase(),
             reason,
             description,
         });
 
         res.status(201).json(dispute);
     } catch (error: any) {
-        res.status(500).json({ message: "Server error" });
+        console.error("Error raising dispute:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
@@ -40,12 +41,31 @@ export const getMyDisputes = async (
     res: Response
 ): Promise<any> => {
     try {
+        const userId = req.user!.id;
+        
+        // Find orders where user is the farmer to include disputes raised AGAINST them
+        const myOrdersAsFarmer = await Order.find({ farmerId: userId }).select("_id");
+        const orderIds = myOrdersAsFarmer.map(o => o._id);
+
         const disputes = await Dispute.find({
-            raisedBy: req.user!.id,
-        }).sort({ createdAt: -1 });
+            $or: [
+                { raisedBy: userId },
+                { orderId: { $in: orderIds } }
+            ]
+        })
+        .populate({
+            path: "orderId",
+            populate: [
+                { path: "farmerId", select: "fullName" }, // To get Farmer Name
+                { path: "buyerId", select: "fullName" }
+            ]
+        })
+        .populate("raisedBy", "fullName role")
+        .sort({ createdAt: -1 });
 
         res.json(disputes);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -59,7 +79,14 @@ export const getDisputeById = async (
 ): Promise<any> => {
     try {
         const dispute = await Dispute.findById(req.params.id)
-            .populate("orderId");
+            .populate({
+                path: "orderId",
+                populate: [
+                    { path: "farmerId", select: "fullName" },
+                    { path: "buyerId", select: "fullName" }
+                ]
+            })
+            .populate("raisedBy", "fullName role");
 
         if (!dispute) {
             return res.status(404).json({ message: "Dispute not found" });
@@ -111,6 +138,39 @@ export const updateDisputeStatus = async (
         await dispute.save();
         res.json(dispute);
     } catch (error) {
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+/**
+ * PATCH /disputes/:id/resolve
+ * Allows Farmer to resolve the dispute
+ */
+export const resolveDispute = async (
+    req: AuthRequest,
+    res: Response
+): Promise<any> => {
+    try {
+        const userId = req.user!.id;
+        const dispute = await Dispute.findById(req.params.id).populate("orderId");
+        
+        if (!dispute) {
+            return res.status(404).json({ message: "Dispute not found" });
+        }
+
+        // Check if user is the farmer of the order
+        const order = dispute.orderId as any; // Type assertion since it is populated
+        if (order.farmerId.toString() !== userId) {
+            return res.status(403).json({ message: "Only the farmer responsible for this order can resolve this dispute." });
+        }
+
+        dispute.status = "RESOLVED";
+        // Optionally add a system remark or farmer remark if schema supported it
+        
+        await dispute.save();
+        res.json(dispute);
+    } catch (error) {
+        console.error("Error resolving dispute:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
