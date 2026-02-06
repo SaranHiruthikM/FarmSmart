@@ -12,10 +12,12 @@ const normalizePart = (value: string): string => {
 export const buildPriceCacheKey = (
   kind: 'current' | 'history' | 'compare',
   crop: string,
-  location?: string
+  location?: string,
+  extra?: string
 ): string => {
   const parts = ['prices', kind, normalizePart(crop)];
   if (location) parts.push(normalizePart(location));
+  if (extra) parts.push(normalizePart(extra));
   return parts.join(':');
 };
 
