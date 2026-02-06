@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Crop } from "../models/Crop";
+import { QualityRule } from "../models/QualityRule";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 /**
@@ -7,8 +8,23 @@ import { AuthRequest } from "../middleware/authMiddleware";
  */
 export const createCrop = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
+    let { finalPrice, basePrice, qualityGrade } = req.body;
+
+    // Calculate finalPrice if missing
+    if (!finalPrice && basePrice && qualityGrade) {
+      const rule = await QualityRule.findOne({ grade: qualityGrade });
+      if (rule) {
+        finalPrice = (Number(basePrice) * rule.multiplier).toFixed(2);
+      } else {
+        // Fallback or error? defaulting to basePrice if rule not found is risky but maybe acceptable?
+        // Better to error if grade is invalid, but schema validation will catch invalid enum.
+        finalPrice = basePrice; 
+      }
+    }
+
     const crop = await Crop.create({
       ...req.body,
+      finalPrice, // Add calculated or provided finalPrice
       farmerId: req.user!.id,
     });
     res.status(201).json(crop);
@@ -25,11 +41,31 @@ export const createCrop = async (req: AuthRequest, res: Response): Promise<any> 
  */
 export const updateCrop = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
+    let updateData = { ...req.body };
+    
+    // If updating price factors, recalculate finalPrice
+    if (updateData.basePrice || updateData.qualityGrade) {
+      // We might need existing data if only one is provided
+      // But for simplicity/performance in findOneAndUpdate, we'd need to fetch first.
+      // Let's fetch first.
+      const existingCrop = await Crop.findOne({ _id: req.params.id, farmerId: req.user!.id });
+      if (!existingCrop) return res.status(404).json({ message: "Crop not found" });
+
+      const newBasePrice = updateData.basePrice ?? existingCrop.basePrice;
+      const newGrade = updateData.qualityGrade ?? existingCrop.qualityGrade;
+
+      const rule = await QualityRule.findOne({ grade: newGrade });
+      if (rule) {
+        updateData.finalPrice = (Number(newBasePrice) * rule.multiplier).toFixed(2);
+      }
+    }
+
     const crop = await Crop.findOneAndUpdate(
       { _id: req.params.id, farmerId: req.user!.id },
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
+    
     if (!crop) return res.status(404).json({ message: "Crop not found" });
     res.json(crop);
   } catch (error: any) {

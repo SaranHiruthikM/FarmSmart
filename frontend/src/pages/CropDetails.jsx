@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import cropService from "../services/crop.service";
-import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info } from "lucide-react";
+import reviewService from "../services/review.service";
+import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info, MessageSquarePlus } from "lucide-react";
 import PrimaryButton from "../components/common/PrimaryButton";
-import mockReviewService from "../services/review.mock";
+import NegotiationModal from "../components/marketplace/NegotiationModal";
+import ReviewModal from "../components/common/ReviewModal";
 import { Star, CheckCircle, Award } from "lucide-react";
 
 const CropDetails = () => {
@@ -12,6 +14,8 @@ const CropDetails = () => {
     const [crop, setCrop] = useState(null);
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState("buyer"); // In real app, get from auth context
+    const [isNegotiationModalOpen, setIsNegotiationModalOpen] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [avgRating, setAvgRating] = useState(0);
 
@@ -37,9 +41,15 @@ const CropDetails = () => {
 
                 // Fetch reviews for the farmer
                 if (data.farmer) {
-                    const farmerReviews = mockReviewService.getReviewsByUserId(data.farmer);
-                    setReviews(farmerReviews);
-                    setAvgRating(mockReviewService.getAverageRating(data.farmer));
+                    try {
+                        const farmerReviews = await reviewService.getReviewsByUserId(data.farmer);
+                        setReviews(farmerReviews);
+                    } catch (err) {
+                        console.error("Failed to fetch reviews", err);
+                        setReviews([]);
+                    }
+                     // Use the pre-calculated rating from crop data which comes from User model
+                    setAvgRating(data.farmerRating || 0);
                 }
             } catch (error) {
                 console.error("Failed to load crop", error);
@@ -205,13 +215,23 @@ const CropDetails = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="flex-1">
+                                <div className="flex-1 flex gap-3"> {/* Changed to flex gap-3 to accomodate two buttons */}
                                     <PrimaryButton
-                                        className="w-full py-4 text-lg"
+                                        className="flex-1 py-4 text-lg"
                                         onClick={() => alert("Interest noted! Farmer will be notified.")}
                                     >
                                         {userRole === "buyer" ? "Contact Farmer" : "Express Interest"}
                                     </PrimaryButton>
+
+                                    {userRole === "buyer" && (
+                                        <button
+                                            onClick={() => setIsNegotiationModalOpen(true)}
+                                            className="flex-1 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <BadgeIndianRupee className="w-5 h-5" />
+                                            Negotiate Price
+                                        </button>
+                                    )}
                                 </div>
                             )}
                             <button className="p-4 border border-neutral-light rounded-2xl hover:bg-neutral-light hover:text-primary transition-all shadow-sm group">
@@ -242,6 +262,16 @@ const CropDetails = () => {
                             <p className="text-accent font-bold uppercase tracking-widest text-xs">Based on {reviews.length} Verified {reviews.length === 1 ? 'Review' : 'Reviews'}</p>
                         </div>
                     </div>
+
+                    {userRole === "buyer" && (
+                        <button
+                            onClick={() => setIsReviewModalOpen(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-white border border-neutral-light text-text-dark font-bold rounded-xl hover:border-primary hover:text-primary transition-all shadow-sm group"
+                        >
+                            <MessageSquarePlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            Write a Review
+                        </button>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -285,6 +315,20 @@ const CropDetails = () => {
                     )}
                 </div>
             </div>
+            <NegotiationModal
+                isOpen={isNegotiationModalOpen}
+                onClose={() => setIsNegotiationModalOpen(false)}
+                crop={crop}
+                onSuccess={(negotiation) => navigate(`/dashboard/negotiations/${negotiation._id}`)}
+            />
+            {crop && (
+                <ReviewModal
+                    isOpen={isReviewModalOpen}
+                    onClose={() => setIsReviewModalOpen(false)}
+                    targetId={crop.farmer}
+                    onSuccess={() => window.location.reload()}
+                />
+            )}
         </div>
     );
 };

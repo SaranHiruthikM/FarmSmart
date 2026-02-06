@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CheckCircle, Truck, User, Info, AlertCircle, ShoppingBag, ArrowLeft } from "lucide-react";
 import authService from "../../services/auth.service";
+import negotiationService from "../../services/negotiation.service";
+import orderService from "../../services/order.service";
 
 const OrderSummary = () => {
     const { negotiationId } = useParams();
@@ -9,36 +11,58 @@ const OrderSummary = () => {
     const user = authService.getCurrentUser();
     const isBuyer = user?.role?.toLowerCase() === "buyer";
     const [confirming, setConfirming] = useState(false);
+    const [orderData, setOrderData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // Mock Data for the negotiation/order
-    const orderData = {
-        cropName: "Organic Basmati Rice",
-        agreedPrice: 70, // Per kg
-        agreedQuantity: 500, // kg
-        totalAmount: 35000,
-        farmer: {
-            name: "Suresh Kumar",
-            location: "Karnal, Haryana",
-            phone: "+91 98765 43210"
-        },
-        buyer: {
-            name: user?.fullName || "Ankit Singh",
-            location: "New Delhi, Delhi",
-            phone: "+91 88888 77777"
-        },
-        deliveryEstimate: "3-5 Business Days",
-        paymentMethod: "Escrow Payment (Secured)"
-    };
+    useEffect(() => {
+        const fetchNegotiation = async () => {
+            try {
+                const data = await negotiationService.getNegotiationById(negotiationId);
+                if (!data) throw new Error("Negotiation not found");
 
-    const handleConfirm = () => {
+                setOrderData({
+                    cropName: data.cropName,
+                    agreedPrice: data.price,
+                    agreedQuantity: data.quantity,
+                    totalAmount: data.price * data.quantity,
+                    farmer: {
+                        name: data.farmerName || "Farmer",
+                        location: "Modakurichi, Tamil Nadu",
+                        phone: "+91 98765 43210"
+                    },
+                    buyer: {
+                        name: data.buyerName || "Buyer",
+                        location: "New Delhi, India",
+                        phone: "+91 88888 77777"
+                    },
+                    deliveryEstimate: "3-5 Business Days",
+                    paymentMethod: "Escrow Payment (Secured)"
+                });
+            } catch (err) {
+                console.error("Failed to load negotiation", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchNegotiation();
+    }, [negotiationId]);
+
+    const handleConfirm = async () => {
         setConfirming(true);
-        // Simulate API call
-        setTimeout(() => {
-            setConfirming(false);
+        try {
+            const newOrder = await orderService.createOrder(negotiationId);
             alert("Order Confirmed Successfully!");
-            navigate("/dashboard/orders/ORD001"); // Redirect to tracking page
-        }, 1500);
+            navigate(`/dashboard/orders/${newOrder.id}`);
+        } catch (err) {
+            console.error("Order creation failed", err);
+            alert("Failed to create order: " + (err.response?.data?.message || err.message));
+        } finally {
+            setConfirming(false);
+        }
     };
+
+    if (loading) return <div className="p-10 text-center text-accent">Loading Order Details...</div>;
+    if (!orderData) return <div className="p-12 text-center text-accent font-bold">Order Details Not Found</div>;
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
