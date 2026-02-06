@@ -1,6 +1,5 @@
 import { Schema, model, Types, Document } from "mongoose";
 
-/* -------------------- OFFER -------------------- */
 export interface IOffer {
   by: "BUYER" | "FARMER";
   pricePerUnit: number;
@@ -9,29 +8,29 @@ export interface IOffer {
   createdAt: Date;
 }
 
-/* -------------------- NEGOTIATION -------------------- */
 export interface INegotiation extends Document {
-  cropId: Types.ObjectId;
   buyerId: Types.ObjectId;
   farmerId: Types.ObjectId;
+  cropId: Types.ObjectId;
+  agreedPrice: number;
+  agreedQuantity: number;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   offers: IOffer[];
-  agreedPrice?: number;
-  agreedQuantity?: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-/* -------------------- OFFER SCHEMA -------------------- */
-const OfferSchema = new Schema<IOffer>({
-  by: { type: String, enum: ["BUYER", "FARMER"], required: true },
-  pricePerUnit: { type: Number, required: true, min: 0 },
-  quantity: { type: Number, required: true, min: 0 },
-  message: { type: String, trim: true },
-  createdAt: { type: Date, default: Date.now },
-});
+const OfferSchema = new Schema<IOffer>(
+  {
+    by: { type: String, enum: ["BUYER", "FARMER"], required: true },
+    pricePerUnit: { type: Number, required: true, min: 0 },
+    quantity: { type: Number, required: true, min: 0 },
+    message: { type: String, trim: true },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
 
-/* -------------------- NEGOTIATION SCHEMA -------------------- */
 const NegotiationSchema = new Schema<INegotiation>(
   {
     buyerId: {
@@ -52,6 +51,18 @@ const NegotiationSchema = new Schema<INegotiation>(
       required: true,
       index: true,
     },
+    agreedPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+    agreedQuantity: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
     status: {
       type: String,
       enum: ["PENDING", "ACCEPTED", "REJECTED"],
@@ -61,19 +72,11 @@ const NegotiationSchema = new Schema<INegotiation>(
       type: [OfferSchema],
       default: [],
     },
-    agreedPrice: {
-      type: Number,
-      min: 0,
-    },
-    agreedQuantity: {
-      type: Number,
-      min: 0,
-    },
   },
   { timestamps: true }
 );
 
-export const Negotiation = model<INegotiation>(
-  "Negotiation",
-  NegotiationSchema
-);
+const Negotiation = model<INegotiation>("Negotiation", NegotiationSchema);
+
+export { Negotiation };
+export default Negotiation;

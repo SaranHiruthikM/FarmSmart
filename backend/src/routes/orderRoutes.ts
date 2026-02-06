@@ -9,9 +9,11 @@ import { authenticate } from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.post("/", authenticate, createOrder);
-router.get("/my", authenticate, getMyOrders);
-router.get("/:id", authenticate, getOrderById);
-router.patch("/:id/status", authenticate, updateOrderStatus);
+router.use(authenticate);
+
+router.post("/", createOrder);
+router.get("/my", getMyOrders);
+router.get("/:id", getOrderById);
+router.patch("/:id/status", updateOrderStatus);
 
 export default router;
