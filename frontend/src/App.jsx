@@ -16,6 +16,9 @@ import OrderHistory from "./pages/orders/OrderHistory";
 import OrderSummary from "./pages/orders/OrderSummary";
 import OrderStatus from "./pages/orders/OrderStatus";
 import ReviewsAndTrust from "./pages/ReviewsAndTrust";
+import MyDisputes from "./pages/orders/MyDisputes";
+import DisputeDetails from "./pages/orders/DisputeDetails";
+import AdminDisputes from "./pages/admin/AdminDisputes";
 
 // Protected Route Wrapper for Public Pages (Login/Register)
 // If authenticated, redirect to dashboard.
@@ -62,6 +65,13 @@ function App() {
 
         {/* Reviews & Trust */}
         <Route path="reviews" element={<ReviewsAndTrust />} />
+
+        {/* Disputes */}
+        <Route path="disputes" element={<MyDisputes />} />
+        <Route path="disputes/:id" element={<DisputeDetails />} />
+
+        {/* Admin Disputes */}
+        <Route path="admin/disputes" element={<AdminDisputes />} />
 
         {/* Fallback for dashboard */}
         <Route path="*" element={<div className="p-10 text-center text-gray-500">Page under construction</div>} />
