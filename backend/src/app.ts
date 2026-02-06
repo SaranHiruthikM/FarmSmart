@@ -4,6 +4,7 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import cropRoutes from './routes/cropRoutes';
 import pricesRoutes from './routes/prices.routes';
+import negotiationRoutes from './routes/negotiationRoutes';
 
 import qualityRoutes from './routes/qualityRoutes';
 import { sendResponse } from './utils/response';
@@ -14,9 +15,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Request Logger
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  next();
+});
+
 // Routes
 app.use('/auth', authRoutes);
 app.use('/crops', cropRoutes);
+app.use('/negotiations', negotiationRoutes);
 app.use('/quality', qualityRoutes);
 
 /**
