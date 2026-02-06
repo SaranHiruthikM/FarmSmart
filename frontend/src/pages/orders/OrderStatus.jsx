@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import authService from "../../services/auth.service";
 import mockOrderService from "../../services/order.mock";
+import mockReviewService from "../../services/review.mock";
+import { Star } from "lucide-react";
 
 const OrderStatus = () => {
     const { orderId } = useParams();
@@ -33,6 +35,10 @@ const OrderStatus = () => {
     ];
 
     const [currentStatus, setCurrentStatus] = useState(orderFromStore.status);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewComment, setReviewComment] = useState("");
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
     const currentStatusIndex = statuses.findIndex(s => s.id === currentStatus);
 
@@ -57,6 +63,25 @@ const OrderStatus = () => {
         setCurrentStatus(statusId);
         mockOrderService.updateOrderStatus(orderId, statusId);
         alert(`Order status updated to ${statusId}`);
+    };
+
+    const handleSubmitReview = (e) => {
+        e.preventDefault();
+        setIsSubmittingReview(true);
+
+        // Simulate API call
+        setTimeout(() => {
+            mockReviewService.addReview({
+                userId: "1", // Hardcoded to Suresh Kumar for this mock
+                reviewerName: user?.fullName || "Buyer",
+                reviewerRole: user?.role?.toUpperCase() || "BUYER",
+                rating: reviewRating,
+                comment: reviewComment
+            });
+            setIsSubmittingReview(false);
+            setReviewSubmitted(true);
+            alert("Review submitted successfully!");
+        }, 1000);
     };
 
     return (
@@ -244,6 +269,66 @@ const OrderStatus = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Review Section - Only for Completed Orders */}
+            {currentStatus === "Completed" && !isFarmer && (
+                <div className="mt-12 bg-white p-8 rounded-[2.5rem] border-2 border-neutral-light shadow-sm max-w-2xl mx-auto">
+                    {!reviewSubmitted ? (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-primary/10 rounded-2xl">
+                                    <Star className="w-6 h-6 text-primary fill-primary" />
+                                </div>
+                                <h2 className="text-2xl font-black text-text-dark tracking-tight">Rate Your Experience</h2>
+                            </div>
+
+                            <p className="text-secondary font-medium">Your feedback helps us maintain a trusted community for farmers and buyers.</p>
+
+                            <form onSubmit={handleSubmitReview} className="space-y-6">
+                                <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setReviewRating(star)}
+                                            className={`transition-all duration-200 ${reviewRating >= star ? "text-primary scale-110" : "text-neutral-light"}`}
+                                        >
+                                            <Star className={`w-8 h-8 ${reviewRating >= star ? "fill-primary" : ""}`} />
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-accent uppercase tracking-widest ml-1">Your Comment</label>
+                                    <textarea
+                                        required
+                                        value={reviewComment}
+                                        onChange={(e) => setReviewComment(e.target.value)}
+                                        placeholder="Tell us about the quality of the crop and the seller's service..."
+                                        className="w-full p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light focus:border-primary outline-none transition-all min-h-[120px] font-medium"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isSubmittingReview}
+                                    className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm tracking-widest uppercase hover:bg-green-600 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+                                >
+                                    {isSubmittingReview ? "SUBMITTING..." : "SUBMIT REVIEW"}
+                                </button>
+                            </form>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 space-y-4">
+                            <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto border-2 border-green-100">
+                                <CheckCircle2 className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-xl font-black text-text-dark">Thank You for Your Review!</h3>
+                            <p className="text-accent font-medium">Your feedback has been published on the seller's profile.</p>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
