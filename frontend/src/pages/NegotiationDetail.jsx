@@ -13,20 +13,26 @@ const NegotiationDetail = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Mocking user role for now - in real app would verify against auth
-    const [userRole, setUserRole] = useState("farmer"); // Default to farmer to show both sides logic
+    const [userRole, setUserRole] = useState(null); // Start as null to avoid default-state flashes
 
     useEffect(() => {
         const fetchNegotiation = async () => {
             try {
                 const data = await negotiationService.getNegotiationById(id);
-                setNegotiation(data);
-                // Determine role based on data if backend returns it, or context
-                // This logic mimics CropDetails
+                
+                // Determine role immediately before setting negotiation to avoid sync issues
                 const userData = JSON.parse(localStorage.getItem("user") || "{}");
                 const userId = userData._id || userData.id;
-                if (data.farmerId === userId) setUserRole("farmer");
-                else setUserRole("buyer");
-
+                
+                // Robust comparison
+                const isFarmer = String(data.farmerId) === String(userId);
+                const isBuyer = String(data.buyerId) === String(userId);
+                
+                if (isFarmer) setUserRole("farmer");
+                else if (isBuyer) setUserRole("buyer");
+                else setUserRole(null); // Unauthorized viewer
+                
+                setNegotiation(data);
             } catch (error) {
                 console.error("Failed to load negotiation", error);
             } finally {
@@ -98,27 +104,36 @@ const NegotiationDetail = () => {
             {/* Chat/Timeline Area */}
             <div className="bg-[#F8FAF8] rounded-[2rem] p-6 border border-neutral-light min-h-[400px] flex flex-col">
                 <div className="flex-1 space-y-6">
-                    {/* Original Offer */}
-                    <div className="flex justify-end">
-                        <div className="bg-white p-5 rounded-2xl rounded-tr-none shadow-sm border border-neutral-light max-w-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="bg-primary/10 p-1.5 rounded-full">
-                                    <User className="w-4 h-4 text-primary" />
+                    {/* Conversation History */}
+                    {negotiation.history && negotiation.history.map((offer, index) => {
+                        const isMyOffer = offer.by.toLowerCase() === userRole;
+                        const offerName = offer.by === 'BUYER' ? negotiation.buyerName : negotiation.farmerName;
+                        
+                        return (
+                            <div key={index} className={`flex ${isMyOffer ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`bg-white p-5 rounded-2xl shadow-sm border border-neutral-light max-w-lg ${isMyOffer ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className={`p-1.5 rounded-full ${offer.by === 'BUYER' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
+                                            <User className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-xs font-bold text-accent uppercase">
+                                            {offerName} <span className="opacity-70">({offer.by})</span>
+                                        </span>
+                                        <span className="text-[10px] text-accent/50 font-medium ml-auto">
+                                            {new Date(offer.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                    <div className="text-2xl font-black text-primary mb-1">
+                                        ₹{offer.price}
+                                        <span className="text-base text-accent font-medium ml-1">/{negotiation.unit || 'kg'} • {offer.quantity} {negotiation.unit || 'kg'}</span>
+                                    </div>
+                                    {offer.message && (
+                                        <p className="text-text-dark bg-neutral-light/30 p-3 rounded-xl text-sm mt-3 italic">"{offer.message}"</p>
+                                    )}
                                 </div>
-                                <span className="text-xs font-bold text-accent uppercase">Buyer Offer</span>
                             </div>
-                            <div className="text-2xl font-black text-primary mb-1">
-                                ₹{negotiation.price}
-                                <span className="text-base text-accent font-medium ml-1">/{negotiation.unit || 'kg'}</span>
-                            </div>
-                            {negotiation.message && (
-                                <p className="text-text-dark bg-neutral-light/30 p-3 rounded-xl text-sm mt-3 italic">"{negotiation.message}"</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Counter Offers or Responses logic would loop here if multiple rounds supported */}
-                    {/* Currently simple model: Offer -> Accept/Reject/Counter(Single step mostly or update) */}
+                        );
+                    })}
 
                     {/* If Status changed */}
                     {isFinalStatus && (
@@ -131,21 +146,24 @@ const NegotiationDetail = () => {
                     )}
                 </div>
 
-                {/* Action Area (Farmer Only & Active) */}
-                {userRole === 'farmer' && !isFinalStatus && (
+                {/* Action Area (Turn-based) */}
+                {userRole && negotiation.lastOfferBy?.toUpperCase() !== userRole.toUpperCase() && !isFinalStatus && (
                     <div className="mt-8 bg-white p-6 rounded-3xl shadow-lg border border-neutral-light">
                         <h3 className="font-bold text-text-dark mb-4 flex items-center gap-2">
                             <Send className="w-5 h-5 text-primary" />
                             Respond to Offer
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <button
-                                onClick={() => handleResponse('accept')}
-                                disabled={isSubmitting}
-                                className="p-4 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-200"
-                            >
-                                <CheckCircle2 className="w-5 h-5" /> Accept Offer
-                            </button>
+                        {/* Action Buttons Grid */}
+                        <div className={`grid grid-cols-1 ${userRole === 'farmer' ? 'md:grid-cols-2' : ''} gap-4`}>
+                            {userRole === 'farmer' && (
+                                <button
+                                    onClick={() => handleResponse('accept')}
+                                    disabled={isSubmitting}
+                                    className="p-4 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-200"
+                                >
+                                    <CheckCircle2 className="w-5 h-5" /> Accept Offer
+                                </button>
+                            )}
                             <button
                                 onClick={() => handleResponse('reject')}
                                 disabled={isSubmitting}
@@ -180,10 +198,10 @@ const NegotiationDetail = () => {
                     </div>
                 )}
 
-                {/* Buyer View (Waiting Status) */}
-                {userRole === 'buyer' && !isFinalStatus && (
+                {/* Waiting View (Turn-based) */}
+                {userRole && negotiation.lastOfferBy?.toUpperCase() === userRole.toUpperCase() && !isFinalStatus && (
                     <div className="mt-6 p-4 bg-yellow-50 text-yellow-800 rounded-2xl border border-yellow-100 text-center font-medium animate-pulse">
-                        Waiting for farmer's response...
+                         Waiting for {userRole === 'buyer' ? 'Farmer' : 'Buyer'} to respond...
                     </div>
                 )}
             </div>

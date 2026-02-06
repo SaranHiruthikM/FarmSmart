@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
     Package,
@@ -13,8 +13,8 @@ import {
     Box
 } from "lucide-react";
 import authService from "../../services/auth.service";
-import mockOrderService from "../../services/order.mock";
-import mockReviewService from "../../services/review.mock";
+import orderService from "../../services/order.service";
+import reviewService from "../../services/review.service";
 import { Star } from "lucide-react";
 
 const OrderStatus = () => {
@@ -22,19 +22,34 @@ const OrderStatus = () => {
     const user = authService.getCurrentUser();
     const isFarmer = user?.role?.toLowerCase() === "farmer";
 
-    // Load order from mock service
-    const orderFromStore = mockOrderService.getOrderById(orderId) || mockOrderService.getAllOrders()[0];
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [currentStatus, setCurrentStatus] = useState("CREATED");
 
-    // Status mapping for the timeline
+    // Status mapping
     const statuses = [
-        { id: "Created", label: "Created", icon: Package, description: "Order has been placed and is awaiting confirmation." },
-        { id: "Confirmed", label: "Confirmed", icon: ShieldCheck, description: "Farmer has confirmed the order and is preparing for shipment." },
-        { id: "Shipped", label: "Shipped", icon: Truck, description: "Crop is in transit to the delivery location." },
-        { id: "Delivered", label: "Delivered", icon: MapPin, description: "Order has reached the destination." },
-        { id: "Completed", label: "Completed", icon: CheckCircle2, description: "Transaction is finalized and funds released." }
+        { id: "CREATED", label: "Created", icon: Package, description: "Order has been placed and is awaiting confirmation." },
+        { id: "CONFIRMED", label: "Confirmed", icon: ShieldCheck, description: "Farmer has confirmed the order and is preparing for shipment." },
+        { id: "SHIPPED", label: "Shipped", icon: Truck, description: "Crop is in transit to the delivery location." },
+        { id: "DELIVERED", label: "Delivered", icon: MapPin, description: "Order has reached the destination." },
+        { id: "COMPLETED", label: "Completed", icon: CheckCircle2, description: "Transaction is finalized and funds released." }
     ];
 
-    const [currentStatus, setCurrentStatus] = useState(orderFromStore.status);
+    useEffect(() => {
+        const fetchOrder = async () => {
+            try {
+                const data = await orderService.getOrderById(orderId);
+                setOrder(data);
+                setCurrentStatus(data.status?.toUpperCase() || "CREATED");
+            } catch (error) {
+                console.error("Failed to load order", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOrder();
+    }, [orderId]);
+
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewComment, setReviewComment] = useState("");
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -42,46 +57,50 @@ const OrderStatus = () => {
 
     const currentStatusIndex = statuses.findIndex(s => s.id === currentStatus);
 
-    // Mock Data (Extending with stored data)
+    if (loading || !order) return <div className="p-10 text-center text-accent">Loading...</div>;
+
+    // Use fetched order data
     const orderDetails = {
-        crop: orderFromStore.crop,
-        quantity: orderFromStore.quantity,
-        total: orderFromStore.totalPrice,
-        orderDate: orderFromStore.date,
-        expectedDelivery: "Feb 10, 2024",
-        trackingId: "FS-TRK-99281",
-        buyer: "Ankit Singh",
-        farmer: "Suresh Kumar",
-        address: "Block C-4, Warehouse 12, Azadpur Mandi, Delhi - 110033"
+        crop: order.crop,
+        quantity: order.quantity,
+        total: order.totalPrice,
+        orderDate: order.date,
+        id: order.id,
+        deliveryAddress: order.shippingAddress || "Agri Market Yard, Erode, Tamil Nadu",
+        farmerLocation: "Modakurichi, Tamil Nadu",
+        expectedDelivery: "In Transit",
+        trackingId: order.id,
+        buyer: order.buyer || "Valued Customer",
+        farmer: order.farmer || "Trusted Farmer",
     };
 
-    const handleUpdateStatus = (statusId) => {
-        if (!isFarmer) {
-            alert("Only Farmers can update order status.");
-            return;
+
+    const handleUpdateStatus = async (statusId) => {
+        try {
+            await orderService.updateOrderStatus(orderId, statusId);
+            setCurrentStatus(statusId);
+        } catch (err) {
+            console.error("Failed to update status", err);
         }
-        setCurrentStatus(statusId);
-        mockOrderService.updateOrderStatus(orderId, statusId);
-        alert(`Order status updated to ${statusId}`);
     };
 
-    const handleSubmitReview = (e) => {
+    const handleSubmitReview = async (e) => {
         e.preventDefault();
         setIsSubmittingReview(true);
-
-        // Simulate API call
-        setTimeout(() => {
-            mockReviewService.addReview({
-                userId: "1", // Hardcoded to Suresh Kumar for this mock
-                reviewerName: user?.fullName || "Buyer",
-                reviewerRole: user?.role?.toUpperCase() || "BUYER",
+        try {
+            await reviewService.addReview({
+                orderId: order.id,
                 rating: reviewRating,
                 comment: reviewComment
+                // targetId is handled by backend based on order
             });
-            setIsSubmittingReview(false);
             setReviewSubmitted(true);
             alert("Review submitted successfully!");
-        }, 1000);
+        } catch (err) {
+            alert("Failed to submit review: " + (err.response?.data?.message || err.message));
+        } finally {
+            setIsSubmittingReview(false);
+        }
     };
 
     return (
@@ -98,7 +117,7 @@ const OrderStatus = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <span className={`px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider border-2 ${currentStatus === "Completed" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-primary/10 border-primary/20 text-primary"
+                    <span className={`px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider border-2 ${currentStatus === "COMPLETED" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-primary/10 border-primary/20 text-primary"
                         }`}>
                         {currentStatus}
                     </span>
@@ -178,7 +197,7 @@ const OrderStatus = () => {
                             </h3>
                             <div className="p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light/50">
                                 <p className="font-bold text-text-dark leading-relaxed">
-                                    {orderDetails.address}
+                                    {orderDetails.deliveryAddress}
                                 </p>
                             </div>
                         </div>
@@ -271,7 +290,7 @@ const OrderStatus = () => {
             </div>
 
             {/* Review Section - Only for Completed Orders */}
-            {currentStatus === "Completed" && !isFarmer && (
+            {currentStatus === "COMPLETED" && !isFarmer && (
                 <div className="mt-12 bg-white p-8 rounded-[2.5rem] border-2 border-neutral-light shadow-sm max-w-2xl mx-auto">
                     {!reviewSubmitted ? (
                         <div className="space-y-6">

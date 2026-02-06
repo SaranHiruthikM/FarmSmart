@@ -1,23 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react"; // Added hooks
 import { Link } from "react-router-dom";
 import { Receipt, Search, Filter, ChevronRight, Package, Calendar, Tag } from "lucide-react";
 import authService from "../../services/auth.service";
-import mockOrderService from "../../services/order.mock";
+import orderService from "../../services/order.service"; // Changed to real service
 
 const OrderHistory = () => {
     const user = authService.getCurrentUser();
     const isFarmer = user?.role?.toLowerCase() === "farmer";
 
-    // Load orders from mock service
-    const mockOrders = mockOrderService.getAllOrders();
+    // Replaced static mock with state
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const data = await orderService.getMyOrders();
+                setOrders(data);
+            } catch (error) {
+                console.error("Failed to fetch orders", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, []);
 
     const getStatusColor = (status) => {
-        switch (status) {
-            case "Created": return "bg-blue-50 text-blue-600 border-blue-100";
-            case "Confirmed": return "bg-orange-50 text-orange-600 border-orange-100";
-            case "Shipped": return "bg-indigo-50 text-indigo-600 border-indigo-100";
-            case "Delivered": return "bg-green-50 text-green-600 border-green-100";
-            case "Completed": return "bg-emerald-50 text-emerald-600 border-emerald-100";
+        // Handle case variant (backend is UPPERCASE)
+        const s = status?.toUpperCase();
+        switch (s) {
+            case "CREATED": return "bg-blue-50 text-blue-600 border-blue-100";
+            case "CONFIRMED": return "bg-orange-50 text-orange-600 border-orange-100";
+            case "SHIPPED": return "bg-indigo-50 text-indigo-600 border-indigo-100";
+            case "DELIVERED": return "bg-green-50 text-green-600 border-green-100";
+            case "COMPLETED": return "bg-emerald-50 text-emerald-600 border-emerald-100";
             default: return "bg-gray-50 text-gray-600 border-gray-100";
         }
     };
@@ -55,7 +73,16 @@ const OrderHistory = () => {
 
             {/* Orders List */}
             <div className="grid gap-4">
-                {mockOrders.map((order) => (
+                {orders.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-3xl border border-neutral-light/50">
+                        <div className="bg-green-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Package className="w-10 h-10 text-green-400" />
+                        </div>
+                        <h3 className="text-xl font-bold text-text-dark">No Orders Found</h3>
+                        <p className="text-accent mt-2 max-w-md mx-auto">Start trading on the marketplace to see your orders here.</p>
+                    </div>
+                ) : (
+                    orders.map((order) => (
                     <Link
                         key={order.id}
                         to={`/dashboard/orders/${order.id}`}
@@ -64,17 +91,18 @@ const OrderHistory = () => {
                         <div className="flex flex-col lg:flex-row lg:items-center gap-6">
                             {/* Crop Image & Basic Info */}
                             <div className="flex items-center gap-4 flex-1">
-                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-neutral-light shrink-0 border-2 border-neutral-light group-hover:border-primary/20 transition-colors">
-                                    <img src={order.image} alt={order.crop} className="w-full h-full object-cover" />
+                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-neutral-light shrink-0 border-2 border-neutral-light group-hover:border-primary/20 transition-colors flex items-center justify-center text-2xl">
+                                    {/* Valid image or Fallback emoji */}
+                                     🌾
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-black text-text-dark group-hover:text-primary transition-colors">{order.crop}</h3>
                                     <div className="flex items-center gap-3 mt-1">
-                                        <span className="text-xs font-bold text-secondary uppercase tracking-wider">{order.id}</span>
+                                        <span className="text-xs font-bold text-secondary uppercase tracking-wider">{order.id.slice(0, 8)}</span>
                                         <span className="w-1 h-1 bg-accent/30 rounded-full" />
                                         <div className="flex items-center gap-1.5 text-accent text-sm font-medium">
                                             <Calendar className="w-4 h-4" />
-                                            {order.date}
+                                            {new Date(order.date).toLocaleDateString()}
                                         </div>
                                     </div>
                                 </div>
@@ -93,7 +121,8 @@ const OrderHistory = () => {
                                     <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1.5">Total Amount</p>
                                     <div className="flex items-center gap-2 text-primary font-black text-lg">
                                         <Tag className="w-4 h-4" />
-                                        {order.totalPrice}
+                                        {/* Format currency if needed */}
+                                        ₹{order.totalPrice}
                                     </div>
                                 </div>
                                 <div className="col-span-2 md:col-span-1">
@@ -112,11 +141,11 @@ const OrderHistory = () => {
                             </div>
                         </div>
                     </Link>
-                ))}
+                )))}
             </div>
 
             {/* Empty State Illustration Placeholder */}
-            {mockOrders.length === 0 && (
+            {orders.length === 0 && (
                 <div className="text-center py-20 bg-white rounded-[2rem] border-4 border-dashed border-neutral-light">
                     <div className="w-20 h-20 bg-neutral-light rounded-full flex items-center justify-center mx-auto mb-6">
                         <Receipt className="w-10 h-10 text-accent opacity-20" />

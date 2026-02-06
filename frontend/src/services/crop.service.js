@@ -12,12 +12,16 @@ const transformCrop = (crop) => {
     const farmerId = farmerObj._id || farmerObj; 
     const farmerName = farmerObj.fullName || "Unknown Farmer";
     const farmerPhone = farmerObj.phoneNumber;
+    const farmerRating = farmerObj.averageRating || 0;
+    const reviewCount = farmerObj.reviewCount || 0;
 
     return {
         ...crop,
         farmer: farmerId, 
         farmerName: farmerName,
         farmerPhone: farmerPhone,
+        farmerRating: farmerRating,
+        reviewCount: reviewCount,
         // Ensure location exists to prevent UI crash
         location: crop.location || { state: "", district: "", village: "" }
     };
