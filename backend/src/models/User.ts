@@ -17,6 +17,9 @@ export interface IUser extends Document {
   preferredLanguage: string;
   isVerified: boolean;
   isActive: boolean;
+  // Reputation
+  averageRating: number;
+  reviewCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +38,10 @@ const UserSchema: Schema = new Schema(
     preferredLanguage: { type: String, default: 'en' },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    
+    // Reputation Fields
+    averageRating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt
