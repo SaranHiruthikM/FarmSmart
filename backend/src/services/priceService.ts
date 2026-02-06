@@ -24,7 +24,7 @@ type PriceServiceOptions = {
 
 export type PriceService = {
   getCurrentPrices: (crop: string) => Promise<CurrentPriceResponse>;
-  getPriceHistory: (crop: string, location: string) => Promise<PriceHistoryResponse>;
+  getPriceHistory: (crop: string, location: string, days?: number) => Promise<PriceHistoryResponse>;
   comparePrices: (crop: string, location: string) => Promise<PriceCompareResponse>;
 };
 
@@ -84,8 +84,8 @@ export const createPriceService = (options: PriceServiceOptions = {}): PriceServ
     }
   };
 
-  const getPriceHistory = async (crop: string, location: string): Promise<PriceHistoryResponse> => {
-    const cacheKey = buildPriceCacheKey('history', crop, location);
+  const getPriceHistory = async (crop: string, location: string, days: number = 30): Promise<PriceHistoryResponse> => {
+    const cacheKey = buildPriceCacheKey('history', crop, location, days.toString());
     const cached = await getCached<PriceHistoryResponse>(cacheKey);
     if (cached) return cached;
 
@@ -96,7 +96,7 @@ export const createPriceService = (options: PriceServiceOptions = {}): PriceServ
       return data;
     } catch (error) {
       console.warn('[prices] Live price history fetch failed.', { crop, location, error });
-      const fallback = getMockPriceHistory(crop, location);
+      const fallback = getMockPriceHistory(crop, location, days);
       await setCached(cacheKey, fallback, TTL_FALLBACK_SECONDS);
       return fallback;
     }

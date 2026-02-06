@@ -37,7 +37,7 @@ export const getMockCurrentPrices = (crop: string) => {
   };
 };
 
-export const getMockPriceHistory = (crop: string, location: string) => {
+export const getMockPriceHistory = (crop: string, location: string, days: number = 30) => {
   const seed = seedFromStrings(crop, location);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -46,11 +46,11 @@ export const getMockPriceHistory = (crop: string, location: string) => {
   const volatility = 1 + Math.round(pseudoRand(seed + 9) * 3);
 
   const points: Array<{ date: string; price: number }> = [];
-  for (let i = 29; i >= 0; i--) {
+  for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
 
-    const trend = Math.round((29 - i) * (pseudoRand(seed + 3) - 0.5) * 0.2);
+    const trend = Math.round((days - 1 - i) * (pseudoRand(seed + 3) - 0.5) * 0.2);
     const noise = Math.round((pseudoRand(seed + i * 7) - 0.5) * 2 * volatility);
 
     points.push({
@@ -63,7 +63,7 @@ export const getMockPriceHistory = (crop: string, location: string) => {
     crop,
     location,
     unit: 'INR/kg',
-    rangeDays: 30,
+    rangeDays: days,
     points,
   };
 };
