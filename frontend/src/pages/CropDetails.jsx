@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import cropService from "../services/crop.service";
 import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info } from "lucide-react";
 import PrimaryButton from "../components/common/PrimaryButton";
+import NegotiationModal from "../components/marketplace/NegotiationModal";
 
 const CropDetails = () => {
     const { id } = useParams();
@@ -10,6 +11,7 @@ const CropDetails = () => {
     const [crop, setCrop] = useState(null);
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState("buyer"); // In real app, get from auth context
+    const [isNegotiationModalOpen, setIsNegotiationModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchCrop = async () => {
@@ -20,13 +22,13 @@ const CropDetails = () => {
                 const userData = JSON.parse(localStorage.getItem("user") || "{}");
                 // Backend uses _id, mock used id. Support both.
                 const userId = userData._id || userData.id;
-                
+
                 if (userData.role === "FARMER" || userData.role === "farmer") { // Check both case just in case
-                     if (data.farmer === userId) {
+                    if (data.farmer === userId) {
                         setUserRole("owner");
-                     } else {
+                    } else {
                         setUserRole("farmer");
-                     }
+                    }
                 } else {
                     setUserRole("buyer");
                 }
@@ -186,13 +188,23 @@ const CropDetails = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="flex-1">
+                                <div className="flex-1 flex gap-3"> {/* Changed to flex gap-3 to accomodate two buttons */}
                                     <PrimaryButton
-                                        className="w-full py-4 text-lg"
+                                        className="flex-1 py-4 text-lg"
                                         onClick={() => alert("Interest noted! Farmer will be notified.")}
                                     >
                                         {userRole === "buyer" ? "Contact Farmer" : "Express Interest"}
                                     </PrimaryButton>
+
+                                    {userRole === "buyer" && (
+                                        <button
+                                            onClick={() => setIsNegotiationModalOpen(true)}
+                                            className="flex-1 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <BadgeIndianRupee className="w-5 h-5" />
+                                            Negotiate Price
+                                        </button>
+                                    )}
                                 </div>
                             )}
                             <button className="p-4 border border-neutral-light rounded-2xl hover:bg-neutral-light hover:text-primary transition-all shadow-sm group">
@@ -209,6 +221,16 @@ const CropDetails = () => {
                     </div>
                 </div>
             </div>
+
+            <NegotiationModal
+                isOpen={isNegotiationModalOpen}
+                onClose={() => setIsNegotiationModalOpen(false)}
+                crop={crop}
+                onSuccess={() => {
+                    // Navigate to negotiation history or show success
+                    navigate('/dashboard/negotiation');
+                }}
+            />
         </div>
     );
 };

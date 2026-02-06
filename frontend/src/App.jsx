@@ -12,6 +12,8 @@ import CropListingForm from "./pages/CropListingForm";
 import PriceInsights from "./pages/PriceInsights";
 import DemandForecast from "./pages/DemandForecast";
 import QualityPricing from "./pages/QualityPricing";
+import NegotiationHistory from "./pages/NegotiationHistory";
+import NegotiationDetail from "./pages/NegotiationDetail";
 
 // Protected Route Wrapper for Public Pages (Login/Register)
 // If authenticated, redirect to dashboard.
@@ -46,6 +48,10 @@ function App() {
 
         {/* Quality Based Pricing */}
         <Route path="pricing" element={<QualityPricing />} />
+
+        {/* Negotiation & Bidding */}
+        <Route path="negotiation" element={<NegotiationHistory />} />
+        <Route path="negotiations/:id" element={<NegotiationDetail />} />
 
         {/* Farmer Crop Management */}
         <Route path="add-crop" element={<CropListingForm />} />
