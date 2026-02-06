@@ -4,7 +4,7 @@ export interface IDispute extends Document {
     orderId: Types.ObjectId;
     raisedBy: Types.ObjectId;
     raisedByRole: "BUYER" | "FARMER";
-    reason: "QUALITY" | "QUANTITY" | "DELIVERY" | "PAYMENT";
+    reason: "Quality Issue" | "Quantity Mismatch" | "Late Delivery" | "Payment Issue";
     description: string;
     status: "OPEN" | "RESOLVED" | "REJECTED";
     adminRemark?: string;
@@ -32,7 +32,8 @@ const DisputeSchema = new Schema<IDispute>(
         },
         reason: {
             type: String,
-            enum: ["QUALITY", "QUANTITY", "DELIVERY", "PAYMENT"],
+            // Maps to Frontend: "Quality Issue", "Quantity Mismatch", "Late Delivery", "Payment Issue"
+            enum: ["Quality Issue", "Quantity Mismatch", "Late Delivery", "Payment Issue"], 
             required: true,
         },
         description: {
