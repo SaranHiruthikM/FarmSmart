@@ -3,7 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import cropService from "../services/crop.service";
 import notificationService from "../services/notification.service";
 import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info, Bell } from "lucide-react";
+import reviewService from "../services/review.service";
+import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info, MessageSquarePlus } from "lucide-react";
 import PrimaryButton from "../components/common/PrimaryButton";
+import NegotiationModal from "../components/marketplace/NegotiationModal";
+import ReviewModal from "../components/common/ReviewModal";
+import { Star, CheckCircle, Award } from "lucide-react";
 
 const CropDetails = () => {
     const { id } = useParams();
@@ -13,6 +18,10 @@ const CropDetails = () => {
     const [userRole, setUserRole] = useState("buyer"); // In real app, get from auth context
     const [alertPrice, setAlertPrice] = useState("");
     const [alertSuccess, setAlertSuccess] = useState(false);
+    const [isNegotiationModalOpen, setIsNegotiationModalOpen] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [avgRating, setAvgRating] = useState(0);
 
     useEffect(() => {
         const fetchCrop = async () => {
@@ -32,6 +41,19 @@ const CropDetails = () => {
                     }
                 } else {
                     setUserRole("buyer");
+                }
+
+                // Fetch reviews for the farmer
+                if (data.farmer) {
+                    try {
+                        const farmerReviews = await reviewService.getReviewsByUserId(data.farmer);
+                        setReviews(farmerReviews);
+                    } catch (err) {
+                        console.error("Failed to fetch reviews", err);
+                        setReviews([]);
+                    }
+                     // Use the pre-calculated rating from crop data which comes from User model
+                    setAvgRating(data.farmerRating || 0);
                 }
             } catch (error) {
                 console.error("Failed to load crop", error);
@@ -109,7 +131,15 @@ const CropDetails = () => {
                                 </div>
                                 <div>
                                     <p className="font-black text-text-dark">{crop.farmerName || 'Farmer Partner'}</p>
-                                    <p className="text-xs text-accent font-medium">Verified Farmer Since 2023</p>
+                                    <div className="flex flex-wrap gap-2 mt-1">
+                                        <p className="text-xs text-accent font-medium">Verified Farmer Since 2023</p>
+                                        <div className="flex items-center bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-blue-100">
+                                            <Award className="w-2.5 h-2.5 mr-1" /> Top Rated
+                                        </div>
+                                        <div className="flex items-center bg-green-50 text-green-600 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-green-100">
+                                            <CheckCircle className="w-2.5 h-2.5 mr-1" /> Verified
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -233,13 +263,23 @@ const CropDetails = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="flex-1">
+                                <div className="flex-1 flex gap-3"> {/* Changed to flex gap-3 to accomodate two buttons */}
                                     <PrimaryButton
-                                        className="w-full py-4 text-lg"
+                                        className="flex-1 py-4 text-lg"
                                         onClick={() => alert("Interest noted! Farmer will be notified.")}
                                     >
                                         {userRole === "buyer" ? "Contact Farmer" : "Express Interest"}
                                     </PrimaryButton>
+
+                                    {userRole === "buyer" && (
+                                        <button
+                                            onClick={() => setIsNegotiationModalOpen(true)}
+                                            className="flex-1 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <BadgeIndianRupee className="w-5 h-5" />
+                                            Negotiate Price
+                                        </button>
+                                    )}
                                 </div>
                             )}
                             <button className="p-4 border border-neutral-light rounded-2xl hover:bg-neutral-light hover:text-primary transition-all shadow-sm group">
@@ -256,6 +296,87 @@ const CropDetails = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Ratings & Reviews Section */}
+            <div className="mt-12 space-y-8 pb-12">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div className="space-y-1">
+                        <h2 className="text-3xl font-black text-text-dark tracking-tight italic">Ratings & Reviews</h2>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center bg-primary text-white px-3 py-1 rounded-xl text-lg font-black">
+                                <Star className="w-5 h-5 mr-1.5 fill-white" />
+                                {avgRating}
+                            </div>
+                            <p className="text-accent font-bold uppercase tracking-widest text-xs">Based on {reviews.length} Verified {reviews.length === 1 ? 'Review' : 'Reviews'}</p>
+                        </div>
+                    </div>
+
+                    {userRole === "buyer" && (
+                        <button
+                            onClick={() => setIsReviewModalOpen(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-white border border-neutral-light text-text-dark font-bold rounded-xl hover:border-primary hover:text-primary transition-all shadow-sm group"
+                        >
+                            <MessageSquarePlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            Write a Review
+                        </button>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {reviews.length > 0 ? (
+                        reviews.map((review) => (
+                            <div key={review.id} className="bg-white p-6 rounded-3xl border-2 border-neutral-light shadow-sm space-y-4 hover:border-primary/20 transition-all group">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-neutral-light rounded-2xl flex items-center justify-center text-primary font-black group-hover:bg-primary group-hover:text-white transition-colors">
+                                            {review.reviewerName[0]}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-text-dark flex items-center gap-2">
+                                                {review.reviewerName}
+                                                <span className="text-[9px] bg-neutral-light text-accent px-2 py-0.5 rounded-md font-black uppercase tracking-tighter">{review.reviewerRole}</span>
+                                            </h4>
+                                            <p className="text-xs text-accent font-medium">{new Date(review.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex text-primary">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? "fill-primary" : "text-neutral-light"}`} />
+                                        ))}
+                                    </div>
+                                </div>
+                                <p className="text-text-dark font-medium leading-relaxed italic text-sm">
+                                    "{review.comment}"
+                                </p>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="lg:col-span-2 bg-neutral-light/30 p-12 rounded-[2.5rem] border-2 border-dashed border-neutral-light text-center space-y-4">
+                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto text-accent shadow-sm">
+                                <Star className="w-8 h-8" />
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="text-xl font-black text-text-dark tracking-tight">No Reviews Yet</h3>
+                                <p className="text-accent font-medium max-w-md mx-auto">Be the first to review this seller's produce after your first successful transaction!</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+            <NegotiationModal
+                isOpen={isNegotiationModalOpen}
+                onClose={() => setIsNegotiationModalOpen(false)}
+                crop={crop}
+                onSuccess={(negotiation) => navigate(`/dashboard/negotiations/${negotiation._id}`)}
+            />
+            {crop && (
+                <ReviewModal
+                    isOpen={isReviewModalOpen}
+                    onClose={() => setIsReviewModalOpen(false)}
+                    targetId={crop.farmer}
+                    onSuccess={() => window.location.reload()}
+                />
+            )}
         </div>
     );
 };
