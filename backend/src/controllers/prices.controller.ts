@@ -16,6 +16,7 @@ export async function getCurrentPrices(req: Request, res: Response) {
 export async function getPriceHistory(req: Request, res: Response) {
   const crop = String(req.query.crop ?? "").trim();
   const location = String(req.query.location ?? "").trim();
+  const days = Number(req.query.days) || 30;
 
   if (!crop) {
     return res.status(400).json({ error: "crop query parameter is required." });
@@ -24,7 +25,7 @@ export async function getPriceHistory(req: Request, res: Response) {
     return res.status(400).json({ error: "location query parameter is required." });
   }
 
-  const data = await priceService.getPriceHistory(crop, location);
+  const data = await priceService.getPriceHistory(crop, location, days);
   return res.status(200).json(data);
 }
 
