@@ -20,11 +20,12 @@ export interface IUser extends Document {
   // Reputation
   averageRating: number;
   reviewCount: number;
-  location?: {
-    state: string;
-    district: string;
-    village?: string;
-  };
+  
+  // Location
+  state: string;
+  district: string;
+  address?: string;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -40,6 +41,12 @@ const UserSchema: Schema = new Schema(
       default: UserRole.FARMER 
     },
     fullName: { type: String },
+    
+    // Location
+    state: { type: String, required: true },
+    district: { type: String, required: true },
+    address: { type: String },
+
     preferredLanguage: { type: String, default: 'en' },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
@@ -47,12 +54,6 @@ const UserSchema: Schema = new Schema(
     // Reputation Fields
     averageRating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
-
-    location: {
-      state: { type: String },
-      district: { type: String },
-      village: { type: String },
-    },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt
