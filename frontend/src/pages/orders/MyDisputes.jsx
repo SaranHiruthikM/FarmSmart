@@ -15,21 +15,22 @@ import authService from "../../services/auth.service";
 import disputeService from "../../services/dispute.service";
 
 const MyDisputes = () => {
-    const user = authService.getCurrentUser();
     const navigate = useNavigate();
     const [disputes, setDisputes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("ALL");
 
     useEffect(() => {
         const fetchDisputes = async () => {
-             try {
-                 const data = await disputeService.getMyDisputes();
-                 setDisputes(data);
-             } catch (err) {
-                 console.error("Failed to fetch disputes", err);
-             } finally {
-                 setLoading(false);
-             }
+            setLoading(true);
+            try {
+                const data = await disputeService.getMyDisputes();
+                setDisputes(data);
+            } catch (err) {
+                console.error("Failed to fetch disputes", err);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchDisputes();
     }, []);
@@ -60,49 +61,72 @@ const MyDisputes = () => {
         }
     };
 
+    const filteredDisputes = activeTab === "ALL"
+        ? disputes
+        : disputes.filter(d => d.status === activeTab);
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <div className="flex items-center gap-2 text-accent text-sm font-bold uppercase tracking-widest mb-2">
+                    <div className="flex items-center gap-2 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-2">
                         <span>Dashboard</span>
-                        <span>/</span>
-                        <span className="text-primary">Disputes</span>
+                        <span className="opacity-30">/</span>
+                        <span className="text-primary font-black uppercase">My Disputes</span>
                     </div>
-                    <h1 className="text-4xl font-black text-text-dark tracking-tight leading-none">My Disputes</h1>
+                    <h1 className="text-5xl font-black text-text-dark tracking-tighter leading-none">
+                        Support <span className="text-primary">Tickets</span>
+                    </h1>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <div className="flex gap-1 p-1 bg-neutral-light/50 rounded-xl">
+                        {["ALL", "OPEN", "RESOLVED"].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? "bg-white text-primary shadow-sm" : "text-accent"
+                                    }`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {disputes.length === 0 ? (
-                <div className="bg-white p-12 rounded-[2.5rem] border-2 border-neutral-light shadow-sm text-center space-y-6">
-                    <div className="w-20 h-20 bg-neutral-light rounded-full flex items-center justify-center mx-auto text-accent">
-                        <ShieldAlert className="w-10 h-10" />
+            {loading ? (
+                <div className="bg-white p-20 rounded-[3rem] border-2 border-neutral-light flex flex-col items-center justify-center space-y-4">
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-xs font-black text-accent uppercase tracking-widest">Loading history...</p>
+                </div>
+            ) : filteredDisputes.length === 0 ? (
+                <div className="bg-white p-20 rounded-[3rem] border-2 border-neutral-light text-center space-y-8 shadow-sm">
+                    <div className="w-24 h-24 bg-neutral-light rounded-[2rem] flex items-center justify-center mx-auto text-accent shadow-inner">
+                        <ShieldAlert className="w-12 h-12" />
                     </div>
-                    <div>
-                        <h3 className="text-xl font-black text-text-dark tracking-tight">No Disputes Found</h3>
-                        <p className="text-accent font-medium mt-2">You haven't raised any disputes yet.</p>
+                    <div className="space-y-2">
+                        <h3 className="text-2xl font-black text-text-dark tracking-tight">No disputes to show</h3>
+                        <p className="text-accent font-medium max-w-xs mx-auto">Either you're all caught up, or your filter is too specific.</p>
                     </div>
                     <Link
                         to="/dashboard/orders"
-                        className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-primary/20"
+                        className="inline-flex items-center gap-2 bg-text-dark text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-black/10 hover:-translate-y-1"
                     >
                         VIEW MY ORDERS <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {disputes.map((dispute) => (
+                    {filteredDisputes.map((dispute) => (
                         <div
                             key={dispute.id}
-                            onClick={() => {
-                                window.scrollTo(0, 0);
-                                navigate(`/dashboard/disputes/${dispute.id}`);
-                            }}
-                            className="bg-white p-8 rounded-[2.5rem] border-2 border-neutral-light shadow-sm hover:border-primary transition-all group relative overflow-hidden cursor-pointer"
+                            onClick={() => navigate(`/dashboard/disputes/${dispute.id}`)}
+                            className="bg-white p-8 rounded-[3rem] border-2 border-neutral-light shadow-sm hover:border-primary hover:shadow-xl hover:shadow-primary/5 transition-all group relative overflow-hidden cursor-pointer"
                         >
-                            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <ShieldAlert className="w-24 h-24" />
+                            <div className="absolute -top-4 -right-4 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <ShieldAlert className="w-32 h-32" />
                             </div>
 
                             <div className="relative z-10 space-y-6">
@@ -117,21 +141,22 @@ const MyDisputes = () => {
                                     </span>
                                 </div>
 
-                                <div>
-                                    <h3 className="text-xl font-black text-text-dark tracking-tight leading-snug group-hover:text-primary transition-colors">
+                                <div className="space-y-1">
+                                    <h3 className="text-xl font-black text-text-dark tracking-tight leading-tight group-hover:text-primary transition-colors">
                                         {dispute.reason}
                                     </h3>
-                                    <p className="text-xs font-black text-accent uppercase tracking-widest mt-1">
-                                        Order ID: {dispute.orderId}
+                                    <p className="text-[10px] font-black text-accent uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <div className="w-1 h-1 rounded-full bg-primary" /> CASE #{dispute.id?.toString().slice(-6) || "???"}
                                     </p>
                                 </div>
 
-                                <p className="text-sm font-medium text-secondary line-clamp-2 leading-relaxed">
-                                    {dispute.description}
+                                <p className="text-sm font-medium text-secondary line-clamp-2 leading-relaxed italic">
+                                    "{dispute.description}"
                                 </p>
 
-                                <div className="pt-4 flex items-center gap-2 text-xs font-black text-primary uppercase tracking-widest">
-                                    VIEW DETAILS <ChevronRight className="w-4 h-4" />
+                                <div className="pt-4 flex items-center justify-between border-t-2 border-neutral-light group-hover:border-primary/20">
+                                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">VIEW DETAILS</span>
+                                    <ChevronRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
                                 </div>
                             </div>
                         </div>
