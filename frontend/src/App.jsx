@@ -12,6 +12,7 @@ import CropListingForm from "./pages/CropListingForm";
 import PriceInsights from "./pages/PriceInsights";
 import DemandForecast from "./pages/DemandForecast";
 import QualityPricing from "./pages/QualityPricing";
+import SchemesPage from "./pages/SchemesPage";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import NegotiationHistory from "./pages/NegotiationHistory";
@@ -66,6 +67,8 @@ function App() {
         <Route path="add-crop" element={<CropListingForm />} />
         <Route path="my-crops/edit/:id" element={<CropListingForm />} />
 
+        {/* Government Schemes */}
+        <Route path="schemes" element={<SchemesPage />} />
         {/* Notifications & Settings */}
         <Route path="notifications" element={<Notifications />} />
         <Route path="settings" element={<Settings />} />
