@@ -13,18 +13,20 @@ export interface IOrder extends Document {
   pricePerUnit: number;
   quantity: number;
   totalAmount: number;
-  status: IOrderStatus[];
   currentStatus: "CREATED" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "COMPLETED";
+  status: IOrderStatus[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const ORDER_STATUSES = ["CREATED", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED"] as const;
 
 const OrderStatusSchema = new Schema<IOrderStatus>(
   {
     status: {
       type: String,
       required: true,
-      enum: ["CREATED", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED"],
+      enum: ORDER_STATUSES,
     },
     timestamp: {
       type: Date,
@@ -41,25 +43,21 @@ const OrderSchema = new Schema<IOrder>(
       type: Schema.Types.ObjectId,
       ref: "Negotiation",
       required: true,
-      index: true,
     },
     cropId: {
       type: Schema.Types.ObjectId,
       ref: "Crop",
       required: true,
-      index: true,
     },
     buyerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     farmerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     pricePerUnit: {
       type: Number,
@@ -76,19 +74,22 @@ const OrderSchema = new Schema<IOrder>(
       required: true,
       min: 0,
     },
-    status: {
-      type: [OrderStatusSchema],
-      required: true,
-      default: [],
-    },
     currentStatus: {
       type: String,
-      required: true,
-      enum: ["CREATED", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED"],
+      enum: ORDER_STATUSES,
       default: "CREATED",
+      required: true,
+    },
+    status: {
+      type: [OrderStatusSchema],
+      default: [],
+      required: true,
     },
   },
   { timestamps: true }
 );
 
-export const Order = model<IOrder>("Order", OrderSchema);
+const Order = model<IOrder>("Order", OrderSchema);
+
+export { Order };
+export default Order;
