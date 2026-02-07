@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout } from "lucide-react";
+import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home } from "lucide-react";
 import authService from "../services/auth.service";
 import AuthCard from "../components/common/AuthCard"; // Keeping for reference if needed elsewhere, but not using here.
 
@@ -10,6 +10,9 @@ const Register = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("farmer");
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
+  const [address, setAddress] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -17,8 +20,8 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!name || !phone || !password) {
-      setError("Please fill in all fields");
+    if (!name || !phone || !password || !state || !district) {
+      setError("Please fill in all required fields");
       return;
     }
 
@@ -30,6 +33,9 @@ const Register = () => {
         fullName: name,
         phoneNumber: phone,
         password: password,
+        state,
+        district,
+        address,
         role: role.toUpperCase(), // Backend expects uppercase Role enum
         // preferredLanguage: 'en' // Defaulting to en, could expand if UI supports it
       });
@@ -102,6 +108,8 @@ const Register = () => {
               </motion.div>
             )}
 
+
+
             {/* Role Selector */}
             <div>
               <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">I am a</label>
@@ -122,7 +130,7 @@ const Register = () => {
                   className={`py-2 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${role === "buyer"
                       ? "bg-white text-primary shadow-sm"
                       : "text-accent hover:text-text-dark"
-                    }`}
+                      }`}
                 >
                   Buyer
                 </button>
@@ -176,6 +184,57 @@ const Register = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
                   placeholder="Create a password"
+                />
+              </div>
+            </div>
+
+            {/* State Input */}
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">State</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MapPin className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
+                </div>
+                <input
+                  type="text"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
+                  placeholder="Enter your state"
+                />
+              </div>
+            </div>
+
+            {/* District Input */}
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">District</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MapPin className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
+                </div>
+                <input
+                  type="text"
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
+                  placeholder="Enter your district"
+                />
+              </div>
+            </div>
+
+            {/* Address Input */}
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Address (Optional)</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Home className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
+                </div>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
+                  placeholder="Village, Street, etc."
                 />
               </div>
             </div>

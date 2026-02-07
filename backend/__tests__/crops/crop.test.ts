@@ -12,6 +12,9 @@ const validFarmer = {
   fullName: 'John Farmer',
   email: 'john@farm.com',
   preferredLanguage: 'en',
+  state: 'Maharashtra',
+  district: 'Pune',
+  address: 'Farm House 1',
 };
 
 const validBuyer = {
@@ -21,6 +24,9 @@ const validBuyer = {
   fullName: 'Jane Buyer',
   email: 'jane@buyer.com',
   preferredLanguage: 'hi',
+  state: 'Maharashtra',
+  district: 'Mumbai',
+  address: 'Shop 2',
 };
 
 const validCrop = {
@@ -576,6 +582,8 @@ describe('CROP CONTROLLER - COMPREHENSIVE TEST SUITE', () => {
         passwordHash: 'SecurePass789!',
         role: 'FARMER',
         fullName: 'Jane Farmer',
+        state: 'Punjab',
+        district: 'Ludhiana',
       });
       anotherFarmerId = anotherFarmer._id.toString();
       anotherFarmerToken = generateToken(anotherFarmerId);
@@ -614,6 +622,8 @@ describe('CROP CONTROLLER - COMPREHENSIVE TEST SUITE', () => {
         passwordHash: 'Pass123!',
         role: 'FARMER',
         fullName: 'Third Farmer',
+        state: 'Assam',
+        district: 'Guwahati',
       });
       const thirdFarmerToken = generateToken(thirdFarmer._id.toString(), 'FARMER');
 
@@ -688,6 +698,8 @@ describe('CROP CONTROLLER - COMPREHENSIVE TEST SUITE', () => {
         passwordHash: 'SecurePass789!',
         role: 'FARMER',
         fullName: 'Jane Farmer',
+        state: 'Punjab',
+        district: 'Ludhiana',
       });
       anotherFarmerId = anotherFarmer._id.toString();
       anotherFarmerToken = generateToken(anotherFarmerId);
@@ -873,6 +885,8 @@ describe('CROP CONTROLLER - COMPREHENSIVE TEST SUITE', () => {
         passwordHash: 'SecurePass789!',
         role: 'FARMER',
         fullName: 'Jane Farmer',
+        state: 'Punjab',
+        district: 'Ludhiana',
       });
       anotherFarmerId = anotherFarmer._id.toString();
       anotherFarmerToken = generateToken(anotherFarmerId);
@@ -1003,6 +1017,8 @@ describe('CROP CONTROLLER - COMPREHENSIVE TEST SUITE', () => {
         passwordHash: 'SecurePass789!',
         role: 'FARMER',
         fullName: 'Jane Farmer',
+        state: 'Punjab',
+        district: 'Ludhiana',
       });
       anotherFarmerId = anotherFarmer._id.toString();
       anotherFarmerToken = generateToken(anotherFarmerId);

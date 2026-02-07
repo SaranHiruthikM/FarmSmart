@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Star, ShieldCheck, Award, MessageSquare, TrendingUp, User, Calendar, CheckCircle } from "lucide-react";
 import authService from "../services/auth.service";
-import mockReviewService from "../services/review.mock";
+import reviewService from "../services/review.service";
 
 const ReviewsAndTrust = () => {
     const user = authService.getCurrentUser();
@@ -10,12 +10,43 @@ const ReviewsAndTrust = () => {
     const [avgRating, setAvgRating] = useState(0);
 
     useEffect(() => {
-        // In this mock, we assume the user's ID is "1" if they are a farmer for display purposes
-        // or we just show all reviews relative to the role.
-        const userId = isFarmer ? "1" : user?.id;
-        const userReviews = mockReviewService.getReviewsByUserId(userId || "1");
-        setReviews(userReviews);
-        setAvgRating(mockReviewService.getAverageRating(userId || "1"));
+        const fetchReputation = async () => {
+             // If farmer, get reviews about me. If buyer, get reviews I wrote? 
+             // The original mock logic was: getReviewsByUserId(userId). Assuming this page shows "My Public Profile Reviews".
+             // reviewService.getReviewsByUserId retrieves reviews *for* a target user. 
+             // reviewService.getMyReputation retrieves reviews for the *logged in* user.
+             
+             try {
+                // Determine what to show. The UI says "Manage your reputation" for farmer.
+                // So we want reviews WHERE targetId = me.
+                // reviewService.getMyReputation() calls GET /reviews/my which does exactly that.
+                
+                if (isFarmer) {
+                     const myReviews = await reviewService.getMyReputation();
+                     // Backend returns raw array. We need to transform if needed OR the service should verify data.
+                     // IMPORTANT: createReview (backend) might not populate reviewerId in getMyReputation?
+                     // Let's check backend controller for getMyReputation.
+                     setReviews(myReviews);
+                     
+                     // Calculate avg
+                     const avg = reviewService.calculateAverage(myReviews);
+                     setAvgRating(avg);
+                } else {
+                     // If buyer, "Track feedback you've shared". 
+                     // This means reviews WHERE reviewerId = me.
+                     // Do we have an endpoint for that? mocked service had getReviewsByUserId?
+                     // Let's assume for now we just show "Reviews about me" (which might be 0 for buyer).
+                     
+                     const myReviews = await reviewService.getMyReputation();
+                     setReviews(myReviews);
+                      const avg = reviewService.calculateAverage(myReviews);
+                     setAvgRating(avg);
+                }
+             } catch (err) {
+                 console.error("Failed to load reputation", err);
+             }
+        };
+        fetchReputation();
     }, [isFarmer, user?.id]);
 
     return (

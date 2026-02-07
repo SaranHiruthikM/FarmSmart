@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import cropService from "../services/crop.service";
-import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info } from "lucide-react";
+import notificationService from "../services/notification.service";
+import reviewService from "../services/review.service";
+import authService from "../services/auth.service";
+import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Bell, User, Calendar, Info, MessageSquarePlus, ShoppingBag } from "lucide-react";
 import PrimaryButton from "../components/common/PrimaryButton";
 import NegotiationModal from "../components/marketplace/NegotiationModal";
-import mockReviewService from "../services/review.mock";
+import ReviewModal from "../components/common/ReviewModal";
 import { Star, CheckCircle, Award } from "lucide-react";
 
 const CropDetails = () => {
@@ -13,7 +16,11 @@ const CropDetails = () => {
     const [crop, setCrop] = useState(null);
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState("buyer"); // In real app, get from auth context
+    const [alertPrice, setAlertPrice] = useState("");
+    const [alertSuccess, setAlertSuccess] = useState(false);
     const [isNegotiationModalOpen, setIsNegotiationModalOpen] = useState(false);
+    const [negotiationMode, setNegotiationMode] = useState('negotiate');
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [avgRating, setAvgRating] = useState(0);
 
@@ -23,7 +30,7 @@ const CropDetails = () => {
                 const data = await cropService.getCropById(id);
                 setCrop(data);
 
-                const userData = JSON.parse(localStorage.getItem("user") || "{}");
+                const userData = authService.getCurrentUser() || {};
                 // Backend uses _id, mock used id. Support both.
                 const userId = userData._id || userData.id;
 
@@ -39,9 +46,15 @@ const CropDetails = () => {
 
                 // Fetch reviews for the farmer
                 if (data.farmer) {
-                    const farmerReviews = mockReviewService.getReviewsByUserId(data.farmer);
-                    setReviews(farmerReviews);
-                    setAvgRating(mockReviewService.getAverageRating(data.farmer));
+                    try {
+                        const farmerReviews = await reviewService.getReviewsByUserId(data.farmer);
+                        setReviews(farmerReviews);
+                    } catch (err) {
+                        console.error("Failed to fetch reviews", err);
+                        setReviews([]);
+                    }
+                     // Use the pre-calculated rating from crop data which comes from User model
+                    setAvgRating(data.farmerRating || 0);
                 }
             } catch (error) {
                 console.error("Failed to load crop", error);
@@ -51,6 +64,18 @@ const CropDetails = () => {
         };
         fetchCrop();
     }, [id]);
+
+    const handleSetAlert = async () => {
+        if (!alertPrice) return;
+        try {
+            await notificationService.createPriceAlert(id, alertPrice);
+            setAlertSuccess(true);
+            setTimeout(() => setAlertSuccess(false), 3000);
+            setAlertPrice("");
+        } catch (error) {
+            console.error("Failed to set alert", error);
+        }
+    };
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center py-32 space-y-4">
@@ -190,6 +215,38 @@ const CropDetails = () => {
                             </div>
                         </div>
 
+                        {/* Price Alert Setup Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-black text-accent uppercase tracking-widest">Price Alert Setup</h3>
+                            <div className="flex items-end gap-3 p-4 bg-yellow-50/50 rounded-2xl border border-yellow-100">
+                                <div className="flex-1 space-y-1">
+                                    <label className="text-xs font-bold text-yellow-700">Notify me when price reaches (≥)</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                                        <input
+                                            type="number"
+                                            value={alertPrice}
+                                            onChange={(e) => setAlertPrice(e.target.value)}
+                                            placeholder={crop.finalPrice || crop.basePrice}
+                                            className="w-full pl-7 pr-4 py-2 border border-yellow-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none bg-white text-sm font-semibold"
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleSetAlert}
+                                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-xl flex items-center gap-2 transition-colors mb-[1px]"
+                                >
+                                    <Bell className="w-4 h-4" />
+                                    Set Alert
+                                </button>
+                            </div>
+                            {alertSuccess && (
+                                <p className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg inline-block animate-pulse">
+                                    Price alert set successfully!
+                                </p>
+                            )}
+                        </div>
+
                         <div className="pt-6 flex gap-4">
                             {userRole === "owner" ? (
                                 <div className="flex-1 flex gap-4">
@@ -207,24 +264,45 @@ const CropDetails = () => {
                                     </button>
                                 </div>
                             ) : (
+                                (crop.quantity || 0) > 0 ? ( /* Only show buy options if stock exists */
                                 <div className="flex-1 flex gap-3"> {/* Changed to flex gap-3 to accomodate two buttons */}
                                     <PrimaryButton
-                                        className="flex-1 py-4 text-lg"
-                                        onClick={() => alert("Interest noted! Farmer will be notified.")}
+                                        className="flex-1 py-4 text-lg flex items-center justify-center gap-2"
+                                        onClick={() => {
+                                            if (userRole === "buyer") {
+                                                setNegotiationMode('buy');
+                                                setIsNegotiationModalOpen(true);
+                                            } else {
+                                                alert("Interest noted! Farmer will be notified.");
+                                            }
+                                        }}
                                     >
-                                        {userRole === "buyer" ? "Contact Farmer" : "Express Interest"}
+                                        {userRole === "buyer" ? (
+                                            <>
+                                                <ShoppingBag className="w-5 h-5" />
+                                                Buy Now
+                                            </>
+                                        ) : "Express Interest"}
                                     </PrimaryButton>
 
                                     {userRole === "buyer" && (
                                         <button
-                                            onClick={() => setIsNegotiationModalOpen(true)}
+                                            onClick={() => {
+                                                setNegotiationMode('negotiate');
+                                                setIsNegotiationModalOpen(true);
+                                            }}
                                             className="flex-1 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
                                         >
                                             <BadgeIndianRupee className="w-5 h-5" />
-                                            Negotiate Price
+                                            Make an Offer
                                         </button>
                                     )}
                                 </div>
+                                ) : (
+                                    <div className="flex-1 p-4 bg-neutral-100 rounded-2xl text-center font-bold text-neutral-400 border-2 border-dashed border-neutral-300">
+                                        Out of Stock
+                                    </div>
+                                )
                             )}
                             <button className="p-4 border border-neutral-light rounded-2xl hover:bg-neutral-light hover:text-primary transition-all shadow-sm group">
                                 <Share2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
@@ -254,6 +332,16 @@ const CropDetails = () => {
                             <p className="text-accent font-bold uppercase tracking-widest text-xs">Based on {reviews.length} Verified {reviews.length === 1 ? 'Review' : 'Reviews'}</p>
                         </div>
                     </div>
+
+                    {userRole === "buyer" && (
+                        <button
+                            onClick={() => setIsReviewModalOpen(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-white border border-neutral-light text-text-dark font-bold rounded-xl hover:border-primary hover:text-primary transition-all shadow-sm group"
+                        >
+                            <MessageSquarePlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            Write a Review
+                        </button>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -297,6 +385,34 @@ const CropDetails = () => {
                     )}
                 </div>
             </div>
+            <NegotiationModal
+                isOpen={isNegotiationModalOpen}
+                onClose={() => setIsNegotiationModalOpen(false)}
+                crop={crop}
+                mode={negotiationMode}
+                onSuccess={(result) => {
+                    if (negotiationMode === 'buy') {
+                        // Result is an Order
+                        alert("Purchase successful! Order Created.");
+                        // Navigate to orders list? or order detail? 
+                        // Assuming dashboard supports order view. But usually users want to see their new order.
+                        // Since we don't have order detail page ready/confirmed, standard is dashboard/orders
+                        navigate('/dashboard/orders'); 
+                    } else {
+                        // Result is a Negotiation
+                        alert("Negotiation started successfully!");
+                        navigate(`/dashboard/negotiations/${result._id}`);
+                    }
+                }}
+            />
+            {crop && (
+                <ReviewModal
+                    isOpen={isReviewModalOpen}
+                    onClose={() => setIsReviewModalOpen(false)}
+                    targetId={crop.farmer}
+                    onSuccess={() => window.location.reload()}
+                />
+            )}
         </div>
     );
 };

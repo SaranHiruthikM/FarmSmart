@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
-import { X, HandCoins, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, HandCoins, AlertCircle, ShoppingBag } from 'lucide-react';
 import PrimaryButton from '../common/PrimaryButton';
+import orderService from '../../services/order.service';
 import negotiationService from '../../services/negotiation.service';
 
-const NegotiationModal = ({ isOpen, onClose, crop, onSuccess }) => {
-    const [price, setPrice] = useState(crop?.basePrice || '');
+const NegotiationModal = ({ isOpen, onClose, crop, onSuccess, mode = 'negotiate' }) => {
+    const [price, setPrice] = useState('');
     const [quantity, setQuantity] = useState('');
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // Reset or Initialize state when modal opens
+    useEffect(() => {
+        if (isOpen && crop) {
+            setPrice(crop.pricePerKg || crop.finalPrice || crop.basePrice || '');
+            setQuantity(crop.quantity || '');
+            
+            if (mode === 'buy') {
+                setMessage(`I would like to purchase ${crop.quantity || 'this'}kg of ${crop.name} at the listed price.`);
+            } else {
+                setMessage('');
+            }
+        }
+    }, [isOpen, crop, mode]);
 
     if (!isOpen) return null;
 
@@ -18,15 +33,35 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess }) => {
         setError(null);
 
         try {
-            await negotiationService.startNegotiation(crop._id, price, quantity, message);
-            onSuccess();
+            if (mode === 'buy') {
+                 // --- NEW DIRECT BUY FLOW ---
+                 // If "Buy Now", we call the instant buy endpoint
+                 const order = await orderService.instantBuy(crop._id, quantity || 1);
+                 // We pass the order object to onSuccess so we can redirect to Order Summary/Details
+                 if (onSuccess) onSuccess(order);
+            } else {
+                // --- EXISTING NEGOTIATION FLOW ---
+                const farmerId = crop.farmer && typeof crop.farmer === 'object' ? crop.farmer._id : crop.farmer;
+                const newNegotiation = await negotiationService.startNegotiation(
+                    crop._id, 
+                    price, 
+                    quantity, 
+                    message, 
+                    farmerId
+                );
+                if (onSuccess) onSuccess(newNegotiation);
+            }
             onClose();
         } catch (err) {
-            setError(err.message || "Failed to start negotiation");
+            console.error(mode === 'buy' ? "Purchase Error:" : "Negotiation Error:", err);
+            const errorMessage = err.response?.data?.message || err.message || "Failed to process request";
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
     };
+
+    const isBuyMode = mode === 'buy';
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -35,9 +70,13 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess }) => {
                 <div className="bg-[#F1F8F1] px-6 py-4 border-b border-green-100 flex justify-between items-center">
                     <div className="flex items-center gap-2 text-primary-dark">
                         <div className="bg-primary/10 p-2 rounded-full">
-                            <HandCoins className="w-5 h-5 text-primary" />
+                            {isBuyMode ? (
+                                <ShoppingBag className="w-5 h-5 text-primary" />
+                            ) : (
+                                <HandCoins className="w-5 h-5 text-primary" />
+                            )}
                         </div>
-                        <h3 className="font-bold text-lg">Negotiate Price</h3>
+                        <h3 className="font-bold text-lg">{isBuyMode ? 'Confirm Purchase' : 'Negotiate Price'}</h3>
                     </div>
                     <button
                         onClick={onClose}
@@ -65,26 +104,29 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess }) => {
                         </div>
                         <div>
                             <p className="font-bold text-text-dark">{crop?.name}</p>
-                            <p className="text-xs text-accent">Asking Price: <span className="font-bold text-primary">₹{crop?.finalPrice}/{crop?.unit}</span></p>
+                            <p className="text-xs text-accent">Asking Price: <span className="font-bold text-primary">₹{crop?.pricePerKg || crop?.finalPrice}/{crop?.unit || 'kg'}</span></p>
                         </div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-bold text-text-dark mb-1">Your Offer Price (₹/{crop?.unit})</label>
+                            <label className="block text-sm font-bold text-text-dark mb-1">
+                                {isBuyMode ? 'Price (Fixed)' : `Your Offer Price (₹/${crop?.unit || 'kg'})`}
+                            </label>
                             <input
                                 type="number"
                                 required
                                 min="0"
                                 value={price}
+                                readOnly={isBuyMode}
                                 onChange={(e) => setPrice(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-neutral-light focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-lg"
+                                className={`w-full px-4 py-3 rounded-xl border border-neutral-light focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-lg ${isBuyMode ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
                                 placeholder="Enter amount"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-text-dark mb-1">Quantity Needed ({crop?.unit})</label>
+                            <label className="block text-sm font-bold text-text-dark mb-1">Quantity Needed ({crop?.unit || 'kg'})</label>
                             <input
                                 type="number"
                                 required
@@ -103,7 +145,7 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess }) => {
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-neutral-light focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all h-24 resize-none"
-                                placeholder="Hi, I'm interested in buying..."
+                                placeholder={isBuyMode ? "Add a note to the farmer..." : "Hi, I'm interested in buying..."}
                             ></textarea>
                         </div>
 
@@ -113,7 +155,7 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess }) => {
                                 className="w-full py-3.5 text-lg shadow-lg shadow-green-200"
                                 disabled={loading}
                             >
-                                {loading ? 'Sending Offer...' : 'Send Offer'}
+                                {loading ? (isBuyMode ? 'Processing...' : 'Sending Offer...') : (isBuyMode ? 'Confirm Purchase Request' : 'Send Offer')}
                             </PrimaryButton>
                         </div>
                     </form>

@@ -35,6 +35,11 @@ model User {
   
   fullName          String?
   
+  // Location
+  state             String
+  district          String
+  address           String?
+
   // Localization for Indian context
   preferredLanguage String   @default("en")
   

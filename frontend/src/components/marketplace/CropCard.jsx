@@ -1,5 +1,6 @@
 import authService from "../../services/auth.service";
-import mockReviewService from "../../services/review.mock";
+// import mockReviewService from "../../services/review.mock"; // Removed
+import { Link, useNavigate } from "react-router-dom";
 import { MapPin, Scale, BadgeIndianRupee, ChevronRight, Edit, Trash2, Award, CheckCircle } from "lucide-react";
 
 const CropCard = ({ crop, onDelete }) => {
@@ -12,7 +13,7 @@ const CropCard = ({ crop, onDelete }) => {
     const isOwner = currentUser && (currentUser.role === "FARMER" || currentUser.role === "farmer") && crop.farmer === currentUserId;
 
     // Get rating data
-    const avgRating = mockReviewService.getAverageRating(crop.farmer || "1");
+    const avgRating = crop.farmerRating || 0;
     const isTopRated = avgRating >= 4.0;
 
     const handleCardClick = () => {

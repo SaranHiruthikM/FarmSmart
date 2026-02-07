@@ -70,7 +70,7 @@ const Header = () => {
                                     <NotificationItem icon={AlertCircle} title="Negotiation alert" isNew={false} />
                                 </div>
                                 <div className="px-4 py-3 bg-white/50 border-t border-[#EAEAEA] text-right">
-                                    <button className="text-xs font-semibold text-primary hover:text-primary-dark">View all</button>
+                                    <button onClick={() => navigate("/dashboard/notifications")} className="text-xs font-semibold text-primary hover:text-primary-dark">View all</button>
                                 </div>
                             </motion.div>
                         )}
@@ -113,7 +113,7 @@ const Header = () => {
                                         <ChevronRight className="w-4 h-4 text-[#C0C0C0]" />
                                     </button>
 
-                                    <button 
+                                    <button
                                         onClick={handleLogout}
                                         className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white hover:shadow-sm text-[#5C715E] hover:text-red-600 transition-all group"
                                     >

@@ -34,11 +34,11 @@ const saveOTP = async (contact: string, type: VerificationType) => {
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { phoneNumber, password, role, fullName, email, preferredLanguage } = req.body;
+    const { phoneNumber, password, role, fullName, email, preferredLanguage, state, district, address } = req.body;
 
     // 1. Validate required fields
-    if (!phoneNumber || !password) {
-      sendResponse(res, 400, "Phone number and password are required");
+    if (!phoneNumber || !password || !state || !district) {
+      sendResponse(res, 400, "Phone number, password, state, and district are required");
       return;
     }
 
@@ -71,6 +71,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       role: userRole,
       fullName,
       email,
+      state,
+      district,
+      address,
       preferredLanguage: preferredLanguage || 'en',
       isVerified: false // Explicitly unverified
     });

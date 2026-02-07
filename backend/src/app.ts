@@ -8,6 +8,9 @@ import negotiationRoutes from './routes/negotiationRoutes';
 import orderRoutes from './routes/orderRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import qualityRoutes from './routes/qualityRoutes';
+import schemeRoutes from './routes/schemeRoutes';
+import advisoryRoutes from './routes/advisoryRoutes';
+import disputeRoutes from './routes/disputeRoutes';
 import { sendResponse } from './utils/response';
 
 const app = express();
@@ -29,6 +32,9 @@ app.use('/negotiations', negotiationRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/quality', qualityRoutes);
+app.use('/schemes', schemeRoutes);
+app.use('/advisory', advisoryRoutes);
+app.use('/disputes', disputeRoutes);
 
 /**
  * Price Comparison & Market Insights
