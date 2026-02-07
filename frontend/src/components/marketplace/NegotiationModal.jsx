@@ -18,8 +18,8 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess }) => {
         setError(null);
 
         try {
-            await negotiationService.startNegotiation(crop._id, price, quantity, message);
-            onSuccess();
+            const newNegotiation = await negotiationService.startNegotiation(crop._id, price, quantity, message, crop.farmer);
+            if (onSuccess) onSuccess(newNegotiation);
             onClose();
         } catch (err) {
             setError(err.message || "Failed to start negotiation");

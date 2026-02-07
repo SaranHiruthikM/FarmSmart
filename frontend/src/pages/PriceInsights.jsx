@@ -70,8 +70,34 @@ const PriceInsights = () => {
                     priceService.getComparison(selectedCrop, location)
                 ]);
 
-                setCurrentPrices(cur || []);
-                setHistoryData(hist || []);
+                // Backend (Mocks) returns objects with arrays inside, mapped to 'price'
+                // Frontend expects arrays with 'pricePerKg'
+                
+                // 1. Current Prices
+                if (cur && cur.regionalVariations) {
+                    setCurrentPrices(cur.regionalVariations.map(p => ({
+                        mandi: p.mandi,
+                        pricePerKg: p.price
+                    })));
+                } else if (Array.isArray(cur)) {
+                    // Fallback if backend changes to array
+                     setCurrentPrices(cur);
+                } else {
+                    setCurrentPrices([]);
+                }
+
+                // 2. History Data
+                if (hist && hist.points) {
+                    setHistoryData(hist.points.map(p => ({
+                        date: p.date,
+                        pricePerKg: p.price
+                    })));
+                } else if (Array.isArray(hist)) {
+                    setHistoryData(hist);
+                } else {
+                    setHistoryData([]);
+                }
+
                 setComparisonData(comp);
             } catch (err) {
                 console.error("Failed to fetch price insights:", err);

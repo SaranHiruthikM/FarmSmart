@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
     Package,
@@ -10,11 +10,13 @@ import {
     ExternalLink,
     ChevronDown,
     CircleDashed,
-    Box
+    Box,
+    AlertTriangle,
+    X
 } from "lucide-react";
 import authService from "../../services/auth.service";
-import mockOrderService from "../../services/order.mock";
-import mockReviewService from "../../services/review.mock";
+import orderService from "../../services/order.service";
+import reviewService from "../../services/review.service";
 import { Star } from "lucide-react";
 
 const OrderStatus = () => {
@@ -22,65 +24,115 @@ const OrderStatus = () => {
     const user = authService.getCurrentUser();
     const isFarmer = user?.role?.toLowerCase() === "farmer";
 
-    // Load order from mock service
-    const orderFromStore = mockOrderService.getOrderById(orderId) || mockOrderService.getAllOrders()[0];
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [currentStatus, setCurrentStatus] = useState("CREATED");
 
-    // Status mapping for the timeline
+    // Status mapping
     const statuses = [
-        { id: "Created", label: "Created", icon: Package, description: "Order has been placed and is awaiting confirmation." },
-        { id: "Confirmed", label: "Confirmed", icon: ShieldCheck, description: "Farmer has confirmed the order and is preparing for shipment." },
-        { id: "Shipped", label: "Shipped", icon: Truck, description: "Crop is in transit to the delivery location." },
-        { id: "Delivered", label: "Delivered", icon: MapPin, description: "Order has reached the destination." },
-        { id: "Completed", label: "Completed", icon: CheckCircle2, description: "Transaction is finalized and funds released." }
+        { id: "CREATED", label: "Created", icon: Package, description: "Order has been placed and is awaiting confirmation." },
+        { id: "CONFIRMED", label: "Confirmed", icon: ShieldCheck, description: "Farmer has confirmed the order and is preparing for shipment." },
+        { id: "SHIPPED", label: "Shipped", icon: Truck, description: "Crop is in transit to the delivery location." },
+        { id: "DELIVERED", label: "Delivered", icon: MapPin, description: "Order has reached the destination." },
+        { id: "COMPLETED", label: "Completed", icon: CheckCircle2, description: "Transaction is finalized and funds released." }
     ];
 
-    const [currentStatus, setCurrentStatus] = useState(orderFromStore.status);
+    useEffect(() => {
+        const fetchOrder = async () => {
+            try {
+                const data = await orderService.getOrderById(orderId);
+                setOrder(data);
+                setCurrentStatus(data.status?.toUpperCase() || "CREATED");
+            } catch (error) {
+                console.error("Failed to load order", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOrder();
+    }, [orderId]);
+
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewComment, setReviewComment] = useState("");
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
+    // Dispute State
+    const [showDisputeModal, setShowDisputeModal] = useState(false);
+    const [disputeReason, setDisputeReason] = useState("");
+    const [disputeDescription, setDisputeDescription] = useState("");
+    const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
+    const [existingDispute, setExistingDispute] = useState(mockDisputeService.getDisputeByOrderId(orderId));
+
     const currentStatusIndex = statuses.findIndex(s => s.id === currentStatus);
 
-    // Mock Data (Extending with stored data)
+    if (loading || !order) return <div className="p-10 text-center text-accent">Loading...</div>;
+
+    // Use fetched order data
     const orderDetails = {
-        crop: orderFromStore.crop,
-        quantity: orderFromStore.quantity,
-        total: orderFromStore.totalPrice,
-        orderDate: orderFromStore.date,
-        expectedDelivery: "Feb 10, 2024",
-        trackingId: "FS-TRK-99281",
-        buyer: "Ankit Singh",
-        farmer: "Suresh Kumar",
-        address: "Block C-4, Warehouse 12, Azadpur Mandi, Delhi - 110033"
+        crop: order.crop,
+        quantity: order.quantity,
+        total: order.totalPrice,
+        orderDate: order.date,
+        id: order.id,
+        deliveryAddress: order.shippingAddress || "Agri Market Yard, Erode, Tamil Nadu",
+        farmerLocation: "Modakurichi, Tamil Nadu",
+        expectedDelivery: "In Transit",
+        trackingId: order.id,
+        buyer: order.buyer || "Valued Customer",
+        farmer: order.farmer || "Trusted Farmer",
     };
 
-    const handleUpdateStatus = (statusId) => {
-        if (!isFarmer) {
-            alert("Only Farmers can update order status.");
-            return;
+
+    const handleUpdateStatus = async (statusId) => {
+        try {
+            await orderService.updateOrderStatus(orderId, statusId);
+            setCurrentStatus(statusId);
+        } catch (err) {
+            console.error("Failed to update status", err);
         }
-        setCurrentStatus(statusId);
-        mockOrderService.updateOrderStatus(orderId, statusId);
-        alert(`Order status updated to ${statusId}`);
     };
 
-    const handleSubmitReview = (e) => {
+    const handleSubmitReview = async (e) => {
         e.preventDefault();
         setIsSubmittingReview(true);
-
-        // Simulate API call
-        setTimeout(() => {
-            mockReviewService.addReview({
-                userId: "1", // Hardcoded to Suresh Kumar for this mock
-                reviewerName: user?.fullName || "Buyer",
-                reviewerRole: user?.role?.toUpperCase() || "BUYER",
+        try {
+            await reviewService.addReview({
+                orderId: order.id,
                 rating: reviewRating,
                 comment: reviewComment
+                // targetId is handled by backend based on order
             });
-            setIsSubmittingReview(false);
             setReviewSubmitted(true);
             alert("Review submitted successfully!");
+        } catch (err) {
+            alert("Failed to submit review: " + (err.response?.data?.message || err.message));
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
+
+    const handleSubmitDispute = (e) => {
+        e.preventDefault();
+        if (!disputeReason || !disputeDescription) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        setIsSubmittingDispute(true);
+        setTimeout(() => {
+            const dispute = mockDisputeService.createDispute({
+                orderId: orderId,
+                raisedBy: user?.fullName || "User",
+                raisedByRole: user?.role?.toUpperCase() || "BUYER",
+                farmerName: orderDetails.farmer,
+                reason: disputeReason,
+                description: disputeDescription
+            });
+            setExistingDispute(dispute);
+            setIsSubmittingDispute(false);
+            setShowDisputeModal(false);
+            alert("Dispute raised successfully! Our team will contact you shortly.");
         }, 1000);
     };
 
@@ -98,7 +150,7 @@ const OrderStatus = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <span className={`px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider border-2 ${currentStatus === "Completed" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-primary/10 border-primary/20 text-primary"
+                    <span className={`px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider border-2 ${currentStatus === "COMPLETED" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-primary/10 border-primary/20 text-primary"
                         }`}>
                         {currentStatus}
                     </span>
@@ -178,7 +230,7 @@ const OrderStatus = () => {
                             </h3>
                             <div className="p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light/50">
                                 <p className="font-bold text-text-dark leading-relaxed">
-                                    {orderDetails.address}
+                                    {orderDetails.deliveryAddress}
                                 </p>
                             </div>
                         </div>
@@ -251,8 +303,23 @@ const OrderStatus = () => {
                             </div>
                         </div>
 
-                        <button className="w-full py-4 bg-neutral-light text-secondary rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-red-50 hover:text-secondary-light transition-all border-2 border-transparent hover:border-secondary-light/20">
-                            NEED HELP? RAISE DISPUTE
+                        <button
+                            onClick={() => {
+                                if (isFarmer) {
+                                    alert("Only Buyers can raise a dispute for this order.");
+                                    return;
+                                }
+                                if (!existingDispute) setShowDisputeModal(true);
+                            }}
+                            disabled={!!existingDispute}
+                            className={`w-full py-4 rounded-2xl font-black text-xs tracking-widest uppercase transition-all border-2 ${existingDispute
+                                ? "bg-amber-50 text-amber-600 border-amber-100 cursor-not-allowed"
+                                : isFarmer
+                                    ? "bg-neutral-light text-accent cursor-not-allowed opacity-50"
+                                    : "bg-neutral-light text-secondary hover:bg-red-50 hover:text-secondary-light hover:border-secondary-light/20 border-transparent"
+                                }`}
+                        >
+                            {existingDispute ? "DISPUTE RAISED" : "NEED HELP? RAISE DISPUTE"}
                         </button>
                     </div>
 
@@ -271,7 +338,7 @@ const OrderStatus = () => {
             </div>
 
             {/* Review Section - Only for Completed Orders */}
-            {currentStatus === "Completed" && !isFarmer && (
+            {currentStatus === "COMPLETED" && !isFarmer && (
                 <div className="mt-12 bg-white p-8 rounded-[2.5rem] border-2 border-neutral-light shadow-sm max-w-2xl mx-auto">
                     {!reviewSubmitted ? (
                         <div className="space-y-6">
@@ -327,6 +394,74 @@ const OrderStatus = () => {
                             <p className="text-accent font-medium">Your feedback has been published on the seller's profile.</p>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Raise Dispute Modal */}
+            {showDisputeModal && (
+                <div className="fixed inset-0 bg-text-dark/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-8 border-b-2 border-neutral-light flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-red-50 rounded-2xl text-red-600">
+                                    <AlertTriangle className="w-6 h-6" />
+                                </div>
+                                <h2 className="text-2xl font-black text-text-dark tracking-tight">Raise Dispute</h2>
+                            </div>
+                            <button
+                                onClick={() => setShowDisputeModal(false)}
+                                className="p-2 hover:bg-neutral-light rounded-xl transition-colors text-accent"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmitDispute} className="p-8 space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-accent uppercase tracking-widest ml-1">Reason for Dispute</label>
+                                <select
+                                    required
+                                    value={disputeReason}
+                                    onChange={(e) => setDisputeReason(e.target.value)}
+                                    className="w-full p-4 bg-neutral-light/30 rounded-2xl border-2 border-neutral-light focus:border-primary outline-none transition-all font-bold text-text-dark"
+                                >
+                                    <option value="">Select a reason</option>
+                                    <option value="Quality Issue">Quality Issue</option>
+                                    <option value="Quantity Mismatch">Quantity Mismatch</option>
+                                    <option value="Late Delivery">Late Delivery</option>
+                                    <option value="Payment Issue">Payment Issue</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-accent uppercase tracking-widest ml-1">Detail Description</label>
+                                <textarea
+                                    required
+                                    value={disputeDescription}
+                                    onChange={(e) => setDisputeDescription(e.target.value)}
+                                    placeholder="Please describe the issue in detail..."
+                                    className="w-full p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light focus:border-primary outline-none transition-all min-h-[150px] font-medium"
+                                />
+                            </div>
+
+                            <div className="flex gap-4 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDisputeModal(false)}
+                                    className="flex-1 py-4 bg-neutral-light text-accent rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-neutral-light/50 transition-all"
+                                >
+                                    CANCEL
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmittingDispute}
+                                    className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-red-700 transition-all shadow-lg shadow-red-200 disabled:opacity-50"
+                                >
+                                    {isSubmittingDispute ? "SUBMITTING..." : "SUBMIT DISPUTE"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

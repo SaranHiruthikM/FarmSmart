@@ -3,6 +3,7 @@ import { Review } from "../models/Review";
 import { Order } from "../models/Order";
 import User  from "../models/User";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { Types } from "mongoose";
 
 /**
  * POST /reviews
@@ -10,40 +11,54 @@ import { AuthRequest } from "../middleware/authMiddleware";
  */
 export const createReview = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    const { orderId, rating, comment } = req.body;
+    const { orderId, targetId: explicitTargetId, rating, comment } = req.body;
     const reviewerId = req.user?.id;
 
     if (!reviewerId) return res.status(401).json({ message: "Unauthorized" });
 
-    // validate input
-    if (!orderId || !rating) {
-      return res.status(400).json({ message: "Order ID and rating are required" });
+    if (!rating) {
+      return res.status(400).json({ message: "Rating is required" });
     }
 
-    // Verify order exists and user is part of it
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+    let targetId = explicitTargetId;
+    let finalOrderId = orderId;
 
-    // Determine target (The other party)
-    let targetId;
-    if (order.buyerId.toString() === reviewerId) {
-      targetId = order.farmerId; // Buyer reviewing Farmer
-    } else if (order.farmerId.toString() === reviewerId) {
-      targetId = order.buyerId; // Farmer reviewing Buyer
-    } else {
-      return res.status(403).json({ message: "You are not a party to this order" });
-    }
+    // SCENARIO 1: Review via Order (Verified Purchase)
+    if (orderId) {
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      // Infer target from order
+      if (order.buyerId.toString() === reviewerId) {
+        targetId = order.farmerId;
+      } else if (order.farmerId.toString() === reviewerId) {
+        targetId = order.buyerId;
+      } else {
+        return res.status(403).json({ message: "You are not a party to this order" });
+      }
 
-    // Check if review already exists
-    const existingReview = await Review.findOne({ orderId, reviewerId });
-    if (existingReview) {
-      return res.status(400).json({ message: "You have already reviewed this order" });
+      // Check for duplicate on this order
+      const existingReview = await Review.findOne({ orderId, reviewerId });
+      if (existingReview) {
+        return res.status(400).json({ message: "You have already reviewed this order" });
+      }
+    } 
+    // SCENARIO 2: Direct Seller Review (No Order Linked)
+    else {
+      if (!targetId) {
+        return res.status(400).json({ message: "Target user ID is required for direct reviews" });
+      }
+      
+      const targetUser = await User.findById(targetId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "Target user not found" });
+      }
     }
 
     const review = await Review.create({
-      orderId,
+      orderId: finalOrderId,
       reviewerId,
       targetId,
       rating,
@@ -53,7 +68,7 @@ export const createReview = async (req: AuthRequest, res: Response): Promise<any
     // --- Dynamic Rating Update ---
     // Recalculate average rating for the target user
     const stats = await Review.aggregate([
-      { $match: { targetId: targetId } },
+      { $match: { targetId: new Types.ObjectId(targetId.toString()) } }, // Explicit casting for aggregation
       { $group: { _id: null, avgRating: { $avg: "$rating" }, count: { $sum: 1 } } }
     ]);
 
@@ -67,8 +82,13 @@ export const createReview = async (req: AuthRequest, res: Response): Promise<any
 
     return res.status(201).json(review);
   } catch (error: any) {
-      if (error.name === "ValidationError") {
+      console.error("Review creation failed:", error); 
+      
+      if (error.name === "ValidationError" || error.name === "CastError") {
           return res.status(400).json({ message: error.message });
+      }
+      if (error.code === 11000) {
+          return res.status(400).json({ message: "You have already reviewed this entity" });
       }
       return res.status(500).json({ message: "Server error" });
   }

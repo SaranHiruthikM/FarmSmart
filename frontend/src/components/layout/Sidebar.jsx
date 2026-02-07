@@ -15,9 +15,12 @@ import {
     Landmark,
     Leaf
 } from "lucide-react";
+import authService from "../../services/auth.service";
 
 const Sidebar = () => {
     const location = useLocation();
+    const user = authService.getCurrentUser();
+    const isAdminOrFarmer = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "farmer";
 
     const menuItems = [
         { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
@@ -30,6 +33,7 @@ const Sidebar = () => {
         { label: "Logistics & Location", icon: Truck, path: "/dashboard/logistics" },
         { label: "Ratings, Reviews & Trust", icon: Star, path: "/dashboard/reviews" },
         { label: "Dispute Resolution", icon: ShieldAlert, path: "/dashboard/disputes" },
+        ...(isAdminOrFarmer ? [{ label: "Manage Disputes (Admin)", icon: ShieldAlert, path: "/dashboard/admin/disputes" }] : []),
         { label: "Notifications & Alerts", icon: Bell, path: "/dashboard/notifications" },
         { label: "Gov Schemes & Advisory", icon: Landmark, path: "/dashboard/schemes" },
     ];
