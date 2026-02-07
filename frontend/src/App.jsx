@@ -86,6 +86,7 @@ function App() {
 
         {/* Admin Disputes */}
         <Route path="admin/disputes" element={<AdminDisputes />} />
+        <Route path="admin/disputes/:id" element={<AdminDisputes />} />
 
         {/* Fallback for dashboard */}
         <Route path="*" element={<div className="p-10 text-center text-gray-500">Page under construction</div>} />
