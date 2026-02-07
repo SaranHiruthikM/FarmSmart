@@ -12,19 +12,27 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
-import mockDisputeService from "../../services/dispute.mock";
+import disputeService from "../../services/dispute.service";
 
 const MyDisputes = () => {
     const user = authService.getCurrentUser();
     const navigate = useNavigate();
     const [disputes, setDisputes] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (user) {
-            const data = mockDisputeService.getMyDisputes(user.fullName);
-            setDisputes(data);
-        }
-    }, [user?.fullName]);
+        const fetchDisputes = async () => {
+             try {
+                 const data = await disputeService.getMyDisputes();
+                 setDisputes(data);
+             } catch (err) {
+                 console.error("Failed to fetch disputes", err);
+             } finally {
+                 setLoading(false);
+             }
+        };
+        fetchDisputes();
+    }, []);
 
     const getStatusStyle = (status) => {
         switch (status) {

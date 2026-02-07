@@ -13,22 +13,30 @@ import {
     ArrowRight
 } from "lucide-react";
 import authService from "../../services/auth.service";
-import mockDisputeService from "../../services/dispute.mock";
+import disputeService from "../../services/dispute.service";
 
 const DisputeDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [dispute, setDispute] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const data = mockDisputeService.getDisputeById(id);
-        if (data) {
-            setDispute(data);
-        } else {
-            navigate("/dashboard/disputes");
-        }
+        const fetchDispute = async () => {
+            try {
+                const data = await disputeService.getDisputeById(id);
+                setDispute(data);
+            } catch (err) {
+                console.error("Failed to fetch dispute", err);
+                navigate("/dashboard/disputes");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDispute();
     }, [id, navigate]);
 
+    if (loading) return <div className="p-10 text-center text-accent">Loading...</div>;
     if (!dispute) return null;
 
     const getStatusStyle = (status) => {

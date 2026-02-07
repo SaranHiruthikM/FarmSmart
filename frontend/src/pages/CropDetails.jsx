@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import cropService from "../services/crop.service";
 import notificationService from "../services/notification.service";
-import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info, Bell } from "lucide-react";
 import reviewService from "../services/review.service";
-import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Scale, User, Calendar, Info, MessageSquarePlus } from "lucide-react";
+import authService from "../services/auth.service";
+import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Bell, User, Calendar, Info, MessageSquarePlus, ShoppingBag } from "lucide-react";
 import PrimaryButton from "../components/common/PrimaryButton";
 import NegotiationModal from "../components/marketplace/NegotiationModal";
 import ReviewModal from "../components/common/ReviewModal";
@@ -19,6 +19,7 @@ const CropDetails = () => {
     const [alertPrice, setAlertPrice] = useState("");
     const [alertSuccess, setAlertSuccess] = useState(false);
     const [isNegotiationModalOpen, setIsNegotiationModalOpen] = useState(false);
+    const [negotiationMode, setNegotiationMode] = useState('negotiate');
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [avgRating, setAvgRating] = useState(0);
@@ -29,7 +30,7 @@ const CropDetails = () => {
                 const data = await cropService.getCropById(id);
                 setCrop(data);
 
-                const userData = JSON.parse(localStorage.getItem("user") || "{}");
+                const userData = authService.getCurrentUser() || {};
                 // Backend uses _id, mock used id. Support both.
                 const userId = userData._id || userData.id;
 
@@ -263,24 +264,45 @@ const CropDetails = () => {
                                     </button>
                                 </div>
                             ) : (
+                                (crop.quantity || 0) > 0 ? ( /* Only show buy options if stock exists */
                                 <div className="flex-1 flex gap-3"> {/* Changed to flex gap-3 to accomodate two buttons */}
                                     <PrimaryButton
-                                        className="flex-1 py-4 text-lg"
-                                        onClick={() => alert("Interest noted! Farmer will be notified.")}
+                                        className="flex-1 py-4 text-lg flex items-center justify-center gap-2"
+                                        onClick={() => {
+                                            if (userRole === "buyer") {
+                                                setNegotiationMode('buy');
+                                                setIsNegotiationModalOpen(true);
+                                            } else {
+                                                alert("Interest noted! Farmer will be notified.");
+                                            }
+                                        }}
                                     >
-                                        {userRole === "buyer" ? "Contact Farmer" : "Express Interest"}
+                                        {userRole === "buyer" ? (
+                                            <>
+                                                <ShoppingBag className="w-5 h-5" />
+                                                Buy Now
+                                            </>
+                                        ) : "Express Interest"}
                                     </PrimaryButton>
 
                                     {userRole === "buyer" && (
                                         <button
-                                            onClick={() => setIsNegotiationModalOpen(true)}
+                                            onClick={() => {
+                                                setNegotiationMode('negotiate');
+                                                setIsNegotiationModalOpen(true);
+                                            }}
                                             className="flex-1 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
                                         >
                                             <BadgeIndianRupee className="w-5 h-5" />
-                                            Negotiate Price
+                                            Make an Offer
                                         </button>
                                     )}
                                 </div>
+                                ) : (
+                                    <div className="flex-1 p-4 bg-neutral-100 rounded-2xl text-center font-bold text-neutral-400 border-2 border-dashed border-neutral-300">
+                                        Out of Stock
+                                    </div>
+                                )
                             )}
                             <button className="p-4 border border-neutral-light rounded-2xl hover:bg-neutral-light hover:text-primary transition-all shadow-sm group">
                                 <Share2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
@@ -367,7 +389,21 @@ const CropDetails = () => {
                 isOpen={isNegotiationModalOpen}
                 onClose={() => setIsNegotiationModalOpen(false)}
                 crop={crop}
-                onSuccess={(negotiation) => navigate(`/dashboard/negotiations/${negotiation._id}`)}
+                mode={negotiationMode}
+                onSuccess={(result) => {
+                    if (negotiationMode === 'buy') {
+                        // Result is an Order
+                        alert("Purchase successful! Order Created.");
+                        // Navigate to orders list? or order detail? 
+                        // Assuming dashboard supports order view. But usually users want to see their new order.
+                        // Since we don't have order detail page ready/confirmed, standard is dashboard/orders
+                        navigate('/dashboard/orders'); 
+                    } else {
+                        // Result is a Negotiation
+                        alert("Negotiation started successfully!");
+                        navigate(`/dashboard/negotiations/${result._id}`);
+                    }
+                }}
             />
             {crop && (
                 <ReviewModal

@@ -1,92 +1,53 @@
-
-const schemesData = [
-    {
-        id: 1,
-        name: "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
-        description: "Crop insurance scheme to provide financial support to farmers suffering crop loss/damage arising out of unforeseen events.",
-        benefits: [
-            "Financial support for crop loss",
-            "Stabilizes income",
-            "Encourages innovative practices"
-        ],
-        applyLink: "https://pmfby.gov.in/"
-    },
-    {
-        id: 2,
-        name: "Pradhan Mantri Krishi Sinchai Yojana (PMKSY)",
-        description: "Scheme to improve on-farm water use efficiency through a focused approach.",
-        benefits: [
-            "Expand cultivable area",
-            "Improve water use efficiency",
-            "Enhance recharge of aquifers"
-        ],
-        applyLink: "https://pmksy.gov.in/"
-    },
-    {
-        id: 3,
-        name: "Soil Health Card Scheme",
-        description: "Government is issuing Soil Health Cards to farmers which will carry crop-wise recommendations of nutrients and fertilizers.",
-        benefits: [
-            "Check soil health status",
-            "Optimize fertilizer usage",
-            "Increase crop yield"
-        ],
-        applyLink: "https://soilhealth.dac.gov.in/"
-    }
-];
-
-const eligibleSchemesData = [
-    {
-        id: 1,
-        name: "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
-        matchReason: "Matches your crop type and region."
-    },
-    {
-        id: 3,
-        name: "Soil Health Card Scheme",
-        matchReason: "Available for all farmers in your state."
-    }
-];
-
-const advisoryData = [
-    {
-        id: 1,
-        type: "tip",
-        title: "Pest Control for Wheat",
-        content: "Monitor for aphids regularly. Use neem oil spray if infestation is low.",
-        date: "2023-10-25"
-    },
-    {
-        id: 2,
-        type: "weather",
-        title: "Heavy Rainfall Alert",
-        content: "Expect heavy rainfall in the next 48 hours. Ensure proper drainage in fields.",
-        date: "2023-10-26"
-    },
-    {
-        id: 3,
-        type: "seasonal",
-        title: "Winter Sowing",
-        content: "Optimal time for sowing rabi crops like mustard and gram.",
-        date: "2023-10-20"
-    }
-];
+import api from "./api";
 
 const schemesService = {
     getSchemes: async () => {
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(schemesData), 500);
-        });
+        try {
+            const response = await api.get("/schemes");
+            if (Array.isArray(response.data)) {
+                return response.data.map(scheme => ({
+                    ...scheme,
+                    id: scheme._id // Map _id to id for frontend
+                }));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error fetching schemes:", error);
+            return [];
+        }
     },
+
     getEligibleSchemes: async () => {
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(eligibleSchemesData), 800);
-        });
+        try {
+            const response = await api.get("/schemes/eligible");
+            if (Array.isArray(response.data)) {
+                 return response.data.map(scheme => ({
+                    ...scheme,
+                    id: scheme._id
+                }));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error fetching eligible schemes:", error);
+            return [];
+        }
     },
+
     getAdvisory: async () => {
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(advisoryData), 600);
-        });
+        try {
+            const response = await api.get("/advisory");
+            if (Array.isArray(response.data)) {
+                 return response.data.map(item => ({
+                    ...item,
+                    id: item._id,
+                    date: new Date(item.createdAt).toLocaleDateString()
+                }));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error fetching advisory:", error);
+            return [];
+        }
     }
 };
 
