@@ -1,15 +1,20 @@
-import { MapPin, Scale, BadgeIndianRupee, ChevronRight, Edit, Trash2 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
+// import mockReviewService from "../../services/review.mock"; // Removed
+import { Link, useNavigate } from "react-router-dom";
+import { MapPin, Scale, BadgeIndianRupee, ChevronRight, Edit, Trash2, Award, CheckCircle } from "lucide-react";
 
 const CropCard = ({ crop, onDelete }) => {
     const navigate = useNavigate();
-    
+
     // Check ownership
     const currentUser = authService.getCurrentUser();
     const currentUserId = currentUser?._id || currentUser?.id;
     // crop.farmer is the ID string from our service transformation
     const isOwner = currentUser && (currentUser.role === "FARMER" || currentUser.role === "farmer") && crop.farmer === currentUserId;
+
+    // Get rating data
+    const avgRating = crop.farmerRating || 0;
+    const isTopRated = avgRating >= 4.0;
 
     const handleCardClick = () => {
         navigate(`/dashboard/marketplace/${crop._id}`);
@@ -36,14 +41,25 @@ const CropCard = ({ crop, onDelete }) => {
                     <span className="text-5xl">🌾</span>
                 </div>
 
-                {/* Grade Badge */}
-                <div className="absolute top-3 right-3">
+                {/* Badges */}
+                <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
                     <span className={`px-3 py-1 text-[10px] font-black tracking-widest uppercase rounded-full shadow-sm border ${crop.qualityGrade === 'A' ? 'bg-green-100 text-green-700 border-green-200' :
                         crop.qualityGrade === 'B' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
                             'bg-red-100 text-red-700 border-red-200'
                         }`}>
                         Grade {crop.qualityGrade}
                     </span>
+                    {isTopRated && (
+                        <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center">
+                            <Award className="w-3 h-3 mr-1" /> Top Rated
+                        </div>
+                    )}
+                </div>
+
+                <div className="absolute top-3 left-3">
+                    <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-sm border border-white/50">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                    </div>
                 </div>
             </div>
 
@@ -105,7 +121,7 @@ const CropCard = ({ crop, onDelete }) => {
                             </button>
                         </>
                     ) : null}
-                    
+
                     <div
                         className="flex-1 flex items-center justify-between px-4 py-2.5 bg-neutral-light/50 text-text-dark text-xs font-black uppercase tracking-widest rounded-xl group-hover:bg-primary group-hover:text-white transition-all group/btn"
                     >

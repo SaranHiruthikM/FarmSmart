@@ -1,33 +1,54 @@
-import priceData from "../mock/prices.json";
+import api from "./api";
 
 const priceService = {
-    // Get all available crops for selectors
+    // Get all available crops for selectors (Hardcoded for now as backend doesn't have a distinct list endpoint yet, or we can fetch unique from crops)
+    // Ideally we might want a distinct query on the backend. For now, let's keep a static list or fetch from crops endpoint if available.
     getAvailableCrops: async () => {
-        return priceData.crops.map(c => ({ id: c.id, name: c.name }));
+        // This could be replaced with an API call later
+        return [
+            { id: "Tomato", name: "Tomato" },
+            { id: "Rice", name: "Rice" },
+            { id: "Onion", name: "Onion" },
+            { id: "Potato", name: "Potato" },
+            { id: "Wheat", name: "Wheat" }
+        ];
     },
 
-    // Get price data for a specific crop
-    getPriceDataByCrop: async (cropId) => {
-        const crop = priceData.crops.find(c => c.id === cropId);
-        if (crop) return crop;
-        throw new Error("Crop price data not found");
+    // Get current day's prices
+    getCurrentPrices: async (crop, location) => {
+        const params = {};
+        if (crop) params.crop = crop;
+        if (location) params.location = location;
+        
+        const response = await api.get("/prices/current", { params });
+        return response.data;
     },
 
-    // Get mandi comparisons for a specific crop
-    getMandiComparisons: async (cropId) => {
-        const crop = priceData.crops.find(c => c.id === cropId);
-        if (crop) return crop.mandis;
-        throw new Error("Crop mandi data not found");
+    // Get historical trends
+    getHistoricalTrends: async (crop, location, days = 30) => {
+        const params = {
+            days
+        };
+        if (crop) params.crop = crop;
+        if (location) params.location = location;
+
+        const response = await api.get("/prices/history", { params });
+        return response.data;
     },
 
-    // Get historical trends for charts
-    getHistoricalTrends: async (cropId, period = "7d") => {
-        const crop = priceData.crops.find(c => c.id === cropId);
-        if (!crop) throw new Error("Crop historical data not found");
+    // Get market comparisons (Best Price)
+    getComparison: async (crop, location) => {
+         const params = {};
+        if (crop) params.crop = crop;
+        if (location) params.location = location;
 
-        // Mocking period filtering
-        // In real app, we would slice the array based on date
-        return crop.historical;
+        try {
+            const response = await api.get("/prices/compare", { params });
+            return response.data;
+        } catch (error) {
+             // If 404 (no data), return null or valid structure
+             return null;
+        }
     }
 };
 

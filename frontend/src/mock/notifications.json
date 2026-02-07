@@ -1,7 +1,39 @@
 {
-  "sms": true,
-  "call": false,
-  "priceAlerts": true,
-  "auctionAlerts": true,
-  "deliveryAlerts": true
+  "settings": {
+    "sms": true,
+    "call": false,
+    "priceAlerts": true,
+    "auctionAlerts": true,
+    "deliveryAlerts": true
+  },
+  "list": [
+    {
+      "id": 1,
+      "message": "Tomato prices in Madurai Market have risen by 10%.",
+      "type": "PRICE",
+      "time": "2023-10-25T10:30:00Z",
+      "read": false
+    },
+    {
+      "id": 2,
+      "message": "Your crop listing for 'Potatoes' has been approved.",
+      "type": "SYSTEM",
+      "time": "2023-10-24T14:15:00Z",
+      "read": true
+    },
+    {
+      "id": 3,
+      "message": "New weather alert: Heavy rains expected in your district tomorrow.",
+      "type": "INFO",
+      "time": "2023-10-24T09:00:00Z",
+      "read": false
+    },
+    {
+      "id": 4,
+      "message": "Buyer request: Detailed inquiry for 500kg Wheat.",
+      "type": "SYSTEM",
+      "time": "2023-10-23T16:45:00Z",
+      "read": true
+    }
+  ]
 }

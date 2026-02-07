@@ -1,12 +1,13 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model, Types, Document } from "mongoose";
 
-export interface ICrop {
+export interface ICrop extends Document {
   farmerId: Types.ObjectId;
   name: string;                 // Tomato, Rice, etc.
   variety?: string;             // Optional
   quantity: number;             // in kg / quintal
   unit: "kg" | "quintal" | "ton";
   basePrice: number;            // expected price per unit
+  finalPrice: number;           // calculated price after quality multiplier
   qualityGrade: "A" | "B" | "C";
   location: {
     state: string;
@@ -45,6 +46,12 @@ const CropSchema = new Schema<ICrop>(
     basePrice: {
       type: Number,
       required: true,
+      min: 0,
+    },
+    finalPrice: {
+      type: Number,
+      required: true,
+      min: 0,
     },
     qualityGrade: {
       type: String,
