@@ -76,8 +76,10 @@ export const createPriceService = (options: PriceServiceOptions = {}): PriceServ
       const data = await provider.getCurrentPrice(crop);
       await setCached(cacheKey, data, TTL_CURRENT_SECONDS);
       return data;
-    } catch (error) {
-      console.warn('[prices] Live current price fetch failed.', { crop, error });
+    } catch (error: any) {
+      if (error.message !== 'MANDI_API_BASE_URL not configured') {
+        console.warn('[prices] Live current price fetch failed.', { crop, error });
+      }
       const fallback = getMockCurrentPrices(crop);
       await setCached(cacheKey, fallback, TTL_FALLBACK_SECONDS);
       return fallback;
@@ -94,8 +96,10 @@ export const createPriceService = (options: PriceServiceOptions = {}): PriceServ
       const data = await provider.getPriceHistory(crop, location);
       await setCached(cacheKey, data, TTL_HISTORY_SECONDS);
       return data;
-    } catch (error) {
-      console.warn('[prices] Live price history fetch failed.', { crop, location, error });
+    } catch (error: any) {
+      if (error.message !== 'MANDI_API_BASE_URL not configured') {
+        console.warn('[prices] Live price history fetch failed.', { crop, location, error });
+      }
       const fallback = getMockPriceHistory(crop, location, days);
       await setCached(cacheKey, fallback, TTL_FALLBACK_SECONDS);
       return fallback;
@@ -112,8 +116,10 @@ export const createPriceService = (options: PriceServiceOptions = {}): PriceServ
       const data = await provider.comparePrices(crop, location);
       await setCached(cacheKey, data, TTL_COMPARE_SECONDS);
       return data;
-    } catch (error) {
-      console.warn('[prices] Live compare prices fetch failed.', { crop, location, error });
+    } catch (error: any) {
+      if (error.message !== 'MANDI_API_BASE_URL not configured') {
+        console.warn('[prices] Live compare prices fetch failed.', { crop, location, error });
+      }
       const fallback = getMockComparePrices(crop, location);
       await setCached(cacheKey, fallback, TTL_FALLBACK_SECONDS);
       return fallback;
