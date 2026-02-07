@@ -30,7 +30,7 @@ export const getEligibleSchemes = async (
         }
         
         const user = await User.findById(req.user.id);
-        const userState = user?.location?.state;
+        const userState = user?.state;
 
         if (!userState) {
              // Return generic eligible schemes or empty if strict
