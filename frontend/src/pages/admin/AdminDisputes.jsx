@@ -12,39 +12,55 @@ import {
     ArrowLeft
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import mockDisputeService from "../../services/dispute.mock";
+import disputeService from "../../services/dispute.service";
+import authService from "../../services/auth.service";
 
 const AdminDisputes = () => {
     const navigate = useNavigate();
+    const user = authService.getCurrentUser();
+    const isAdmin = user?.role?.toUpperCase() === "ADMIN";
+
     const [disputes, setDisputes] = useState([]);
     const [selectedDispute, setSelectedDispute] = useState(null);
     const [adminRemarks, setAdminRemarks] = useState("");
     const [isUpdating, setIsUpdating] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadDisputes();
     }, []);
 
-    const loadDisputes = () => {
-        const data = mockDisputeService.getAllDisputes();
-        setDisputes(data);
+    const loadDisputes = async () => {
+        try {
+            const data = isAdmin 
+                ? await disputeService.getAllDisputes() 
+                : await disputeService.getMyDisputes();
+            setDisputes(data);
+        } catch (err) {
+            console.error("Failed to load disputes", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleAction = (status) => {
+    const handleAction = async (status) => {
         if (!adminRemarks) {
             alert("Please provide admin remarks.");
             return;
         }
 
         setIsUpdating(true);
-        setTimeout(() => {
-            mockDisputeService.updateDisputeStatus(selectedDispute.id, status, adminRemarks);
-            loadDisputes();
-            setIsUpdating(false);
+        try {
+            await disputeService.updateDisputeStatus(selectedDispute.id, status, adminRemarks);
+            await loadDisputes();
             setSelectedDispute(null);
             setAdminRemarks("");
             alert(`Dispute ${status.toLowerCase()} successfully.`);
-        }, 1000);
+        } catch (err) {
+            alert("Failed to update dispute: " + err.message);
+        } finally {
+            setIsUpdating(false);
+        }
     };
 
     const getStatusStyle = (status) => {
@@ -66,11 +82,11 @@ const AdminDisputes = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <div className="flex items-center gap-2 text-accent text-sm font-bold uppercase tracking-widest mb-2">
-                        <span>Admin</span>
+                        <span>{isAdmin ? "Admin" : "Dashboard"}</span>
                         <span>/</span>
-                        <span className="text-primary">Dispute Management</span>
+                        <span className="text-primary">{isAdmin ? "Dispute Management" : "My Disputes"}</span>
                     </div>
-                    <h1 className="text-4xl font-black text-text-dark tracking-tight leading-none">Manage Disputes</h1>
+                    <h1 className="text-4xl font-black text-text-dark tracking-tight leading-none">{isAdmin ? "Manage Disputes" : "Disputes Overview"}</h1>
                 </div>
 
                 <button
@@ -156,7 +172,7 @@ const AdminDisputes = () => {
                                     </p>
                                 </div>
 
-                                {selectedDispute.status === "OPEN" ? (
+                                {selectedDispute.status === "OPEN" && isAdmin ? (
                                     <>
                                         <div className="space-y-2">
                                             <label className="text-xs font-black text-accent uppercase tracking-widest ml-1">Admin Remarks</label>
@@ -188,22 +204,58 @@ const AdminDisputes = () => {
                                 ) : (
                                     <div className="space-y-4 pt-4 border-t-2 border-neutral-light">
                                         <div className="flex items-center gap-2 text-primary">
-                                            <CheckCircle2 className="w-5 h-5" />
-                                            <span className="text-xs font-black uppercase tracking-widest">Already {selectedDispute.status}</span>
+                                            {selectedDispute.status === "OPEN" ? <Clock className="w-5 h-5 text-amber-500" /> : <CheckCircle2 className="w-5 h-5" />}
+                                            <span className="text-xs font-black uppercase tracking-widest">
+                                                {selectedDispute.status === "OPEN" ? "Under Review" : `Status: ${selectedDispute.status}`}
+                                            </span>
                                         </div>
-                                        <div className="p-4 bg-neutral-light/50 rounded-2xl italic text-sm text-secondary">
-                                            "{selectedDispute.adminRemarks}"
-                                        </div>
-                                        <button
-                                            onClick={() => {
-                                                mockDisputeService.updateDisputeStatus(selectedDispute.id, "OPEN", "");
-                                                loadDisputes();
-                                                setSelectedDispute(null);
-                                            }}
-                                            className="w-full py-3 border-2 border-neutral-light text-accent rounded-xl font-black text-[10px] tracking-widest uppercase hover:bg-neutral-light transition-all flex items-center justify-center gap-2"
-                                        >
-                                            <RotateCcw className="w-3 h-3" /> RE-OPEN DISPUTE
-                                        </button>
+                                        
+                                        {selectedDispute.adminRemarks && (
+                                            <div className="p-4 bg-neutral-light/50 rounded-2xl italic text-sm text-secondary">
+                                                <span className="block text-[10px] font-black uppercase text-accent mb-1">Admin Remarks:</span>
+                                                "{selectedDispute.adminRemarks}"
+                                            </div>
+                                        )}
+
+                                        {isAdmin && selectedDispute.status !== "OPEN" && (
+                                            <button
+                                                onClick={async () => {
+                                                    try {
+                                                        await disputeService.updateDisputeStatus(selectedDispute.id, "OPEN", "Re-opened by admin");
+                                                        loadDisputes();
+                                                        setSelectedDispute(null);
+                                                    } catch (error) {
+                                                        console.error("Failed to re-open dispute", error);
+                                                        alert("Failed to re-open dispute");
+                                                    }
+                                                }}
+                                                className="w-full py-3 border-2 border-neutral-light text-accent rounded-xl font-black text-[10px] tracking-widest uppercase hover:bg-neutral-light transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <RotateCcw className="w-3 h-3" /> RE-OPEN DISPUTE
+                                            </button>
+                                        )}
+                                        
+                                        {!isAdmin && selectedDispute.status === "OPEN" && (
+                                            <div className="space-y-4 pt-2">
+                                                 <p className="text-xs text-secondary font-medium">If you have addressed this issue, you can close the dispute.</p>
+                                                 <button
+                                                     onClick={async () => {
+                                                         if(!window.confirm("Are you sure you want to mark this dispute as resolved? This cannot be undone.")) return;
+                                                         try {
+                                                             await disputeService.resolveDispute(selectedDispute.id);
+                                                             loadDisputes();
+                                                             setSelectedDispute(null);
+                                                         } catch (error) {
+                                                             console.error("Failed to resolve dispute", error);
+                                                             alert("Failed to resolve dispute: " + (error.response?.data?.message || error.message));
+                                                         }
+                                                     }}
+                                                     className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200"
+                                                 >
+                                                     <CheckCircle2 className="w-4 h-4 inline-block mr-2" /> MARK AS RESOLVED
+                                                 </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

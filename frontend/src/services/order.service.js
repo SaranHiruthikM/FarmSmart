@@ -22,6 +22,12 @@ const transformOrder = (order) => {
 };
 
 const OrderService = {
+  // Direct Buy ("Buy Now") - Bypass Manual Negotiation
+  instantBuy: async (cropId, quantity) => {
+    const response = await api.post("/orders/instant-buy", { cropId, quantity });
+    return transformOrder(response.data);
+  },
+
   // Create order from negotiation
   createOrder: async (negotiationId) => {
     const response = await api.post("/orders", { negotiationId });

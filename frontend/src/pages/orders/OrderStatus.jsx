@@ -17,6 +17,7 @@ import {
 import authService from "../../services/auth.service";
 import orderService from "../../services/order.service";
 import reviewService from "../../services/review.service";
+import disputeService from "../../services/dispute.service";
 import { Star } from "lucide-react";
 
 const OrderStatus = () => {
@@ -37,20 +38,6 @@ const OrderStatus = () => {
         { id: "COMPLETED", label: "Completed", icon: CheckCircle2, description: "Transaction is finalized and funds released." }
     ];
 
-    useEffect(() => {
-        const fetchOrder = async () => {
-            try {
-                const data = await orderService.getOrderById(orderId);
-                setOrder(data);
-                setCurrentStatus(data.status?.toUpperCase() || "CREATED");
-            } catch (error) {
-                console.error("Failed to load order", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchOrder();
-    }, [orderId]);
 
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewComment, setReviewComment] = useState("");
@@ -62,7 +49,33 @@ const OrderStatus = () => {
     const [disputeReason, setDisputeReason] = useState("");
     const [disputeDescription, setDisputeDescription] = useState("");
     const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
-    const [existingDispute, setExistingDispute] = useState(mockDisputeService.getDisputeByOrderId(orderId));
+    const [existingDispute, setExistingDispute] = useState(null);
+
+    useEffect(() => {
+        const fetchOrderData = async () => {
+             setLoading(true);
+            try {
+                // Fetch Order
+                const data = await orderService.getOrderById(orderId);
+                setOrder(data);
+                setCurrentStatus(data.status?.toUpperCase() || "CREATED");
+
+                // Check for existing disputes for this order
+                // Since there is no direct getByOrderId endpoint, fetching my disputes and filtering
+                const myDisputes = await disputeService.getMyDisputes();
+                const foundDispute = myDisputes.find(d => d.orderId === orderId || d.orderId._id === orderId);
+                if (foundDispute) {
+                    setExistingDispute(foundDispute);
+                }
+
+            } catch (error) {
+                console.error("Failed to load order data", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOrderData();
+    }, [orderId]);
 
     const currentStatusIndex = statuses.findIndex(s => s.id === currentStatus);
 
@@ -79,17 +92,21 @@ const OrderStatus = () => {
         farmerLocation: "Modakurichi, Tamil Nadu",
         expectedDelivery: "In Transit",
         trackingId: order.id,
-        buyer: order.buyer || "Valued Customer",
-        farmer: order.farmer || "Trusted Farmer",
+        buyer: order.buyerName || "Valued Customer",
+        farmer: order.farmerName || "Trusted Farmer",
     };
 
 
     const handleUpdateStatus = async (statusId) => {
         try {
             await orderService.updateOrderStatus(orderId, statusId);
+            // Refresh order data to update timeline
+            const updatedOrder = await orderService.getOrderById(orderId);
+            setOrder(updatedOrder);
             setCurrentStatus(statusId);
         } catch (err) {
             console.error("Failed to update status", err);
+            alert("Failed to update status");
         }
     };
 
@@ -112,7 +129,7 @@ const OrderStatus = () => {
         }
     };
 
-    const handleSubmitDispute = (e) => {
+    const handleSubmitDispute = async (e) => {
         e.preventDefault();
         if (!disputeReason || !disputeDescription) {
             alert("Please fill in all fields.");
@@ -120,20 +137,21 @@ const OrderStatus = () => {
         }
 
         setIsSubmittingDispute(true);
-        setTimeout(() => {
-            const dispute = mockDisputeService.createDispute({
+        try {
+            const dispute = await disputeService.createDispute({
                 orderId: orderId,
-                raisedBy: user?.fullName || "User",
-                raisedByRole: user?.role?.toUpperCase() || "BUYER",
-                farmerName: orderDetails.farmer,
                 reason: disputeReason,
                 description: disputeDescription
             });
             setExistingDispute(dispute);
-            setIsSubmittingDispute(false);
             setShowDisputeModal(false);
             alert("Dispute raised successfully! Our team will contact you shortly.");
-        }, 1000);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to raise dispute: " + (err.response?.data?.message || err.message));
+        } finally {
+            setIsSubmittingDispute(false);
+        }
     };
 
     return (
