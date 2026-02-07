@@ -88,6 +88,12 @@ export const instantBuy = async (req: AuthRequest, res: Response): Promise<any> 
     // 6. Reduce Stock
     crop.quantity -= quantity;
     if (crop.quantity < 0) crop.quantity = 0;
+
+    // Ensure finalPrice is set if missing (validation fix for legacy data)
+    if (!crop.finalPrice) {
+      crop.finalPrice = crop.basePrice;
+    }
+
     await crop.save();
 
     // Populate for frontend
