@@ -1,56 +1,85 @@
-import notificationData from "../mock/notifications.json";
-
-// Simulate API delay
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import authService from "./auth.service";
 
 class NotificationService {
     constructor() {
-        // Initialize from mock data or local storage to persist changes in session
-        const storedSettings = localStorage.getItem("notification_settings");
-        this.settings = storedSettings ? JSON.parse(storedSettings) : notificationData.settings;
-
-        // For notifications list, we just read from mock for now, but could be stateful
-        this.notifications = notificationData.list;
+        this.STORAGE_KEY = "farmsmart_notifications";
     }
 
+    // Helper to get current user
+    _getUser() {
+        return authService.getCurrentUser();
+    }
+
+    // Get notifications for the current user
     async getNotifications() {
-        await delay(300);
-        return [...this.notifications];
+        const user = this._getUser();
+        if (!user) return [];
+
+        const allNotifications = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || "[]");
+
+        // Filter notifications meant for this user
+        return allNotifications.filter(n => n.userId === user.id).sort((a, b) => new Date(b.time) - new Date(a.time));
     }
 
-    async getSettings() {
-        await delay(200);
-        return { ...this.settings };
-    }
+    // Add a notification
+    // targetUserId: ID of the user who should receive this
+    // message: text
+    // type: 'INFO', 'SUCCESS', 'WARNING', 'ERROR', 'PRICE', 'SYSTEM'
+    // link: optional link to redirect
+    async addNotification(targetUserId, message, type = 'INFO', link = null) {
+        if (!targetUserId) return;
 
-    async updateSettings(newSettings) {
-        await delay(300);
-        this.settings = { ...this.settings, ...newSettings };
-        localStorage.setItem("notification_settings", JSON.stringify(this.settings));
-        return { success: true, settings: this.settings };
-    }
-
-    async updateSMSSettings(enabled) {
-        return this.updateSettings({ sms: enabled });
-    }
-
-    async createPriceAlert(cropId, priceThreshold) {
-        await delay(500);
-        console.log(`[Mock API] Price Alert Created: Crop ${cropId} >= ${priceThreshold}`);
-        return {
-            success: true,
-            message: `Alert set for price ≥ ₹${priceThreshold}`,
-            data: { cropId, priceThreshold, active: true }
+        const newNotification = {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            userId: targetUserId,
+            message,
+            type,
+            link,
+            read: false,
+            time: new Date().toISOString()
         };
+
+        const allNotifications = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || "[]");
+        allNotifications.push(newNotification);
+
+        // Limit storage to last 50 notifications per user (clean up old ones)
+        // This is a naive cleanup for simplicity
+        if (allNotifications.length > 200) {
+            allNotifications.splice(0, allNotifications.length - 200);
+        }
+
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(allNotifications));
+        return newNotification;
     }
 
+    // Mark as read
     async markAsRead(id) {
-        await delay(100);
-        const index = this.notifications.findIndex(n => n.id === id);
+        const allNotifications = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || "[]");
+        const index = allNotifications.findIndex(n => n.id === id);
+
         if (index !== -1) {
-            this.notifications[index].read = true;
+            allNotifications[index].read = true;
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(allNotifications));
         }
-        return { success: true };
+    }
+
+    // Mark all as read for current user
+    async markAllAsRead() {
+        const user = this._getUser();
+        if (!user) return;
+
+        const allNotifications = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || "[]");
+        const updated = allNotifications.map(n =>
+            n.userId === user.id ? { ...n, read: true } : n
+        );
+
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
+    }
+
+    // Get unread count
+    async getUnreadCount() {
+        const notifications = await this.getNotifications();
+        return notifications.filter(n => !n.read).length;
     }
 }
 

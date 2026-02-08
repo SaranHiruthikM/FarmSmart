@@ -1,4 +1,6 @@
 import api from "./api";
+import notificationService from "./notification.service";
+import authService from "./auth.service";
 
 // Helper to transform Backend Negotiation format to Frontend Mock format
 const transformNegotiation = (serverData) => {
@@ -27,24 +29,24 @@ const transformNegotiation = (serverData) => {
         quantity: lastOffer.quantity,
         unit: crop.unit || "kg",
         price: lastOffer.pricePerUnit, // Current/Last price
-        
+
         // Frontend expects 'message' on root for the main display?
         message: lastOffer.message,
-        
-        status: (serverData.status === 'PENDING' && serverData.offers && serverData.offers.length > 1) 
-            ? 'counter_offer' 
+
+        status: (serverData.status === 'PENDING' && serverData.offers && serverData.offers.length > 1)
+            ? 'counter_offer'
             : (serverData.status ? serverData.status.toLowerCase() : 'pending'),
         statusBy,
         lastOfferBy: lastOffer.by,
-        
+
         createdAt: serverData.createdAt,
         updatedAt: serverData.updatedAt,
-        
+
         farmerId: serverData.farmerId?._id || serverData.farmerId, // Needed for role check
         buyerId: serverData.buyerId?._id || serverData.buyerId,
         farmerName: serverData.farmerId?.fullName || "Farmer",
         buyerName: serverData.buyerId?.fullName || "Buyer",
-        
+
         // Map offers to history
         history: (serverData.offers || []).map(offer => ({
             by: offer.by,
@@ -66,6 +68,14 @@ const NegotiationService = {
             message,
             farmerId // Required by backend
         });
+
+        // Notify Farmer
+        notificationService.addNotification(
+            farmerId,
+            `New Bid Received! Buyer offered ₹${price} for your crop.`,
+            "PRICE"
+        );
+
         return transformNegotiation(response.data);
     },
 
@@ -73,8 +83,8 @@ const NegotiationService = {
     getMyNegotiations: async () => {
         const response = await api.get("/negotiations/my");
         // Backend returns array
-        return Array.isArray(response.data) 
-            ? response.data.map(transformNegotiation) 
+        return Array.isArray(response.data)
+            ? response.data.map(transformNegotiation)
             : [];
     },
 
@@ -93,7 +103,35 @@ const NegotiationService = {
             message
         };
         const response = await api.post(`/negotiations/${id}/respond`, payload);
-        return transformNegotiation(response.data);
+        const data = response.data;
+        const currentUser = authService.getCurrentUser();
+
+        // Determine target (The other party)
+        // If current user is buyer, notify farmer. If farmer, notify buyer.
+        // We need the IDs. 'data' from backend usually contains buyerId and farmerId.
+        // Assuming data is the Negotiation object
+
+        const targetUserId = currentUser.id === data.buyerId ? data.farmerId : data.buyerId;
+
+        if (targetUserId) {
+            let notifMsg = "";
+            let notifType = "INFO";
+
+            if (action.toUpperCase() === 'ACCEPT') {
+                notifMsg = `Great News! Your offer for ${data.cropId?.name || 'crop'} was ACCEPTED!`;
+                notifType = "SUCCESS";
+            } else if (action.toUpperCase() === 'REJECT') {
+                notifMsg = `Update: Your offer for ${data.cropId?.name || 'crop'} was REJECTED.`;
+                notifType = "ERROR";
+            } else if (action.toUpperCase() === 'COUNTER') {
+                notifMsg = `Counter Offer: You received a new offer of ₹${pricePerUnit} for ${data.cropId?.name || 'crop'}.`;
+                notifType = "PRICE";
+            }
+
+            notificationService.addNotification(targetUserId, notifMsg, notifType);
+        }
+
+        return transformNegotiation(data);
     }
 };
 
