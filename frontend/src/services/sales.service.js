@@ -21,11 +21,10 @@ const salesService = {
 
         const totalSales = orders.length;
 
-        // Calculate total revenue from confirmed/completed orders
-        // Assuming 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'COMPLETED' count as revenue generating
-        // 'CREATED' might be pending payment/negotiation finalization
+        // Calculate total revenue
+        // usage: 'CREATED' orders are now included to reflect potential revenue immediately in the dashboard
         const revenueOrders = orders.filter(order =>
-            ['CONFIRMED', 'SHIPPED', 'DELIVERED', 'COMPLETED'].includes(order.currentStatus)
+            ['CREATED', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'COMPLETED'].includes(order.currentStatus)
         );
 
         const totalRevenue = revenueOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);

@@ -155,6 +155,8 @@ export const getMyNegotiations = async (
 
         const negotiations = await Negotiation.find(filter)
             .populate("cropId", "name unit")
+            .populate("buyerId", "fullName phoneNumber")
+            .populate("farmerId", "fullName phoneNumber")
             .sort({ updatedAt: -1 });
 
         res.json(negotiations);

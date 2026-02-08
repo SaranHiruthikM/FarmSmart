@@ -165,7 +165,8 @@ export const getCropById = async (req: Request, res: Response): Promise<any> => 
  */
 export const myCrops = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    const crops = await Crop.find({ farmerId: req.user!.id });
+    const crops = await Crop.find({ farmerId: req.user!.id })
+      .populate("farmerId", "fullName phoneNumber averageRating reviewCount");
     res.json(crops);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
