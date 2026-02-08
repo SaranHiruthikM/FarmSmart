@@ -1,4 +1,5 @@
 import { Response } from "express";
+import { Types } from "mongoose";
 import { Order } from "../models/Order";
 import { Negotiation } from "../models/Negotiation";
 import { Crop } from "../models/Crop";
@@ -90,7 +91,7 @@ export const getOrderById = async (req: AuthRequest, res: Response): Promise<any
   try {
     const { id } = req.params;
 
-    if (!Types.ObjectId.isValid(id)) {
+    if (!Types.ObjectId.isValid(id as string)) {
       return res.status(400).json({ message: "Invalid order id" });
     }
 
@@ -143,7 +144,7 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response): Promis
 
     const { id } = req.params;
 
-    if (!Types.ObjectId.isValid(id)) {
+    if (!Types.ObjectId.isValid(id as string)) {
       return res.status(404).json({ message: "Order not found" });
     }
 
