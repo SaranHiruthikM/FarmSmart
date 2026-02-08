@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/auth', authRoutes);
 app.use('/crops', cropRoutes);
+app.use('/api/crops', cropRoutes);
 app.use('/negotiations', negotiationRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reviews', reviewRoutes);
@@ -44,6 +45,7 @@ app.use('/disputes', disputeRoutes);
  *  GET /prices/compare?crop=&location=
  */
 app.use('/prices', pricesRoutes);
+app.use('/api/prices', pricesRoutes);
 
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
