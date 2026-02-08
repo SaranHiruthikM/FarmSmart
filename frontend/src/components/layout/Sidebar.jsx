@@ -34,6 +34,7 @@ const Sidebar = () => {
         { label: "Ratings, Reviews & Trust", icon: Star, path: "/dashboard/reviews" },
         { label: "Dispute Resolution", icon: ShieldAlert, path: "/dashboard/disputes" },
         ...(isAdminOrFarmer ? [{ label: "Manage Disputes (Admin)", icon: ShieldAlert, path: "/dashboard/admin/disputes" }] : []),
+        ...(user?.role?.toLowerCase() === "farmer" ? [{ label: "Sales & Revenue", icon: TrendingUp, path: "/dashboard/sales" }] : []),
         { label: "Notifications & Alerts", icon: Bell, path: "/dashboard/notifications" },
         { label: "Gov Schemes & Advisory", icon: Landmark, path: "/dashboard/schemes" },
     ];

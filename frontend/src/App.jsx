@@ -24,6 +24,7 @@ import ReviewsAndTrust from "./pages/ReviewsAndTrust";
 import MyDisputes from "./pages/orders/MyDisputes";
 import DisputeDetails from "./pages/orders/DisputeDetails";
 import AdminDisputes from "./pages/admin/AdminDisputes";
+import SalesRevenue from "./pages/SalesRevenue";
 
 // Protected Route Wrapper for Public Pages (Login/Register)
 // If authenticated, redirect to dashboard.
@@ -76,6 +77,9 @@ function App() {
         <Route path="orders" element={<OrderHistory />} />
         <Route path="orders/summary/:negotiationId" element={<OrderSummary />} />
         <Route path="orders/:orderId" element={<OrderStatus />} />
+
+        {/* Sales & Revenue (Farmer Only) */}
+        <Route path="sales" element={<SalesRevenue />} />
 
         {/* Reviews & Trust */}
         <Route path="reviews" element={<ReviewsAndTrust />} />
