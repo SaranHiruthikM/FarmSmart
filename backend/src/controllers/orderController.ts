@@ -126,7 +126,11 @@ export const getMyOrders = async (req: AuthRequest, res: Response): Promise<any>
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    const orders = await Order.find(filter).sort({ createdAt: -1 });
+    const orders = await Order.find(filter)
+      .populate("cropId", "name")
+      .populate("buyerId", "fullName role phoneNumber")
+      .populate("farmerId", "fullName role phoneNumber")
+      .sort({ createdAt: -1 });
 
     return res.json(orders);
   } catch {
