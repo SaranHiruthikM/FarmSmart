@@ -1,0 +1,34 @@
+
+> backend@1.0.0 start
+> node dist/src/index.js
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+Server is running on port 5000
+MongoDB Connected: localhost
+Seeding Schemes and Advisory...
+Schemes and Advisory seeded successfully
+[REQUEST] GET /health
+[REQUEST] GET /api/health
+[REQUEST] GET /
+[REQUEST] POST /auth/register
+[REQUEST] POST /auth/register
+
+----------------------------------------
+[OTP] GENERATED FOR 9106263793: 686718
+----------------------------------------
+
+[REQUEST] POST /auth/login
+[REQUEST] POST /auth/login
+
+----------------------------------------
+[OTP] GENERATED FOR 9106263793: 435274
+----------------------------------------
+
+[REQUEST] POST /auth/verify
+[REQUEST] POST /crops
+[REQUEST] GET /crops
+[REQUEST] GET /prices/current?crop=tomato&state=Tamil%20Nadu&district=Coimbatore
+[REQUEST] GET /prices/history?crop=tomato&state=Tamil%20Nadu&district=Coimbatore
+[REQUEST] GET /prices/compare?crop=tomato&state=Tamil%20Nadu&district=Coimbatore&compareState=Kerala&compareDistrict=Palakkad

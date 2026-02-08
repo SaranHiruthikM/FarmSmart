@@ -8,7 +8,22 @@ import { AuthRequest } from "../middleware/authMiddleware";
  */
 export const createCrop = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    let { finalPrice, basePrice, qualityGrade } = req.body;
+    const payload: any = { ...req.body };
+
+    // Backward-compatible input normalization for clients sending state/district at root.
+    if (!payload.location && (payload.state || payload.district || payload.village)) {
+      payload.location = {
+        state: payload.state,
+        district: payload.district,
+        ...(payload.village ? { village: payload.village } : {}),
+      };
+    }
+
+    delete payload.state;
+    delete payload.district;
+    delete payload.village;
+
+    let { finalPrice, basePrice, qualityGrade } = payload;
 
     // Calculate finalPrice if missing
     if (!finalPrice && basePrice && qualityGrade) {
@@ -23,7 +38,7 @@ export const createCrop = async (req: AuthRequest, res: Response): Promise<any> 
     }
 
     const crop = await Crop.create({
-      ...req.body,
+      ...payload,
       finalPrice, // Add calculated or provided finalPrice
       farmerId: req.user!.id,
     });

@@ -15,7 +15,7 @@ export async function getCurrentPrices(req: Request, res: Response) {
 
 export async function getPriceHistory(req: Request, res: Response) {
   const crop = String(req.query.crop ?? "").trim();
-  const location = String(req.query.location ?? "").trim();
+  const location = String(req.query.location ?? req.query.district ?? req.query.state ?? "").trim();
   const days = Number(req.query.days) || 30;
 
   if (!crop) {
@@ -31,7 +31,7 @@ export async function getPriceHistory(req: Request, res: Response) {
 
 export async function comparePrices(req: Request, res: Response) {
   const crop = String(req.query.crop ?? "").trim();
-  const location = String(req.query.location ?? "").trim();
+  const location = String(req.query.location ?? req.query.district ?? req.query.state ?? "").trim();
 
   if (!crop) {
     return res.status(400).json({ error: "crop query parameter is required." });
