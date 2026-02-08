@@ -103,7 +103,13 @@ const Header = () => {
                                 </div>
 
                                 <div className="space-y-1">
-                                    <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white hover:shadow-sm text-[#5C715E] hover:text-primary transition-all group">
+                                    <button
+                                        onClick={() => {
+                                            navigate("/dashboard/profile");
+                                            setShowProfile(false);
+                                        }}
+                                        className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white hover:shadow-sm text-[#5C715E] hover:text-primary transition-all group"
+                                    >
                                         <div className="flex items-center gap-3">
                                             <div className="p-1.5 bg-green-100/50 rounded-lg group-hover:bg-primary/10 transition-colors">
                                                 <User className="w-4 h-4" />

@@ -4,8 +4,69 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import VerificationCode, { VerificationType } from '../models/VerificationCode';
 import { sendResponse } from '../utils/response';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_key_change_me';
+
+export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      sendResponse(res, 401, "Unauthorized");
+      return;
+    }
+
+    const user = await User.findById(userId).select('-passwordHash');
+    if (!user) {
+      sendResponse(res, 404, "User not found");
+      return;
+    }
+
+    sendResponse(res, 200, "User profile fetched", { user });
+  } catch (error) {
+    console.error("GetMe Error:", error);
+    sendResponse(res, 500, "Internal Server Error");
+  }
+};
+
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      sendResponse(res, 401, "Unauthorized");
+      return;
+    }
+
+    const { fullName, email, preferredLanguage, state, district, address } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        fullName,
+        email,
+        preferredLanguage,
+        state,
+        district,
+        address
+      },
+      { new: true, runValidators: true }
+    ).select('-passwordHash');
+
+    if (!updatedUser) {
+      sendResponse(res, 404, "User not found");
+      return;
+    }
+
+    sendResponse(res, 200, "Profile updated successfully", { user: updatedUser });
+  } catch (error: any) {
+    console.error("UpdateProfile Error:", error);
+    if (error.code === 11000) {
+      sendResponse(res, 400, "Email already in use");
+    } else {
+      sendResponse(res, 500, "Internal Server Error");
+    }
+  }
+};
 
 const generateOTP = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();

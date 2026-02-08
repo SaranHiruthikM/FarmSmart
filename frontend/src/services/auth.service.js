@@ -50,6 +50,24 @@ const authService = {
   // Check if authenticated
   isAuthenticated: () => {
     return !!localStorage.getItem("token");
+  },
+
+  // Get profile from backend
+  getProfile: async () => {
+    const response = await api.get("/auth/me");
+    if (response.data.data && response.data.data.user) {
+      localStorage.setItem("user", JSON.stringify(response.data.data.user));
+    }
+    return response.data.data.user;
+  },
+
+  // Update profile
+  updateProfile: async (profileData) => {
+    const response = await api.patch("/auth/profile", profileData);
+    if (response.data.data && response.data.data.user) {
+      localStorage.setItem("user", JSON.stringify(response.data.data.user));
+    }
+    return response.data.data;
   }
 };
 
