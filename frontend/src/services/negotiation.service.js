@@ -60,23 +60,44 @@ const transformNegotiation = (serverData) => {
 
 const NegotiationService = {
     // Start a new negotiation (Buyer side)
-    startNegotiation: async (cropId, price, quantity, message, farmerId) => {
-        const response = await api.post("/negotiations/start", {
-            cropId,
-            pricePerUnit: price,
-            quantity,
-            message,
-            farmerId // Required by backend
-        });
+    async startNegotiation(cropId, price, quantity, message, farmerId) {
+        try {
+            const response = await api.post("/negotiations/start", {
+                cropId,
+                initialOffer: price,
+                quantity,
+                message,
+                farmerId
+            });
 
-        // Notify Farmer
-        notificationService.addNotification(
-            farmerId,
-            `New Bid Received! Buyer offered ₹${price} for your crop.`,
-            "PRICE"
-        );
+            // --- NOTIFICATION TRIGGER ---
+            try {
+                // We need to know who is sending this.
+                const currentUser = JSON.parse(localStorage.getItem("user"));
+                const buyerName = currentUser?.name || "A potential buyer";
 
-        return transformNegotiation(response.data);
+                // Notify the farmer
+                if (farmerId) {
+                    // Extract ID if it's an object again, just to be safe
+                    const targetId = typeof farmerId === 'object' ? farmerId._id || farmerId.id : farmerId;
+
+                    notificationService.createNotification(
+                        targetId,
+                        `New Bid: ${buyerName} offered ₹${price}/${quantity}kg for your crop.`,
+                        'PRICE'
+                    );
+
+                    console.log(`Notification sent to farmer ${targetId}`);
+                }
+            } catch (notifError) {
+                console.error("Failed to trigger notification locally", notifError);
+            }
+            // ----------------------------
+
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     },
 
     // Get all negotiations for current user

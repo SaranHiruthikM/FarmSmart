@@ -17,8 +17,23 @@ class NotificationService {
 
         const allNotifications = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || "[]");
 
+        // DEBUG LOGGING
+        console.log("Fetching notifications for user:", user);
+        console.log("All notifications in storage:", allNotifications);
+
         // Filter notifications meant for this user
-        return allNotifications.filter(n => n.userId === user.id).sort((a, b) => new Date(b.time) - new Date(a.time));
+        // Handle both id and _id, and ensure string comparison
+        const userId = user.id || user._id;
+
+        const filtered = allNotifications.filter(n => {
+            const notifUserId = n.userId;
+            // Loose comparison or string conversion to be safe
+            return String(notifUserId) === String(userId);
+        });
+
+        console.log("Filtered notifications:", filtered);
+
+        return filtered.sort((a, b) => new Date(b.time) - new Date(a.time));
     }
 
     // Add a notification
@@ -27,11 +42,19 @@ class NotificationService {
     // type: 'INFO', 'SUCCESS', 'WARNING', 'ERROR', 'PRICE', 'SYSTEM'
     // link: optional link to redirect
     async addNotification(targetUserId, message, type = 'INFO', link = null) {
-        if (!targetUserId) return;
+        if (!targetUserId) {
+            console.error("NotificationService: No targetUserId provided!");
+            return;
+        }
+
+        // Normalize ID to string to avoid object/id mismatches
+        const normalizedTargetId = typeof targetUserId === 'object' ? (targetUserId._id || targetUserId.id) : targetUserId;
+
+        console.log(`Adding notification for ${normalizedTargetId}: ${message}`);
 
         const newNotification = {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-            userId: targetUserId,
+            userId: String(normalizedTargetId), // Ensure string
             message,
             type,
             link,
@@ -80,6 +103,11 @@ class NotificationService {
     async getUnreadCount() {
         const notifications = await this.getNotifications();
         return notifications.filter(n => !n.read).length;
+    }
+
+    // Alias for createNotification
+    createNotification(targetUserId, message, type = 'INFO', link = null) {
+        return this.addNotification(targetUserId, message, type, link);
     }
 }
 
