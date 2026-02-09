@@ -31,8 +31,7 @@ const Header = () => {
     return (
         <header className="h-20 bg-[#FAF9F6] border-b border-[#EAEAEA] flex items-center justify-between px-8 shrink-0 relative bg-opacity-80 backdrop-blur-sm z-20">
 
-            {/* Title / Context (Optional, can be dynamic) */}
-            <h2 className="text-2xl font-bold text-[#2D362E]">Dashboard</h2>
+
 
             <div className="flex items-center gap-6">
                 {/* Search */}

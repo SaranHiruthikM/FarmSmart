@@ -16,7 +16,7 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess, mode = 'negotiate'
         if (isOpen && crop) {
             setPrice(crop.pricePerKg || crop.finalPrice || crop.basePrice || '');
             setQuantity(crop.quantity || '');
-            
+
             if (mode === 'buy') {
                 setMessage(`I would like to purchase ${crop.quantity || 'this'}kg of ${crop.name} at the listed price.`);
             } else {
@@ -34,19 +34,38 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess, mode = 'negotiate'
 
         try {
             if (mode === 'buy') {
-                 // --- NEW DIRECT BUY FLOW ---
-                 // If "Buy Now", we call the instant buy endpoint
-                 const order = await orderService.instantBuy(crop._id, quantity || 1);
-                 // We pass the order object to onSuccess so we can redirect to Order Summary/Details
-                 if (onSuccess) onSuccess(order);
+                // --- NEW DIRECT BUY FLOW ---
+                // If "Buy Now", we call the instant buy endpoint
+                const order = await orderService.instantBuy(crop._id, quantity || 1);
+                // We pass the order object to onSuccess so we can redirect to Order Summary/Details
+                if (onSuccess) onSuccess(order);
             } else {
                 // --- EXISTING NEGOTIATION FLOW ---
-                const farmerId = crop.farmer && typeof crop.farmer === 'object' ? crop.farmer._id : crop.farmer;
+                // FIX: Ensure we extract the ID correctly whether crop.farmer is an object (populated) or string
+                // The crop service transform puts 'farmer' as the ID or object, and 'farmerName' separately.
+                // Let's rely on crop.farmerId if available (raw from backend) or crop.farmer
+
+                // Inspecting cropService transform:
+                // farmer: farmerId (which is _id || obj)
+
+                let farmerId = null;
+                if (crop.farmerId && typeof crop.farmerId === 'object') {
+                    farmerId = crop.farmerId._id;
+                } else if (crop.farmer && typeof crop.farmer === 'object') {
+                    farmerId = crop.farmer._id;
+                } else {
+                    farmerId = crop.farmer || crop.farmerId;
+                }
+
+                if (!farmerId) {
+                    console.error("Critical: Farmer ID missing from crop object, notification will fail.", crop);
+                }
+
                 const newNegotiation = await negotiationService.startNegotiation(
-                    crop._id, 
-                    price, 
-                    quantity, 
-                    message, 
+                    crop._id,
+                    price,
+                    quantity,
+                    message,
                     farmerId
                 );
                 if (onSuccess) onSuccess(newNegotiation);

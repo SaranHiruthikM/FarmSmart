@@ -7,11 +7,11 @@ import authService from "./auth.service"; // Potentially needed for auth logic, 
 // Frontend Expects: { _id, farmer: "id", farmerName: "name", ... }
 const transformCrop = (crop) => {
     if (!crop) return null;
-    
+
     // Handle farmerId population
     const farmerObj = crop.farmerId || {};
     // If populated, it has _id. If not (just ID string), it is the ID.
-    const farmerId = farmerObj._id || farmerObj; 
+    const farmerId = farmerObj._id || farmerObj;
     const farmerName = farmerObj.fullName || "Unknown Farmer";
     const farmerPhone = farmerObj.phoneNumber;
     const farmerRating = farmerObj.averageRating || 0;
@@ -19,7 +19,7 @@ const transformCrop = (crop) => {
 
     return {
         ...crop,
-        farmer: farmerId, 
+        farmer: farmerId,
         farmerName: farmerName,
         farmerPhone: farmerPhone,
         farmerRating: farmerRating,
@@ -58,8 +58,7 @@ const cropService = {
     },
 
     // Delete crop
-    deleteCrop: async (id) => {
-        // eslint-disable-next-line
+    deleteCrop: async (id, cropName = "Unknown Crop") => {
         const response = await api.delete(`/crops/${id}`);
         // eslint-disable-next-line
         return response.data;
