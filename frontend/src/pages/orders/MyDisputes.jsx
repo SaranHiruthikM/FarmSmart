@@ -11,6 +11,7 @@ import {
     ArrowRight
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+// eslint-disable-next-line
 import authService from "../../services/auth.service";
 import disputeService from "../../services/dispute.service";
 

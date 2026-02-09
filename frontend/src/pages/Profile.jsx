@@ -3,7 +3,7 @@ import {
     User, Mail, Phone, MapPin, Briefcase, Languages, Edit2, Check, X, Loader2,
     Map as MapIcon, Home, Save
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import authService from "../services/auth.service";
 
 const Profile = () => {
@@ -310,16 +310,14 @@ const Profile = () => {
                         {/* Save Button */}
                         {isEditing && (
                             <div className="pt-8 border-t border-gray-50 flex justify-end">
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                <button
                                     type="submit"
                                     disabled={saving}
-                                    className="flex items-center gap-2 px-8 py-3.5 bg-primary text-white rounded-2xl font-bold shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all disabled:opacity-70"
+                                    className="flex items-center gap-2 px-8 py-3.5 bg-primary text-white rounded-2xl font-bold shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all disabled:opacity-70 transform hover:scale-105 active:scale-95"
                                 >
                                     {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                                     {saving ? "Saving..." : "Save Changes"}
-                                </motion.button>
+                                </button>
                             </div>
                         )}
                     </div>
@@ -329,7 +327,7 @@ const Profile = () => {
     );
 };
 
-const FormField = ({ label, name, value, onChange, isEditing, icon: Icon, disabled, placeholder, type = "text", required, helperText }) => (
+const FormField = ({ label, name, value, onChange, isEditing, disabled, placeholder, type = "text", required, helperText }) => (
     <div className="space-y-2">
         <label className="block text-sm font-bold text-[#5C715E] font-sans uppercase tracking-wide ml-1">{label}</label>
         {!isEditing || disabled ? (
