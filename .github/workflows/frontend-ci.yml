@@ -1,4 +1,4 @@
-name: Frontend CI - Sprint 1
+name: Frontend CI 
 
 on:
   push:
