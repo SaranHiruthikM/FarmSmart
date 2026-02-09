@@ -1,4 +1,5 @@
 import api from "./api";
+import authService from "./auth.service";
 
 const transformOrder = (order) => {
   if (!order) return null;
@@ -25,13 +26,15 @@ const OrderService = {
   // Direct Buy ("Buy Now") - Bypass Manual Negotiation
   instantBuy: async (cropId, quantity) => {
     const response = await api.post("/orders/instant-buy", { cropId, quantity });
-    return transformOrder(response.data);
+    const order = transformOrder(response.data);
+    return order;
   },
 
   // Create order from negotiation
   createOrder: async (negotiationId) => {
     const response = await api.post("/orders", { negotiationId });
-    return transformOrder(response.data);
+    const order = transformOrder(response.data);
+    return order;
   },
 
   // Get all orders for current user
@@ -63,7 +66,8 @@ const OrderService = {
   updateOrderStatus: async (id, status) => {
     // status must be UPPERCASE for backend enum match if not already
     const response = await api.patch(`/orders/${id}/status`, { status: status.toUpperCase() });
-    return transformOrder(response.data);
+    const order = transformOrder(response.data);
+    return order;
   },
 
   // Get negotiation details (helper for Order Summary)

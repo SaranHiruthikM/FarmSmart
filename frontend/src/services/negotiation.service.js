@@ -1,4 +1,5 @@
 import api from "./api";
+import authService from "./auth.service";
 
 // Helper to transform Backend Negotiation format to Frontend Mock format
 const transformNegotiation = (serverData) => {
@@ -27,24 +28,24 @@ const transformNegotiation = (serverData) => {
         quantity: lastOffer.quantity,
         unit: crop.unit || "kg",
         price: lastOffer.pricePerUnit, // Current/Last price
-        
+
         // Frontend expects 'message' on root for the main display?
         message: lastOffer.message,
-        
-        status: (serverData.status === 'PENDING' && serverData.offers && serverData.offers.length > 1) 
-            ? 'counter_offer' 
+
+        status: (serverData.status === 'PENDING' && serverData.offers && serverData.offers.length > 1)
+            ? 'counter_offer'
             : (serverData.status ? serverData.status.toLowerCase() : 'pending'),
         statusBy,
         lastOfferBy: lastOffer.by,
-        
+
         createdAt: serverData.createdAt,
         updatedAt: serverData.updatedAt,
-        
+
         farmerId: serverData.farmerId?._id || serverData.farmerId, // Needed for role check
         buyerId: serverData.buyerId?._id || serverData.buyerId,
         farmerName: serverData.farmerId?.fullName || "Farmer",
         buyerName: serverData.buyerId?.fullName || "Buyer",
-        
+
         // Map offers to history
         history: (serverData.offers || []).map(offer => ({
             by: offer.by,
@@ -58,23 +59,28 @@ const transformNegotiation = (serverData) => {
 
 const NegotiationService = {
     // Start a new negotiation (Buyer side)
-    startNegotiation: async (cropId, price, quantity, message, farmerId) => {
-        const response = await api.post("/negotiations/start", {
-            cropId,
-            pricePerUnit: price,
-            quantity,
-            message,
-            farmerId // Required by backend
-        });
-        return transformNegotiation(response.data);
+    async startNegotiation(cropId, price, quantity, message, farmerId) {
+        try {
+            const response = await api.post("/negotiations/start", {
+                cropId,
+                pricePerUnit: price,
+                quantity,
+                message,
+                farmerId
+            });
+
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     },
 
     // Get all negotiations for current user
     getMyNegotiations: async () => {
         const response = await api.get("/negotiations/my");
         // Backend returns array
-        return Array.isArray(response.data) 
-            ? response.data.map(transformNegotiation) 
+        return Array.isArray(response.data)
+            ? response.data.map(transformNegotiation)
             : [];
     },
 
@@ -93,7 +99,9 @@ const NegotiationService = {
             message
         };
         const response = await api.post(`/negotiations/${id}/respond`, payload);
-        return transformNegotiation(response.data);
+        const data = response.data;
+
+        return transformNegotiation(data);
     }
 };
 

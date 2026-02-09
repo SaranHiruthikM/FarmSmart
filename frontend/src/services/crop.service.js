@@ -1,15 +1,16 @@
 import api from "./api";
+import authService from "./auth.service";
 
 // Helper to transform Backend Data (Crop Model) -> to Frontend UI Model (Mock structure)
 // Backend: { _id, farmerId: { _id, fullName }, ... }
 // Frontend Expects: { _id, farmer: "id", farmerName: "name", ... }
 const transformCrop = (crop) => {
     if (!crop) return null;
-    
+
     // Handle farmerId population
     const farmerObj = crop.farmerId || {};
     // If populated, it has _id. If not (just ID string), it is the ID.
-    const farmerId = farmerObj._id || farmerObj; 
+    const farmerId = farmerObj._id || farmerObj;
     const farmerName = farmerObj.fullName || "Unknown Farmer";
     const farmerPhone = farmerObj.phoneNumber;
     const farmerRating = farmerObj.averageRating || 0;
@@ -17,7 +18,7 @@ const transformCrop = (crop) => {
 
     return {
         ...crop,
-        farmer: farmerId, 
+        farmer: farmerId,
         farmerName: farmerName,
         farmerPhone: farmerPhone,
         farmerRating: farmerRating,
@@ -56,7 +57,7 @@ const cropService = {
     },
 
     // Delete crop
-    deleteCrop: async (id) => {
+    deleteCrop: async (id, cropName = "Unknown Crop") => {
         const response = await api.delete(`/crops/${id}`);
         return response.data;
     },
