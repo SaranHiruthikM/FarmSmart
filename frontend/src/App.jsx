@@ -25,6 +25,7 @@ import MyDisputes from "./pages/orders/MyDisputes";
 import DisputeDetails from "./pages/orders/DisputeDetails";
 import AdminDisputes from "./pages/admin/AdminDisputes";
 import SalesRevenue from "./pages/SalesRevenue";
+import Profile from "./pages/Profile";
 
 // Protected Route Wrapper for Public Pages (Login/Register)
 // If authenticated, redirect to dashboard.
@@ -73,6 +74,7 @@ function App() {
         {/* Notifications & Settings */}
         <Route path="notifications" element={<Notifications />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="profile" element={<Profile />} />
         {/* Orders */}
         <Route path="orders" element={<OrderHistory />} />
         <Route path="orders/summary/:negotiationId" element={<OrderSummary />} />
