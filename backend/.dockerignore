@@ -1,0 +1,13 @@
+node_modules
+dist
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.env
+.env.*
+__tests__
+coverage
+README.md
+junit.xml
+tsconfig.tsbuildinfo
