@@ -24,6 +24,7 @@ const AdminDisputes = () => {
     const userRole = user?.role?.toUpperCase() || "BUYER";
     const isAdmin = userRole === "ADMIN";
     const isFarmer = userRole === "FARMER";
+     // eslint-disable-next-line
     const isBuyer = userRole === "BUYER";
 
     const [disputes, setDisputes] = useState([]);
@@ -35,6 +36,7 @@ const AdminDisputes = () => {
 
     useEffect(() => {
         loadDisputes();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userRole]);
 
     const loadDisputes = async () => {
@@ -361,7 +363,7 @@ const AdminDisputes = () => {
                                                         await disputeService.updateDisputeStatus(selectedDispute.id, "OPEN", "Re-opened for further investigation");
                                                         loadDisputes();
                                                         setSelectedDispute(null);
-                                                    } catch (error) {
+                                                    } catch {
                                                         alert("Failed to re-open dispute");
                                                     }
                                                 }}

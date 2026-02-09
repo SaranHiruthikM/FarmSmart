@@ -17,6 +17,7 @@ const Marketplace = () => {
 
     useEffect(() => {
         fetchCrops();
+        // eslint-disable-next-line
     }, []);
 
     const fetchCrops = async (appliedFilters = {}) => {

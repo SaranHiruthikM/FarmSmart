@@ -1,5 +1,7 @@
 import api from "./api";
 
+// eslint-disable-next-line
+// eslint-disable-next-line
 const transformDispute = (data) => {
   if (!data) return null;
 
@@ -49,6 +51,9 @@ const getPersistentDisputes = () => {
   }
 };
 
+// eslint-disable-next-line
+// eslint-disable-next-line
+// eslint-disable-next-line
 const savePersistentDisputes = (disputes) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(disputes));

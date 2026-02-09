@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Star, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import reviewService from '../../services/review.service';
 
 const ReviewModal = ({ isOpen, onClose, targetId, onSuccess }) => {

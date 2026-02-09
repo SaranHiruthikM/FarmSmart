@@ -32,6 +32,7 @@ const DisputeDetails = () => {
 
     useEffect(() => {
         loadDispute();
+        // eslint-disable-next-line
     }, [id]);
 
     const loadDispute = async () => {

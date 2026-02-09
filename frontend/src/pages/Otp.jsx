@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { FiArrowLeft, FiRefreshCw, FiCheckCircle } from "react-icons/fi";
 
 import OTPInput from "../components/common/OTPInput";

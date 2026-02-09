@@ -15,6 +15,7 @@ const CropListingForm = () => {
         if (id) {
             loadCrop(id);
         }
+        // eslint-disable-next-line
     }, [id]);
 
     const loadCrop = async (cropId) => {

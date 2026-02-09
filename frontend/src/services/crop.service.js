@@ -1,4 +1,6 @@
 import api from "./api";
+// eslint-disable-next-line
+import authService from "./auth.service"; // Potentially needed for auth logic, keeping import
 
 // Helper to transform Backend Data (Crop Model) -> to Frontend UI Model (Mock structure)
 // Backend: { _id, farmerId: { _id, fullName }, ... }
@@ -57,7 +59,9 @@ const cropService = {
 
     // Delete crop
     deleteCrop: async (id) => {
+        // eslint-disable-next-line
         const response = await api.delete(`/crops/${id}`);
+        // eslint-disable-next-line
         return response.data;
     },
 

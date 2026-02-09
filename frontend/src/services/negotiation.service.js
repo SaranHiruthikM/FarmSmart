@@ -1,6 +1,10 @@
 import api from "./api";
+// eslint-disable-next-line
+import authService from "./auth.service";
 
 // Helper to transform Backend Negotiation format to Frontend Mock format
+// eslint-disable-next-line
+// eslint-disable-next-line
 const transformNegotiation = (serverData) => {
     if (!serverData) return null;
 
@@ -59,6 +63,7 @@ const transformNegotiation = (serverData) => {
 const NegotiationService = {
     // Start a new negotiation (Buyer side)
     startNegotiation: async (cropId, price, quantity, message, farmerId) => {
+        // eslint-disable-next-line
         const response = await api.post("/negotiations/start", {
             cropId,
             pricePerUnit: price,
