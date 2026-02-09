@@ -1,5 +1,4 @@
 import api from "./api";
-import notificationService from "./notification.service";
 import authService from "./auth.service";
 
 // Helper to transform Backend Negotiation format to Frontend Mock format
@@ -64,35 +63,11 @@ const NegotiationService = {
         try {
             const response = await api.post("/negotiations/start", {
                 cropId,
-                initialOffer: price,
+                pricePerUnit: price,
                 quantity,
                 message,
                 farmerId
             });
-
-            // --- NOTIFICATION TRIGGER ---
-            try {
-                // We need to know who is sending this.
-                const currentUser = JSON.parse(localStorage.getItem("user"));
-                const buyerName = currentUser?.name || "A potential buyer";
-
-                // Notify the farmer
-                if (farmerId) {
-                    // Extract ID if it's an object again, just to be safe
-                    const targetId = typeof farmerId === 'object' ? farmerId._id || farmerId.id : farmerId;
-
-                    notificationService.createNotification(
-                        targetId,
-                        `New Bid: ${buyerName} offered ₹${price}/${quantity}kg for your crop.`,
-                        'PRICE'
-                    );
-
-                    console.log(`Notification sent to farmer ${targetId}`);
-                }
-            } catch (notifError) {
-                console.error("Failed to trigger notification locally", notifError);
-            }
-            // ----------------------------
 
             return response.data;
         } catch (error) {
@@ -125,32 +100,6 @@ const NegotiationService = {
         };
         const response = await api.post(`/negotiations/${id}/respond`, payload);
         const data = response.data;
-        const currentUser = authService.getCurrentUser();
-
-        // Determine target (The other party)
-        // If current user is buyer, notify farmer. If farmer, notify buyer.
-        // We need the IDs. 'data' from backend usually contains buyerId and farmerId.
-        // Assuming data is the Negotiation object
-
-        const targetUserId = currentUser.id === data.buyerId ? data.farmerId : data.buyerId;
-
-        if (targetUserId) {
-            let notifMsg = "";
-            let notifType = "INFO";
-
-            if (action.toUpperCase() === 'ACCEPT') {
-                notifMsg = `Great News! Your offer for ${data.cropId?.name || 'crop'} was ACCEPTED!`;
-                notifType = "SUCCESS";
-            } else if (action.toUpperCase() === 'REJECT') {
-                notifMsg = `Update: Your offer for ${data.cropId?.name || 'crop'} was REJECTED.`;
-                notifType = "ERROR";
-            } else if (action.toUpperCase() === 'COUNTER') {
-                notifMsg = `Counter Offer: You received a new offer of ₹${pricePerUnit} for ${data.cropId?.name || 'crop'}.`;
-                notifType = "PRICE";
-            }
-
-            notificationService.addNotification(targetUserId, notifMsg, notifType);
-        }
 
         return transformNegotiation(data);
     }

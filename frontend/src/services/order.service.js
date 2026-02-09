@@ -1,5 +1,4 @@
 import api from "./api";
-import notificationService from "./notification.service";
 import authService from "./auth.service";
 
 const transformOrder = (order) => {
@@ -28,20 +27,6 @@ const OrderService = {
   instantBuy: async (cropId, quantity) => {
     const response = await api.post("/orders/instant-buy", { cropId, quantity });
     const order = transformOrder(response.data);
-
-    // Notifications
-    if (order) {
-      notificationService.addNotification(
-        order.buyerId,
-        `Order Placed Successfully! Your order for ${order.crop} needs confirmation.`,
-        "SUCCESS"
-      );
-      notificationService.addNotification(
-        order.farmerId,
-        `New Order Received! You have a new order for ${order.crop}.`,
-        "SYSTEM"
-      );
-    }
     return order;
   },
 
@@ -49,20 +34,6 @@ const OrderService = {
   createOrder: async (negotiationId) => {
     const response = await api.post("/orders", { negotiationId });
     const order = transformOrder(response.data);
-
-    // Notifications
-    if (order) {
-      notificationService.addNotification(
-        order.buyerId,
-        `Order Placed! Your negotiation for ${order.crop} has been finalized into an order.`,
-        "SUCCESS"
-      );
-      notificationService.addNotification(
-        order.farmerId,
-        `New Order! A negotiation for ${order.crop} has been finalized.`,
-        "SYSTEM"
-      );
-    }
     return order;
   },
 
@@ -96,25 +67,6 @@ const OrderService = {
     // status must be UPPERCASE for backend enum match if not already
     const response = await api.patch(`/orders/${id}/status`, { status: status.toUpperCase() });
     const order = transformOrder(response.data);
-
-    if (order) {
-      const currentUser = authService.getCurrentUser();
-      const targetUserId = currentUser.id === order.buyerId ? order.farmerId : order.buyerId;
-
-      // Notify the OTHER party about the update
-      if (targetUserId) {
-        notificationService.addNotification(
-          targetUserId,
-          `Order Update: Status for ${order.crop} changed to ${status}.`,
-          "INFO"
-        );
-      }
-
-      // Also notify self for confirmation? Maybe not needed as UI updates.
-      // But let's be safe and notify buyer if farmer updated it.
-      // Wait, 'targetUserId' logic handles "other party".
-    }
-
     return order;
   },
 

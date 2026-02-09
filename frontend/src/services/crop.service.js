@@ -1,5 +1,4 @@
 import api from "./api";
-import notificationService from "./notification.service";
 import authService from "./auth.service";
 
 // Helper to transform Backend Data (Crop Model) -> to Frontend UI Model (Mock structure)
@@ -34,14 +33,6 @@ const cropService = {
     createCrop: async (cropData) => {
         // Backend expects { name, quantity, unit, ... location: {...} }
         const response = await api.post("/crops", cropData);
-        const currentUser = authService.getCurrentUser();
-        if (currentUser) {
-            notificationService.addNotification(
-                currentUser.id,
-                `Your crop "${cropData.name}" has been listed successfully.`,
-                "SUCCESS"
-            );
-        }
         return transformCrop(response.data);
     },
 
@@ -62,28 +53,12 @@ const cropService = {
     // Update crop
     updateCrop: async (id, cropData) => {
         const response = await api.put(`/crops/${id}`, cropData);
-        const currentUser = authService.getCurrentUser();
-        if (currentUser) {
-            notificationService.addNotification(
-                currentUser.id,
-                `Your crop "${cropData.name}" has been updated.`,
-                "INFO"
-            );
-        }
         return transformCrop(response.data);
     },
 
     // Delete crop
     deleteCrop: async (id, cropName = "Unknown Crop") => {
         const response = await api.delete(`/crops/${id}`);
-        const currentUser = authService.getCurrentUser();
-        if (currentUser) {
-            notificationService.addNotification(
-                currentUser.id,
-                `Crop listing has been deleted.`,
-                "WARNING"
-            );
-        }
         return response.data;
     },
 

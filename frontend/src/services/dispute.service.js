@@ -1,5 +1,4 @@
 import api from "./api";
-import notificationService from "./notification.service";
 import authService from "./auth.service";
 
 const transformDispute = (data) => {
@@ -70,20 +69,6 @@ const disputeService = {
       const { orderId, reason, description } = payload;
       const response = await api.post("/disputes", { orderId, reason, description });
       const dispute = transformDispute(response.data);
-
-      // Notify the OTHER party that a dispute was raised
-      // If buyer raised, notify farmer.
-      if (dispute) {
-        const currentUser = authService.getCurrentUser();
-        const targetId = currentUser.role === 'BUYER' ? dispute.farmerId : dispute.buyerId;
-        if (targetId) {
-          notificationService.addNotification(
-            targetId,
-            `Dispute Raised: A dispute has been raised for Order #${dispute.orderIdDisplay}.`,
-            "WARNING"
-          );
-        }
-      }
       return dispute;
     } catch (error) {
       // Mock fallback handled differently in original code, simplifying for replacement...
@@ -136,14 +121,6 @@ const disputeService = {
     try {
       const response = await api.patch(`/disputes/admin/${id}`, { status, adminRemark: adminRemarks });
       const dispute = transformDispute(response.data);
-
-      if (dispute) {
-        // Notify both parties of admin update
-        const msg = `Dispute Update: Order #${dispute.orderIdDisplay} status changed to ${status}.`;
-        if (dispute.buyerId) notificationService.addNotification(dispute.buyerId, msg, "INFO");
-        if (dispute.farmerId) notificationService.addNotification(dispute.farmerId, msg, "INFO");
-      }
-
       return dispute;
     } catch (error) {
       console.error("Error updating dispute", error);
@@ -156,15 +133,6 @@ const disputeService = {
     try {
       const response = await api.patch(`/disputes/${id}/resolve`);
       const dispute = transformDispute(response.data);
-
-      // Notify Buyer
-      if (dispute && dispute.buyerId) {
-        notificationService.addNotification(
-          dispute.buyerId,
-          `Dispute Resolved: The farmer has resolved the dispute for Order #${dispute.orderIdDisplay}.`,
-          "SUCCESS"
-        );
-      }
       return dispute;
     } catch (error) {
       console.error("Error resolving dispute", error);
