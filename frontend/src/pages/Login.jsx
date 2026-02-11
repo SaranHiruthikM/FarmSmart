@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Leaf, Phone, Lock, ArrowRight, Loader2 } from "lucide-react";
 import authService from "../services/auth.service";
 import LanguageSelector from "../components/common/LanguageSelector";

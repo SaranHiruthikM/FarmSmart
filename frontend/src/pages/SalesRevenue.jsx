@@ -26,6 +26,14 @@ const SalesRevenue = () => {
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [filteredSales, setFilteredSales] = useState([]);
 
+    useEffect(() => {
+        loadSalesData();
+    }, []);
+
+    useEffect(() => {
+        filterSales();
+    }, [sales, searchTerm, statusFilter]);
+
     const loadSalesData = async () => {
         try {
             setLoading(true);
@@ -58,16 +66,6 @@ const SalesRevenue = () => {
 
         setFilteredSales(result);
     };
-
-    useEffect(() => {
-        loadSalesData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        filterSales();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sales, searchTerm, statusFilter]);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -226,7 +224,6 @@ const SalesRevenue = () => {
     );
 };
 
-// eslint-disable-next-line no-unused-vars
 const StatsCard = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
         <div className={`p-3 rounded-lg ${color}`}>
