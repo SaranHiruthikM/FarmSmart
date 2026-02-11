@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, AlertCircle } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
 
@@ -139,8 +139,9 @@ const Header = () => {
     );
 };
 
-const NotificationItem = ({ title, isNew }) => (
+const NotificationItem = ({ icon: Icon, title, isNew }) => (
     <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-colors cursor-pointer group">
+        <Icon className={`w-4 h-4 ${isNew ? "text-primary" : "text-[#8CA38D]"}`} />
         <span className={`text-sm font-medium ${isNew ? "text-[#2D362E]" : "text-[#5C715E]"}`}>{title}</span>
         {isNew && <span className="ml-auto w-1.5 h-1.5 bg-primary rounded-full"></span>}
     </div>
