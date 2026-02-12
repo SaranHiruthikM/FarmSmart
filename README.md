@@ -1,220 +1,193 @@
-# Amrita Placement Tracker
-<p align="center">
-<img width="516" height="193" alt="APT Logo" src="https://github.com/user-attachments/assets/fc8c034e-4c3f-41ec-9fc4-ef50fe9cfdaa" />
-</p>
+# FarmSmart - Smart Agriculture Marketplace
 
-<div align="center">
+> A full-stack farm-to-buyer platform with OTP auth, crop listings, negotiation, instant buy, disputes, and market price insights.
 
-![Version](https://img.shields.io/badge/version-1.1.0-darkred?style=for-the-badge)
-![Build](https://img.shields.io/badge/build-passing-success?style=for-the-badge)
-![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
-![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-darkgreen?style=for-the-badge)
-![React](https://img.shields.io/badge/react-19.2.0-61dafb?style=for-the-badge)
-
-### **Next-Generation Campus Placement Management System**
-
-*Streamlining placement tracking with AI-enhanced insights, real-time analytics, and collaborative peer stories*
-
-[Features](#features) • [Tech Stack](#tech-stack) • [System Flow](#system-flow) • [Installation](#installation) • [API Guide](#api-documentation) • [Future Roadmap](#road-map)
+[![Node.js](https://img.shields.io/badge/node-Required-brightgreen)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/react-19.2.0-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/typescript-5.9.3-blue)](https://www.typescriptlang.org/)
+[![MongoDB](https://img.shields.io/badge/database-MongoDB-green)](https://www.mongodb.com/)
 
 ---
 
-<img src="https://raw.githubusercontent.com/andreasbm/rainbow-line/master/line.png" width="100%">
+## 📖 Table of Contents
 
-</div>
-
-## 📌 Overview
-
-**Amrita Placement Tracker (APT)** is an enterprise-grade, full-stack ecosystem designed to optimize campus recruitment at Amrita Vishwa Vidyapeetham. It provides a bridge between the **Career & Internship Readiness (CIR)** team, students, and alumni, delivering centralized tracking, deep behavioral analytics, and AI-driven growth metrics.
-
-### 🌟 Why APT?
-- **AI-Enhanced Readiness**: Proprietary scoring algorithm mapping CGPA and skills to industry requirements.
-- **Storytelling Hub**: Students share and learn from real-world interview experiences.
-- **Enterprise-Scale Dashboards**: High-fidelity metrics for institutional oversight.
-- **Real-Time Synergy**: Live tickers, instant notifications, and dynamic scheduling.
+- [Overview](#-overview)
+- [Quick Start](#-quick-start)
+- [Features](#-features)
+- [Project Structure](#-project-structure)
+- [Documentation](#-documentation)
+- [Technology Stack](#-technology-stack)
+- [Development](#-development)
+- [Contributing](#-contributing)
+- [Security](#-security)
 
 ---
 
-## 📸 Visual Showcase
+## 🌟 Overview
 
-<details>
-<summary><b>Click to view Dashboard Screenshots</b></summary>
-<br>
+FarmSmart is built as a two-part web application:
 
-| Student Dashboard | Admin Analytics |
-|-------------------|-----------------|
-| ![Student](https://via.placeholder.com/400x200?text=Student+Dashboard) | ![Admin](https://via.placeholder.com/400x200?text=Admin+Analytics) |
+- **Frontend (`frontend/`)**: React + Vite client for farmer and buyer workflows
+- **Backend (`backend/`)**: Express + TypeScript API using MongoDB (Mongoose)
 
-| Placement Drives | Interview Stories |
-|------------------|-------------------|
-| ![Drives](https://via.placeholder.com/400x200?text=Drives+Page) | ![Stories](https://via.placeholder.com/400x200?text=Stories+Page) |
-
-</details>
+The backend starts on **port `3000` by default** (`backend/src/index.ts`) and the frontend calls it through `VITE_API_BASE_URL` (or defaults to `http://localhost:3000`).
 
 ---
 
-## 🏗️ System Architecture & Flow
+## 🚀 Quick Start
 
-<details open>
-<summary><b>View System Interaction</b></summary>
+### For New Contributors
 
-```mermaid
-sequenceDiagram
-    participant S as Student
-    participant A as Admin
-    participant API as Express API
-    participant DB as MongoDB / Supabase
-    participant AI as AI Engine
+```powershell
+# 1. Clone the repository
+git clone https://github.com/SaranHiruthikM/FarmSmart.git
+cd FarmSmart
 
-    S->>API: Login & Activity
-    API->>DB: Fetch Profile & History
-    API->>AI: Compute Readiness & Matches
-    AI-->>API: Insights & Recommendation
-    API-->>S: Personalized Dashboard
+# 2. Install backend dependencies
+Set-Location backend
+npm install
 
-    A->>API: Upload CSV / Managed Drives
-    API->>DB: Bulk Write / Update Status
-    API-->>S: Live Ticker Notifications
-    
-    rect rgb(139, 0, 0, 0.1)
-        Note over S,A: Shared Resource Hub & Interview Stories
-    end
+# 3. Create backend env file
+Copy-Item .env.example .env
+
+# 4. Optional: start MongoDB container
+# (If you already run MongoDB locally, skip this)
+docker compose up -d
+
+# 5. Start backend API (http://localhost:3000)
+npm run dev
 ```
 
-</details>
+Open a second PowerShell terminal:
+
+```powershell
+# 6. Start frontend
+# From repository root:
+Set-Location frontend
+npm install
+Copy-Item .env.example .env
+npm run dev
+```
+
+For a full walkthrough, use [QUICK_START.md](./QUICK_START.md).
+
+### For Existing Team Members
+
+```powershell
+# Backend terminal
+Set-Location backend
+npm run dev
+
+# Frontend terminal
+Set-Location ..\frontend
+npm run dev
+```
 
 ---
 
 ## ✨ Features
 
-*Verified components from current architecture:*
+Verified from route/controller/service code:
 
-- **Secure Authentication**: JWT-based session management with Bcrypt password hashing.
-- **Role-Based Access Control**: Middleware protected routes for **Student** and **Admin** (CIR).
-- **Placement Drive Engine**: Create/Update/Delete drives with eligibility criteria (CGPA/Backlogs).
-- **Application Workflow**: One-click apply, automated eligibility checks, and real-time status updates (Applied → Shortlisted → Selected).
-- **Student Profiling**: comprehensive profile management including Resume, Academic History, and Skills.
-- **Knowledge Repository**: **PrepHub** for study materials and **Interview Experiences** for peer-shared insights.
-- **Live Communication**: Dynamic **Ticker System** for flash updates and **Announcements** module.
-- **Analytics Suite**: Admin dashboard with visual metrics for Placement % and department-wise stats.
-- **Alumni Connect**: Curated success stories and alumni guidance feed.
-- **Resource Management**: PDF/Doc upload support via Supabase/Local storage.
+- **OTP-based authentication**: register, login, OTP verify, resend
+- **Role-aware access**: FARMER, BUYER, ADMIN checks in middleware
+- **Crop marketplace**: create/list/update/delete crops, own listings endpoint
+- **Negotiation workflow**: buyer starts negotiation, both sides counter/respond
+- **Order workflow**: create from accepted negotiation or use instant buy
+- **Order lifecycle**: `CREATED` to `CONFIRMED` to `SHIPPED` to `DELIVERED` to `COMPLETED`
+- **Reviews and reputation**: rating + comment with aggregated seller/buyer rating
+- **Disputes**: raise, view, resolve, and admin update endpoints
+- **Quality pricing**: grade-based price impact using `QualityRule`
+- **Schemes and advisories**: scheme listing + eligibility + advisory feed
+- **Market price insights**: current/history/compare APIs with cache + provider fallback
+- **Frontend i18n scaffold**: English + Tamil resource initialization
+
+---
+
+## 📁 Project Structure
+
+```text
+FarmSmart/
+├── backend/
+│   ├── src/
+│   │   ├── app.ts
+│   │   ├── index.ts
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── models/
+│   │   ├── middleware/
+│   │   ├── services/
+│   │   ├── cache/
+│   │   └── utils/
+│   ├── __tests__/
+│   ├── prisma/
+│   ├── docker-compose.yml
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── services/
+│   │   ├── i18n/
+│   │   └── mock/
+│   ├── public/
+│   └── package.json
+└── CODEOWNERS
+```
+
+---
+
+## 📚 Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [QUICK_START.md](./QUICK_START.md) | Fast local run instructions |
+| [DEVELOPMENT.md](./DEVELOPMENT.md) | Full setup and environment guide |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | System design and data flow |
+| [API.md](./API.md) | Route-level API contract |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution workflow and standards |
+| [BRANCH_PLAN.md](./BRANCH_PLAN.md) | Branching strategy and implementation plan |
+| [TEAM_SETUP_GUIDE.md](./TEAM_SETUP_GUIDE.md) | New teammate onboarding |
+| [SECURITY_CHECKLIST.md](./SECURITY_CHECKLIST.md) | Pre-public security checks |
+| [backend/README.md](./backend/README.md) | Backend-only setup and operations |
 
 ---
 
 ## 🛠️ Technology Stack
 
-<div align="center">
+### Frontend
 
-| Core | Technologies |
-|------|--------------|
-| **Frontend** | ![React](https://img.shields.io/badge/React-19.2.0-61DAFB?style=flat-square&logo=react) ![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?style=flat-square&logo=vite) ![Tailwind](https://img.shields.io/badge/Tailwind-4.1-38B2AC?style=flat-square&logo=tailwind-css) ![Framer](https://img.shields.io/badge/Framer-Motion-0055FF?style=flat-square&logo=framer) |
-| **Backend** | ![Node](https://img.shields.io/badge/Node.js-16+-339933?style=flat-square&logo=node.js) ![Express](https://img.shields.io/badge/Express-5.2-000000?style=flat-square) ![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=json-web-tokens) |
-| **Data** | ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb) ![Supabase](https://img.shields.io/badge/Supabase-Cloud-3ECF8E?style=flat-square&logo=supabase) |
-| **Testing** | ![Vitest](https://img.shields.io/badge/Vitest-Unit-729B1B?style=flat-square&logo=vitest) ![Jest](https://img.shields.io/badge/Jest-Backend-C21325?style=flat-square&logo=jest) |
+- React 19 (`frontend/package.json`)
+- Vite 7 (`frontend/package.json`)
+- React Router (`frontend/package.json`)
+- Tailwind CSS (`frontend/package.json`)
+- Axios (`frontend/src/services/api.js`)
 
-</div>
+### Backend
 
----
-
-## 📂 Project Structure
-
-```plaintext
-APT/
-├── client/                     # Frontend Application
-│   ├── src/
-│   │   ├── components/         # Atomic UI & Layout components
-│   │   ├── context/            # Auth, Theme, & Global State
-│   │   ├── pages/
-│   │   │   ├── admin/          # High-fidelity Admin Views
-│   │   │   └── student/        # Personalized Student Views
-│   │   ├── services/           # API Abstraction & AI Utils
-│   │   └── App.jsx             # Route Guarding & Orchestration
-│   └── public/                 # Static Assets & Global Styles
-│
-├── server/                     # Backend Logic
-│   ├── controllers/            # Business Logic & Data Handling
-│   ├── models/                 # Mongoose Data Schemas (13 Entities)
-│   ├── routes/                 # Express API Definitions (15 Routes)
-│   ├── services/               # Internal AI & Cloud Integration
-│   └── data/                   # Seed Scripts & Raw Data
-└── README.md                   # System Documentation
-```
+- Node.js + Express 5 (`backend/package.json`)
+- TypeScript (`backend/package.json`, `backend/tsconfig.json`)
+- Mongoose + MongoDB (`backend/src/config/db.ts`)
+- JWT + bcrypt auth (`backend/src/controllers/authController.ts`)
+- Redis-compatible cache support for price endpoints (`backend/src/cache/redisCache.ts`)
 
 ---
 
-## 📡 API Documentation
+## 💻 Development
 
-APT exposes a robust REST API for cross-platform integration.
-
-| Resource | Methods | Endpoint | Description |
-|----------|---------|----------|-------------|
-| **Auth** | `POST` | `/api/auth/login` | Session creation with JWT |
-| **User** | `GET` | `/api/auth/me` | Current profile retrieval |
-| **Student**| `GET` | `/api/student/dashboard` | Main student metric hub |
-| **Drives** | `POST`| `/api/admin/drive` | Create drive (Restricted) |
-| **Stories**| `POST`| `/api/experiences` | Share interview story |
-| **Ticker** | `PUT` | `/api/ticker/:id`| Toggle live message status |
-| **Analytics**|`GET`| `/api/reports/analytics`| Fetch system-wide metrics |
+- Setup and environment details: [DEVELOPMENT.md](./DEVELOPMENT.md)
+- Fast day-to-day workflow: [QUICK_START.md](./QUICK_START.md)
+- Backend-focused instructions: [backend/README.md](./backend/README.md)
 
 ---
 
-## ⚙️ Installation & Setup
+## 🤝 Contributing
 
-### 1. Prerequisites
-- **Node.js**: v16.0 or higher
-- **Database**: MongoDB Atlas instance
-- **Cloud Storage**: Supabase account (for file uploads)
-
-### 2. Quick Start
-```bash
-git clone https://github.com/Team8-Synapse/APT.git
-cd APT
-
-# Install and build all environments
-npm run install:all
-```
-
-### 3. Environment Config
-Place a `.env` in the `/server` directory:
-
-| Variable | Description |
-|----------|-------------|
-| `PORT` | Server listening port (default: 5005) |
-| `MONGODB_URI` | MongoDB Atlas Connection String |
-| `JWT_SECRET` | Secret key for signing tokens |
-| `SUPABASE_URL` | Endpoint for Supabase storage |
-| `SUPABASE_SERVICE_KEY` | Admin key for file operations |
-
-### 4. Launch
-```bash
-# Production Launch
-cd server && npm start
-
-# Development with Hot-Reload
-cd client && npm run dev
-```
+Follow [CONTRIBUTING.md](./CONTRIBUTING.md) for branch naming, commit format, PR process, and quality checks.
 
 ---
 
-## 🔮 Future Roadmap
+## 🔒 Security
 
-- [ ] **Mobile Application**: Native mobile app for iOS and Android.
-- [ ] **Resume Parsing**: AI-based auto-filling of profile data from PDFs.
-- [ ] **Mock Tests**: Integrating code compile for technical mock tests.
-- [ ] **Chatbot**: AI assistant for resolving student FAQs.
-
----
-
-## 🤝 Team & Contribution
-
-**Managed by Team 8**
-*Amrita Vishwa Vidyapeetham*
-
-We welcome community feedback and contributions! Please read our [Contribution Guidelines](CONTRIBUTING.md) before submitting Pull Requests.
-
----
-
-**© 2026 Amrita Placement Tracker | Built for Excellence**
-
-![Footer](https://raw.githubusercontent.com/andreasbm/rainbow-line/master/line.png)
+Before publishing or sharing wider access, run through [SECURITY_CHECKLIST.md](./SECURITY_CHECKLIST.md).
