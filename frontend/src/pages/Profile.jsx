@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import authService from "../services/auth.service";
-import { motion } from "framer-motion";
+
 
 const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);

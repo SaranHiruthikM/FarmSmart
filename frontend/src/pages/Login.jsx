@@ -5,7 +5,6 @@ import { Leaf, Phone, Lock, ArrowRight, Loader2 } from "lucide-react";
 import authService from "../services/auth.service";
 import LanguageSelector from "../components/common/LanguageSelector";
 import loginImage from "../assets/Images/loginPageImage.jpg";
-import { motion } from "framer-motion";
 
 
 const Login = () => {
