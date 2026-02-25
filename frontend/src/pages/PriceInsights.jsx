@@ -389,8 +389,7 @@ const PriceInsights = () => {
 const PriceCard = ({ label, value, unit, icon: Icon, color, bg, isText = false }) => (
     <div className="bg-white p-6 rounded-[2rem] border border-neutral-light shadow-sm flex flex-col space-y-4 transition-all hover:shadow-md hover:translate-y-[-2px] group">
         <div className={`w-12 h-12 ${bg} ${color} rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110`}>
-            {/* eslint-disable-next-line */}
-            {Icon && <Icon className="w-6 h-6" />}
+            <Icon className="w-6 h-6" />
         </div>
         <div>
             <p className="text-[10px] font-black text-accent uppercase tracking-[0.2em] mb-1">{label}</p>

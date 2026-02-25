@@ -1,5 +1,4 @@
 import api from "./api";
-// eslint-disable-next-line
 import authService from "./auth.service";
 
 const transformOrder = (order) => {

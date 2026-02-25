@@ -20,7 +20,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDashboardData = async () => {
@@ -149,7 +148,6 @@ const Dashboard = () => {
   );
 };
 
-// eslint-disable-next-line no-unused-vars
 const StatCard = ({ title, value, change, icon: Icon, color }) => (
   <div className="bg-white p-6 rounded-2xl border border-green-50 shadow-sm hover:shadow-md transition-shadow">
     <div className="flex items-center justify-between mb-4">
