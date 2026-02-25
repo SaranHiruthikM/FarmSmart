@@ -3,7 +3,6 @@ import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, AlertCi
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
-import { motion } from "framer-motion";
 
 const Header = () => {
     const [showNotifications, setShowNotifications] = useState(false);
