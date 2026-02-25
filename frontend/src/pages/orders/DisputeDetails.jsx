@@ -5,7 +5,7 @@ import {
     ArrowLeft,
     Calendar,
     Clock,
-    AlertCircle,
+    CircleAlert,
     CheckCircle2,
     XCircle,
     MessageCircle,
@@ -269,7 +269,7 @@ const DisputeDetails = () => {
                             ) : (
                                 <div className="space-y-6">
                                     <div className="bg-amber-50 p-6 rounded-2xl border-2 border-amber-100 flex items-start gap-4">
-                                        <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                                        <CircleAlert className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                                         <p className="text-xs font-medium text-amber-800 leading-relaxed italic">
                                             "Marking this as resolved confirms you have addressed the buyer's concerns directly. This will close the ticket."
                                         </p>

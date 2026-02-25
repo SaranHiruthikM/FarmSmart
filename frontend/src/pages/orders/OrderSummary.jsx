@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CheckCircle, Truck, User, Info, AlertCircle, ShoppingBag, ArrowLeft } from "lucide-react";
+import { CheckCircle, Truck, User, Info, CircleAlert, ShoppingBag, ArrowLeft } from "lucide-react";
 import authService from "../../services/auth.service";
 import negotiationService from "../../services/negotiation.service";
 import orderService from "../../services/order.service";
@@ -212,7 +212,7 @@ const OrderSummary = () => {
                     </div>
 
                     <div className="p-4 bg-orange-50 rounded-2xl border-2 border-orange-100 flex gap-3 text-orange-800">
-                        <AlertCircle className="w-5 h-5 shrink-0" />
+                        <CircleAlert className="w-5 h-5 shrink-0" />
                         <p className="text-xs font-bold leading-relaxed">
                             By clicking confirm, you agree to the terms of the transaction. Funds will be held in escrow until delivery is confirmed.
                         </p>

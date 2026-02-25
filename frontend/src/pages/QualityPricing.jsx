@@ -4,7 +4,7 @@ import {
     BadgeIndianRupee,
     TrendingUp,
     CheckCircle2,
-    AlertCircle,
+    CircleAlert,
     ArrowRight,
     Search,
     Info,

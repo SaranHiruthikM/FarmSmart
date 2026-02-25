@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home } from "lucide-react";
 import authService from "../services/auth.service";
 import AuthCard from "../components/common/AuthCard"; // Keeping for reference if needed elsewhere, but not using here.
-
+import { motion } from "framer-motion";
 const Register = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");

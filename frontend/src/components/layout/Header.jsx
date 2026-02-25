@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, AlertCircle } from "lucide-react";
+import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, CircleAlert } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
+import { motion } from "framer-motion";
 
 const Header = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -66,7 +67,7 @@ const Header = () => {
                                     <NotificationItem icon={MessageSquare} title="New Message" isNew />
                                     <NotificationItem icon={Gavel} title="Auction Update" isNew={false} />
                                     <NotificationItem icon={Gavel} title="Auction Update" isNew={false} />
-                                    <NotificationItem icon={AlertCircle} title="Negotiation alert" isNew={false} />
+                                    <NotificationItem icon={CircleAlert} title="Negotiation alert" isNew={false} />
                                 </div>
                                 <div className="px-4 py-3 bg-white/50 border-t border-[#EAEAEA] text-right">
                                     <button onClick={() => navigate("/dashboard/notifications")} className="text-xs font-semibold text-primary hover:text-primary-dark">View all</button>

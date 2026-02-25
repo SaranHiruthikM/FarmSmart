@@ -5,7 +5,7 @@ import {
     ChevronRight,
     Calendar,
     Clock,
-    AlertCircle,
+    CircleAlert,
     CheckCircle2,
     XCircle,
     ArrowRight
@@ -58,7 +58,7 @@ const MyDisputes = () => {
             case "REJECTED":
                 return <XCircle className="w-4 h-4" />;
             default:
-                return <AlertCircle className="w-4 h-4" />;
+                return <CircleAlert className="w-4 h-4" />;
         }
     };
 
@@ -146,9 +146,9 @@ const MyDisputes = () => {
                                     <h3 className="text-xl font-black text-text-dark tracking-tight leading-tight group-hover:text-primary transition-colors">
                                         {dispute.reason}
                                     </h3>
-                                    <p className="text-[10px] font-black text-accent uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <div className="text-[10px] font-black text-accent uppercase tracking-[0.2em] flex items-center gap-2">
                                         <div className="w-1 h-1 rounded-full bg-primary" /> CASE #{dispute.id?.toString().slice(-6) || "???"}
-                                    </p>
+                                    </div>
                                 </div>
 
                                 <p className="text-sm font-medium text-secondary line-clamp-2 leading-relaxed italic">

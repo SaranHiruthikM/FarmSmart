@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import {
     User, Mail, Phone, MapPin, Briefcase, Languages, Edit2, Check, X, Loader2,
-    Map as MapIcon, Home, Save
+    Map as MapIcon, Home, Save,
+    Icon
 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import authService from "../services/auth.service";
+import { motion } from "framer-motion";
 
 const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);

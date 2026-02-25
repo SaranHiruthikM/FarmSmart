@@ -80,3 +80,20 @@ export const seedSchemesAndAdvisory = async () => {
         console.error("Error seeding schemes:", error);
     }
 };
+
+if (require.main === module) {
+    const runSeed = async () => {
+        try {
+            await mongoose.connect(process.env.DATABASE_URL as string);
+            console.log("✓ Connected to MongoDB");
+            await seedSchemesAndAdvisory();
+            await mongoose.disconnect();
+            console.log("✓ Disconnected");
+            process.exit(0);
+        } catch (error) {
+            console.error("Error seeding schemes:", error);
+            process.exit(1);
+        }
+    };
+    runSeed();
+}
