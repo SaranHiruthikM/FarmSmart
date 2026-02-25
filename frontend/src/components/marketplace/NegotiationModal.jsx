@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, HandCoins, AlertCircle, ShoppingBag } from 'lucide-react';
+import { X, HandCoins, CircleAlert, ShoppingBag } from 'lucide-react';
 import PrimaryButton from '../common/PrimaryButton';
 import orderService from '../../services/order.service';
 import negotiationService from '../../services/negotiation.service';
@@ -109,7 +109,7 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess, mode = 'negotiate'
                 <div className="p-6 space-y-4">
                     {error && (
                         <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4" />
+                            <CircleAlert className="w-4 h-4" />
                             {error}
                         </div>
                     )}

@@ -6,6 +6,7 @@ import { FiArrowLeft, FiRefreshCw, FiCheckCircle } from "react-icons/fi";
 import OTPInput from "../components/common/OTPInput";
 import PrimaryButton from "../components/common/PrimaryButton";
 import authService from "../services/auth.service";
+import { motion } from "framer-motion";
 
 function Otp() {
   const [otp, setOtp] = useState("");

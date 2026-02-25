@@ -11,7 +11,7 @@ import {
     RotateCcw,
     ArrowLeft,
     ChevronRight,
-    AlertCircle
+    CircleAlert
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import disputeService from "../../services/dispute.service";
@@ -303,7 +303,7 @@ const AdminDisputes = () => {
                                         ) : isFarmer ? (
                                             <div className="space-y-4">
                                                 <div className="bg-amber-50 p-5 rounded-2xl border-2 border-amber-100 flex items-start gap-4">
-                                                    <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                                                    <CircleAlert className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                                                     <p className="text-xs font-medium text-amber-800 leading-relaxed">
                                                         A buyer has raised an issue regarding this order. If you've addressed their concerns, you can close this dispute yourself.
                                                     </p>

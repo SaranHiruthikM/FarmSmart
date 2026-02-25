@@ -43,6 +43,28 @@ class NotificationService {
     }
 
     /**
+     * Settings Management (Local Storage for now)
+     */
+    async getSettings() {
+        const defaultSettings = {
+            sms: false,
+            call: false,
+            priceAlerts: false,
+            auctionAlerts: false,
+            deliveryAlerts: false
+        };
+        const settings = localStorage.getItem("farmsmart_notification_settings");
+        return settings ? { ...defaultSettings, ...JSON.parse(settings) } : defaultSettings;
+    }
+
+    async updateSettings(newSettings) {
+        const currentCheck = await this.getSettings();
+        const updated = { ...currentCheck, ...newSettings };
+        localStorage.setItem("farmsmart_notification_settings", JSON.stringify(updated));
+        return updated;
+    }
+
+    /**
      * DERIVE NOTIFICATIONS from Negotiations, Orders, and Crops
      */
     async getNotifications() {

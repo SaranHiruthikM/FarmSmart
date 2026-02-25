@@ -8,7 +8,11 @@
     "test:coverage": "jest --coverage",
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "seed": "npm run seed:schemes && npm run seed:prices && npm run seed:quality",
+    "seed:schemes": "ts-node src/utils/seedSchemes.ts",
+    "seed:prices": "ts-node src/utils/seedMarketPrices.ts",
+    "seed:quality": "ts-node src/utils/seedQualityRules.ts"
   },
   "keywords": [],
   "author": "",
