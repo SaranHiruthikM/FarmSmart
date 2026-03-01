@@ -26,6 +26,7 @@ import DisputeDetails from "./pages/orders/DisputeDetails";
 import AdminDisputes from "./pages/admin/AdminDisputes";
 import SalesRevenue from "./pages/SalesRevenue";
 import Profile from "./pages/Profile";
+import LogisticsDashboard from "./pages/logistics/LogisticsDashboard";
 
 // Protected Route Wrapper for Public Pages (Login/Register)
 // If authenticated, redirect to dashboard.
@@ -82,6 +83,9 @@ function App() {
 
         {/* Sales & Revenue (Farmer Only) */}
         <Route path="sales" element={<SalesRevenue />} />
+
+        {/* Logistics Provider Dashboard (Logistics Only) */}
+        <Route path="logistics/*" element={<LogisticsDashboard />} />
 
         {/* Reviews & Trust */}
         <Route path="reviews" element={<ReviewsAndTrust />} />

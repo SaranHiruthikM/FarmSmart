@@ -53,7 +53,7 @@ const OrderStatus = () => {
 
     useEffect(() => {
         const fetchOrderData = async () => {
-             setLoading(true);
+            setLoading(true);
             try {
                 // Fetch Order
                 const data = await orderService.getOrderById(orderId);
@@ -172,24 +172,7 @@ const OrderStatus = () => {
                         }`}>
                         {currentStatus}
                     </span>
-                    {isFarmer && (
-                        <div className="relative group">
-                            <button className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-primary/20">
-                                UPDATE STATUS <ChevronDown className="w-4 h-4" />
-                            </button>
-                            <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-neutral-light rounded-2xl shadow-xl hidden group-hover:block z-10 overflow-hidden">
-                                {statuses.map((s) => (
-                                    <button
-                                        key={s.id}
-                                        onClick={() => handleUpdateStatus(s.id)}
-                                        className="w-full text-left px-5 py-3 text-xs font-bold text-text-dark hover:bg-neutral-light hover:text-primary transition-colors border-b border-neutral-light last:border-0"
-                                    >
-                                        Mark as {s.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    {/* Status updates are now handled by Logistics Providers */}
                 </div>
             </div>
 
@@ -266,13 +249,26 @@ const OrderStatus = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Carrier</p>
-                                        <p className="text-sm font-bold">SmartLogistics</p>
+                                        <p className="text-sm font-bold">FarmSmart Logistics</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Weight</p>
                                         <p className="text-sm font-bold">{orderDetails.quantity}</p>
                                     </div>
                                 </div>
+                                {order.logisticsDetails?.driverName && (
+                                    <div className="pt-2 border-t border-neutral-light">
+                                        <p className="text-[10px] font-black text-accent uppercase tracking-tighter mb-2">Driver Details</p>
+                                        <div className="space-y-1">
+                                            <p className="text-xs font-bold text-text-dark">{order.logisticsDetails.driverName}</p>
+                                            <p className="text-xs font-medium text-accent">Vehicle: {order.logisticsDetails.vehicleNumber}</p>
+                                            <p className="text-xs font-medium text-accent">Contact: {order.logisticsDetails.contactNumber}</p>
+                                            {order.logisticsDetails.estimatedDelivery && (
+                                                <p className="text-xs font-medium text-accent mt-1">Est. Delivery: {new Date(order.logisticsDetails.estimatedDelivery).toLocaleDateString()}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

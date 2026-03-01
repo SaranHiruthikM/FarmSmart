@@ -20,23 +20,24 @@ import authService from "../../services/auth.service";
 const Sidebar = () => {
     const location = useLocation();
     const user = authService.getCurrentUser();
+    const isLogisticsProvider = user?.role?.toLowerCase() === "logistics";
     const isAdminOrFarmer = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "farmer";
 
     const menuItems = [
-        { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-        { label: "Crop Listing & Marketplace", icon: Store, path: "/dashboard/marketplace" },
-        { label: "Price Comparison & Insights", icon: TrendingUp, path: "/dashboard/insights" },
-        { label: "Demand Forecasting", icon: LineChart, path: "/dashboard/forecast" },
-        { label: "Quality-Based Pricing", icon: Award, path: "/dashboard/pricing" },
-        { label: "Negotiation & Bidding", icon: Handshake, path: "/dashboard/negotiation" },
-        { label: "Orders & Transactions", icon: Receipt, path: "/dashboard/orders" },
-        { label: "Logistics & Location", icon: Truck, path: "/dashboard/logistics" },
-        { label: "Ratings, Reviews & Trust", icon: Star, path: "/dashboard/reviews" },
-        { label: "Dispute Resolution", icon: ShieldAlert, path: "/dashboard/disputes" },
-        ...(isAdminOrFarmer ? [{ label: "Manage Disputes (Admin)", icon: ShieldAlert, path: "/dashboard/admin/disputes" }] : []),
-        ...(user?.role?.toLowerCase() === "farmer" ? [{ label: "Sales & Revenue", icon: TrendingUp, path: "/dashboard/sales" }] : []),
-        { label: "Notifications & Alerts", icon: Bell, path: "/dashboard/notifications" },
-        { label: "Gov Schemes & Advisory", icon: Landmark, path: "/dashboard/schemes" },
+        { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard", show: true },
+        { label: "Crop Listing & Marketplace", icon: Store, path: "/dashboard/marketplace", show: !isLogisticsProvider },
+        { label: "Price Comparison & Insights", icon: TrendingUp, path: "/dashboard/insights", show: !isLogisticsProvider },
+        { label: "Demand Forecasting", icon: LineChart, path: "/dashboard/forecast", show: !isLogisticsProvider },
+        { label: "Quality-Based Pricing", icon: Award, path: "/dashboard/pricing", show: !isLogisticsProvider },
+        { label: "Negotiation & Bidding", icon: Handshake, path: "/dashboard/negotiation", show: !isLogisticsProvider },
+        { label: "Orders & Transactions", icon: Receipt, path: "/dashboard/orders", show: !isLogisticsProvider },
+        { label: "Logistics Dashboard", icon: Truck, path: "/dashboard/logistics", show: isLogisticsProvider },
+        { label: "Ratings, Reviews & Trust", icon: Star, path: "/dashboard/reviews", show: !isLogisticsProvider },
+        { label: "Dispute Resolution", icon: ShieldAlert, path: "/dashboard/disputes", show: !isLogisticsProvider },
+        ...(isAdminOrFarmer ? [{ label: "Manage Disputes (Admin)", icon: ShieldAlert, path: "/dashboard/admin/disputes", show: true }] : []),
+        ...(user?.role?.toLowerCase() === "farmer" ? [{ label: "Sales & Revenue", icon: TrendingUp, path: "/dashboard/sales", show: true }] : []),
+        { label: "Notifications & Alerts", icon: Bell, path: "/dashboard/notifications", show: true },
+        { label: "Gov Schemes & Advisory", icon: Landmark, path: "/dashboard/schemes", show: !isLogisticsProvider },
     ];
 
     return (
@@ -51,7 +52,7 @@ const Sidebar = () => {
 
             {/* Menu */}
             <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-green-200">
-                {menuItems.map((item) => {
+                {menuItems.filter(item => item.show).map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
                         <Link

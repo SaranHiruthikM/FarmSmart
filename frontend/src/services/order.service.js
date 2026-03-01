@@ -18,7 +18,9 @@ const transformOrder = (order) => {
     farmerId: order.farmerId?._id || order.farmerId,
     buyerId: order.buyerId?._id || order.buyerId,
     timeline: order.status || [], // Backend: status array of objects { status, timestamp }
-    negotiationId: order.negotiationId
+    negotiationId: order.negotiationId,
+    logisticsDetails: order.logisticsDetails,
+    shippingAddress: order.shippingAddress || "Not Provided"
   };
 };
 
@@ -60,6 +62,29 @@ const OrderService = {
       console.error(`Error fetching order ${id}:`, error);
       return null;
     }
+  },
+
+  // Get available/pending orders (Logistics Only)
+  getAvailableOrders: async () => {
+    try {
+      const response = await api.get("/orders/available");
+      return Array.isArray(response.data) ? response.data.map(transformOrder) : [];
+    } catch (error) {
+      console.error("Error fetching available orders:", error);
+      return [];
+    }
+  },
+
+  // Accept an order (Logistics Only)
+  acceptOrder: async (id) => {
+    const response = await api.put(`/orders/${id}/accept`);
+    return transformOrder(response.data);
+  },
+
+  // Update logistics info like driver details (Logistics Only)
+  updateLogistics: async (id, data) => {
+    const response = await api.patch(`/orders/${id}/logistics`, data);
+    return transformOrder(response.data);
   },
 
   // Update order status
