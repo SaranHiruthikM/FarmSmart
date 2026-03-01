@@ -98,7 +98,8 @@ export const getOrderById = async (req: AuthRequest, res: Response): Promise<any
     const order = await Order.findById(id)
       .populate("cropId", "name")
       .populate("buyerId", "fullName role phoneNumber")
-      .populate("farmerId", "fullName role phoneNumber");
+      .populate("farmerId", "fullName role phoneNumber")
+      .populate("logisticsProviderId", "fullName role phoneNumber");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -116,12 +117,14 @@ export const getMyOrders = async (req: AuthRequest, res: Response): Promise<any>
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    let filter: Record<string, string>;
+    let filter: Record<string, any>;
 
     if (req.user.role === "BUYER") {
       filter = { buyerId: req.user.id };
     } else if (req.user.role === "FARMER") {
       filter = { farmerId: req.user.id };
+    } else if (req.user.role === "LOGISTICS") {
+      filter = { logisticsProviderId: req.user.id };
     } else {
       return res.status(403).json({ message: "Forbidden" });
     }
@@ -130,10 +133,105 @@ export const getMyOrders = async (req: AuthRequest, res: Response): Promise<any>
       .populate("cropId", "name")
       .populate("buyerId", "fullName role phoneNumber")
       .populate("farmerId", "fullName role phoneNumber")
+      .populate("logisticsProviderId", "fullName role phoneNumber")
       .sort({ createdAt: -1 });
 
     return res.json(orders);
   } catch {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getAvailableOrdersForLogistics = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    if (req.user?.role !== "LOGISTICS") {
+      return res.status(403).json({ message: "Logistics only" });
+    }
+
+    // Find orders that are CREATED but have no logistics provider assigned
+    const orders = await Order.find({
+      currentStatus: "CREATED",
+      $or: [
+        { logisticsProviderId: { $exists: false } },
+        { logisticsProviderId: null }
+      ]
+    })
+      .populate("cropId", "name")
+      .populate("buyerId", "fullName role phoneNumber")
+      .populate("farmerId", "fullName role phoneNumber")
+      .sort({ createdAt: -1 });
+
+    return res.json(orders);
+  } catch (error) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const acceptOrder = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+    if (req.user?.role !== "LOGISTICS") {
+      return res.status(403).json({ message: "Logistics only" });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    if (order.logisticsProviderId) {
+      return res.status(400).json({ message: "Order already accepted by another provider" });
+    }
+
+    order.logisticsProviderId = new Types.ObjectId(req.user.id);
+    // Optionally move status to CONFIRMED or keep CREATED? 
+    // User said: "until then for farmer and buyer the order should be in pending state"
+    // Pending state usually means CREATED.
+    // Let's set it to CONFIRMED so everyone knows it's picked up.
+    order.currentStatus = "CONFIRMED";
+    order.status.push({ status: "CONFIRMED", timestamp: new Date() });
+    
+    await order.save();
+    
+    // Return populated order
+    const populated = await Order.findById(order._id)
+       .populate("cropId", "name")
+       .populate("buyerId", "fullName role phoneNumber")
+       .populate("farmerId", "fullName role phoneNumber")
+       .populate("logisticsProviderId", "fullName role phoneNumber");
+
+    return res.json(populated);
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateLogisticsDetails = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+    const { driverName, vehicleNumber, contactNumber, estimatedDelivery } = req.body;
+
+    if (req.user?.role !== "LOGISTICS") {
+      return res.status(403).json({ message: "Logistics only" });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Ensure this provider owns the order
+    if (order.logisticsProviderId?.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You are not the provider for this order" });
+    }
+
+    order.logisticsDetails = {
+      ...order.logisticsDetails,
+      driverName,
+      vehicleNumber,
+      contactNumber,
+      estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : undefined
+    };
+
+    await order.save();
+    return res.json(order);
+  } catch (err) {
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -158,8 +256,19 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response): Promis
       return res.status(404).json({ message: "Order not found" });
     }
 
-    if (!(req.user?.role === "FARMER" && order.farmerId.toString() === req.user.id)) {
-      return res.status(403).json({ message: "Forbidden" });
+    // Logic: Only Logistics provider (who accepted the order) can update status.
+    // ALSO: Admin can probably update status? I'll stick to user requirement: "Logistics provideder... They should be the ones be able to change the order status"
+    // User requested removal of farmer capability.
+
+    const isLogistics = req.user?.role === "LOGISTICS";
+    const isAdmin = req.user?.role === "ADMIN";
+
+    if (!isLogistics && !isAdmin) {
+       return res.status(403).json({ message: "Only Logistics Provider can update status" });
+    }
+
+    if (isLogistics && order.logisticsProviderId?.toString() !== req.user?.id) {
+       return res.status(403).json({ message: "You are not the designated logistics provider" });
     }
 
     order.currentStatus = nextStatus as OrderStatus;

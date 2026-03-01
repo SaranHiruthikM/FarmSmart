@@ -67,7 +67,7 @@ const QualityPricing = () => {
             </div>
 
             {/* Interactive Calculator */}
-            <div className="bg-gradient-to-br from-text-dark to-neutral-900 p-8 rounded-[2rem] text-white shadow-xl shadow-black/10">
+            <div className="bg-linear-to-br from-text-dark to-neutral-900 p-8 rounded-4xl text-white shadow-xl shadow-black/10">
                 <div className="max-w-4xl mx-auto space-y-10">
                     <div className="text-center space-y-2">
                         <h2 className="text-2xl font-black uppercase tracking-tight">Price Impact Calculator</h2>
@@ -117,7 +117,7 @@ const QualityPricing = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {grades.map((grade) => (
-                        <div key={grade.id} className="bg-white p-8 rounded-[2rem] border border-neutral-light shadow-sm flex flex-col group hover:shadow-xl transition-all h-full">
+                        <div key={grade.id} className="bg-white p-8 rounded-4xl border border-neutral-light shadow-sm flex flex-col group hover:shadow-xl transition-all h-full">
                             <div className="flex items-center gap-4 mb-8">
                                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black ${grade.color === 'green' ? 'bg-green-50 text-green-600' : grade.color === 'yellow' ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-600'}`}>
                                     {grade.id}
