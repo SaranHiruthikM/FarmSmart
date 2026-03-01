@@ -47,3 +47,14 @@ export const adminOnly = (
   }
   next();
 };
+
+export const logisticsOnly = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.user?.role !== "LOGISTICS") {
+    return res.status(403).json({ message: "Logistics only" });
+  }
+  next();
+};

@@ -13,6 +13,13 @@ export interface IOrder extends Document {
   pricePerUnit: number;
   quantity: number;
   totalAmount: number;
+  logisticsProviderId?: Types.ObjectId;
+  logisticsDetails?: {
+    driverName?: string;
+    vehicleNumber?: string;
+    contactNumber?: string;
+    estimatedDelivery?: Date;
+  };
   currentStatus: "CREATED" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "COMPLETED";
   status: IOrderStatus[];
   createdAt: Date;
@@ -73,6 +80,17 @@ const OrderSchema = new Schema<IOrder>(
       type: Number,
       required: true,
       min: 0,
+    },
+    logisticsProviderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
+    logisticsDetails: {
+      driverName: String,
+      vehicleNumber: String,
+      contactNumber: String,
+      estimatedDelivery: Date,
     },
     currentStatus: {
       type: String,
