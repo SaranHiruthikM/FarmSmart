@@ -17,7 +17,11 @@ function LanguageSelector() {
         "
       >
         <option value="en">🌐 English</option>
-        <option value="ta">🌐 தமிழ்</option>
+        <option value="hi">🌐 हिन्दी (Hindi)</option>
+        <option value="ta">🌐 தமிழ் (Tamil)</option>
+        <option value="te">🌐 తెలుగు (Telugu)</option>
+        <option value="kn">🌐 ಕನ್ನಡ (Kannada)</option>
+        <option value="ml">🌐 മലയാളം (Malayalam)</option>
       </select>
 
     </div>

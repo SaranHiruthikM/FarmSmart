@@ -27,6 +27,8 @@ import AdminDisputes from "./pages/admin/AdminDisputes";
 import SalesRevenue from "./pages/SalesRevenue";
 import Profile from "./pages/Profile";
 
+import GlobalVoiceButton from "./components/common/GlobalVoiceButton";
+
 // Protected Route Wrapper for Public Pages (Login/Register)
 // If authenticated, redirect to dashboard.
 const PublicRoute = ({ children }) => {
@@ -38,69 +40,73 @@ const PublicRoute = ({ children }) => {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-      <Route path="/otp" element={<PublicRoute><Otp /></PublicRoute>} />
+    <>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/otp" element={<PublicRoute><Otp /></PublicRoute>} />
 
-      {/* Dashboard Routes */}
-      <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<Dashboard />} />
+        {/* Dashboard Routes */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
 
-        {/* Marketplace */}
-        <Route path="marketplace" element={<Marketplace />} />
-        <Route path="marketplace/:id" element={<CropDetails />} />
+          {/* Marketplace */}
+          <Route path="marketplace" element={<Marketplace />} />
+          <Route path="marketplace/:id" element={<CropDetails />} />
 
-        {/* Price Insights */}
-        <Route path="insights" element={<PriceInsights />} />
+          {/* Price Insights */}
+          <Route path="insights" element={<PriceInsights />} />
 
-        {/* Demand Forecast */}
-        <Route path="forecast" element={<DemandForecast />} />
+          {/* Demand Forecast */}
+          <Route path="forecast" element={<DemandForecast />} />
 
-        {/* Quality Based Pricing */}
-        <Route path="pricing" element={<QualityPricing />} />
+          {/* Quality Based Pricing */}
+          <Route path="pricing" element={<QualityPricing />} />
 
-        {/* Negotiation & Bidding */}
-        <Route path="negotiation" element={<NegotiationHistory />} />
-        <Route path="negotiations/:id" element={<NegotiationDetail />} />
+          {/* Negotiation & Bidding */}
+          <Route path="negotiation" element={<NegotiationHistory />} />
+          <Route path="negotiations/:id" element={<NegotiationDetail />} />
 
-        {/* Farmer Crop Management */}
-        <Route path="add-crop" element={<CropListingForm />} />
-        <Route path="my-crops/edit/:id" element={<CropListingForm />} />
+          {/* Farmer Crop Management */}
+          <Route path="add-crop" element={<CropListingForm />} />
+          <Route path="my-crops/edit/:id" element={<CropListingForm />} />
 
-        {/* Government Schemes */}
-        <Route path="schemes" element={<SchemesPage />} />
-        {/* Notifications & Settings */}
-        <Route path="notifications" element={<Notifications />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="profile" element={<Profile />} />
-        {/* Orders */}
-        <Route path="orders" element={<OrderHistory />} />
-        <Route path="orders/summary/:negotiationId" element={<OrderSummary />} />
-        <Route path="orders/:orderId" element={<OrderStatus />} />
+          {/* Government Schemes */}
+          <Route path="schemes" element={<SchemesPage />} />
+          {/* Notifications & Settings */}
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="profile" element={<Profile />} />
+          {/* Orders */}
+          <Route path="orders" element={<OrderHistory />} />
+          <Route path="orders/summary/:negotiationId" element={<OrderSummary />} />
+          <Route path="orders/:orderId" element={<OrderStatus />} />
 
-        {/* Sales & Revenue (Farmer Only) */}
-        <Route path="sales" element={<SalesRevenue />} />
+          {/* Sales & Revenue (Farmer Only) */}
+          <Route path="sales" element={<SalesRevenue />} />
 
-        {/* Reviews & Trust */}
-        <Route path="reviews" element={<ReviewsAndTrust />} />
+          {/* Reviews & Trust */}
+          <Route path="reviews" element={<ReviewsAndTrust />} />
 
-        {/* Disputes */}
-        <Route path="disputes" element={<MyDisputes />} />
-        <Route path="disputes/:id" element={<DisputeDetails />} />
+          {/* Disputes */}
+          <Route path="disputes" element={<MyDisputes />} />
+          <Route path="disputes/:id" element={<DisputeDetails />} />
 
-        {/* Admin Disputes */}
-        <Route path="admin/disputes" element={<AdminDisputes />} />
-        <Route path="admin/disputes/:id" element={<AdminDisputes />} />
+          {/* Admin Disputes */}
+          <Route path="admin/disputes" element={<AdminDisputes />} />
+          <Route path="admin/disputes/:id" element={<AdminDisputes />} />
 
-        {/* Fallback for dashboard */}
-        <Route path="*" element={<div className="p-10 text-center text-gray-500">Page under construction</div>} />
-      </Route>
+          {/* Fallback for dashboard */}
+          <Route path="*" element={<div className="p-10 text-center text-gray-500">Page under construction</div>} />
+        </Route>
 
-      {/* Global Fallback */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+        {/* Global Fallback */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+
+      <GlobalVoiceButton />
+    </>
   );
 }
 
