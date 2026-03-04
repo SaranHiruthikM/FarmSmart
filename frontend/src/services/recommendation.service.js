@@ -1,20 +1,20 @@
-import forecastData from "../mock/forecast.json";
+import api from "./api";
 
 const recommendationService = {
     // Get demand forecasting for a specific crop
-    getDemandForecast: async (cropId) => {
-        const forecast = forecastData.demandData.find(d => d.cropId === cropId);
-        if (forecast) return forecast;
-        return forecastData.demandData[0]; // Fallback
+    getDemandForecast: async (cropId, location = 'Coimbatore') => {
+        const response = await api.get('/demand/forecast', {
+            params: { crop: cropId, location }
+        });
+        return response.data;
     },
 
     // Get crop recommendations based on location
     getCropRecommendations: async (location) => {
-        const recommendations = forecastData.cropRecommendations.find(
-            r => r.location.toLowerCase().includes(location.toLowerCase())
-        );
-        if (recommendations) return recommendations.suggestions;
-        return forecastData.cropRecommendations[0].suggestions; // Fallback
+        const response = await api.get('/demand/recommendations', {
+            params: { location }
+        });
+        return response.data.suggestions || response.data;
     }
 };
 

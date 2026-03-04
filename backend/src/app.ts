@@ -11,6 +11,7 @@ import qualityRoutes from './routes/qualityRoutes';
 import schemeRoutes from './routes/schemeRoutes';
 import advisoryRoutes from './routes/advisoryRoutes';
 import disputeRoutes from './routes/disputeRoutes';
+import demandRoutes from './routes/demandRoutes';
 import { sendResponse } from './utils/response';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/quality', qualityRoutes);
 app.use('/schemes', schemeRoutes);
 app.use('/advisory', advisoryRoutes);
 app.use('/disputes', disputeRoutes);
+app.use('/demand', demandRoutes);
 
 /**
  * Price Comparison & Market Insights
