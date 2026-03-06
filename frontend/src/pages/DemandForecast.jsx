@@ -46,7 +46,7 @@ const DemandForecast = () => {
             setLoading(true);
             try {
                 const [forecast, recs] = await Promise.all([
-                    recommendationService.getDemandForecast(selectedCrop),
+                    recommendationService.getDemandForecast(selectedCrop, location),
                     recommendationService.getCropRecommendations(location)
                 ]);
                 setDemandData(forecast);
@@ -58,7 +58,7 @@ const DemandForecast = () => {
             }
         };
         fetchData();
-    }, [selectedCrop]); // Removed location so it doesn't trigger on every keystroke
+    }, [selectedCrop, location]);
 
     if (loading || !demandData) return <div className="p-10 text-center">Analysing Market Trends...</div>;
 

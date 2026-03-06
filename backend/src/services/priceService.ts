@@ -9,80 +9,76 @@ import {
   PriceCompareResponse,
   PriceHistoryResponse,
 } from './mandiPriceProvider';
-import { getMockComparePrices, getMockCurrentPrices, getMockPriceHistory } from './priceMocks';
 
 const TTL_CURRENT_SECONDS = 90;
 const TTL_COMPARE_SECONDS = 420;
 const TTL_HISTORY_SECONDS = 2700;
-const TTL_FALLBACK_SECONDS = 45;
 
-type PriceServiceOptions = {
-  provider?: MandiPriceProvider | null;
-  cache?: Cache;
-  cacheEnabled?: boolean;
-};
-
-export type PriceService = {
-  getCurrentPrices: (crop: string) => Promise<CurrentPriceResponse>;
-  getPriceHistory: (crop: string, location: string, days?: number) => Promise<PriceHistoryResponse>;
-  comparePrices: (crop: string, location: string) => Promise<PriceCompareResponse>;
-};
-
-const createDefaultCache = (): Cache => {
-  const redisUrl = process.env.REDIS_URL?.trim();
-  if (redisUrl) {
-    try {
-      const redis = new RedisCache(redisUrl);
-      return redis;
-    } catch (error) {
-      console.warn('[cache] Failed to initialize Redis cache, using in-memory cache.', error);
-    }
+export const createPriceService = () => {
+  const provider = createHttpMandiPriceProvider();
+  
+  let cache: Cache;
+  // Initialize cache based on config
+  if (isCacheEnabled()) {
+    cache = new RedisCache(process.env.REDIS_URL || 'redis://localhost:6379');
+  } else {
+    cache = new InMemoryCache();
   }
 
-  return new InMemoryCache();
-};
-
-export const createPriceService = (options: PriceServiceOptions = {}): PriceService => {
-  const provider = options.provider ?? createHttpMandiPriceProvider();
-  const cacheEnabled = options.cacheEnabled ?? isCacheEnabled();
-  const cache = options.cache ?? (cacheEnabled ? createDefaultCache() : undefined);
-
   const getCached = async <T>(key: string): Promise<T | null> => {
-    if (!cacheEnabled || !cache) return null;
     try {
       return await cache.get<T>(key);
-    } catch (error) {
-      console.warn('[cache] Cache get failed:', error);
+    } catch (e) {
+      console.warn(`[PriceService] Cache GET failed for key: ${key}`, e);
       return null;
     }
   };
 
-  const setCached = async <T>(key: string, value: T, ttlSeconds: number): Promise<void> => {
-    if (!cacheEnabled || !cache) return;
+  const setCached = async <T>(key: string, value: T, ttl: number): Promise<void> => {
     try {
-      await cache.set<T>(key, value, ttlSeconds);
-    } catch (error) {
-      console.warn('[cache] Cache set failed:', error);
+      await cache.set(key, value, ttl);
+    } catch (e) {
+      console.warn(`[PriceService] Cache SET failed for key: ${key}`, e);
     }
   };
 
-  const getCurrentPrices = async (crop: string): Promise<CurrentPriceResponse> => {
-    const cacheKey = buildPriceCacheKey('current', crop);
+  const getListCached = async (key: string): Promise<string[] | null> => {
+    try {
+      return await cache.get<string[]>(key);
+    } catch (e) {
+        console.warn(`[PriceService] Cache GET List failed for key: ${key}`, e);
+        return null;
+    }
+  }
+
+  const setListCached = async (key: string, value: string[]): Promise<string[] | void> => {
+    try {
+        await cache.set(key, value, 3600);
+        return value;
+    } catch (e) {
+        console.warn(`[PriceService] Cache SET List failed for key: ${key}`, e);
+    }
+  }
+
+  const getCurrentPrices = async (crop: string, location: string = ''): Promise<CurrentPriceResponse> => {
+    const cacheKey = buildPriceCacheKey('current', crop, location);
     const cached = await getCached<CurrentPriceResponse>(cacheKey);
     if (cached) return cached;
 
     try {
       if (!provider) throw new Error('MANDI_API_BASE_URL not configured');
-      const data = await provider.getCurrentPrice(crop);
+      const data = await provider.getCurrentPrice(crop, location);
       await setCached(cacheKey, data, TTL_CURRENT_SECONDS);
       return data;
     } catch (error: any) {
-      if (error.message !== 'MANDI_API_BASE_URL not configured') {
-        console.warn('[prices] Live current price fetch failed.', { crop, error });
-      }
-      const fallback = getMockCurrentPrices(crop);
-      await setCached(cacheKey, fallback, TTL_FALLBACK_SECONDS);
-      return fallback;
+       console.warn('[prices] Live current price fetch failed.', { crop, location, error });
+       // Return empty/safe structure
+       return {
+            crop,
+            unit: 'INR/kg',
+            averageMarketPrice: 0,
+            regionalVariations: []
+       };
     }
   };
 
@@ -97,12 +93,15 @@ export const createPriceService = (options: PriceServiceOptions = {}): PriceServ
       await setCached(cacheKey, data, TTL_HISTORY_SECONDS);
       return data;
     } catch (error: any) {
-      if (error.message !== 'MANDI_API_BASE_URL not configured') {
         console.warn('[prices] Live price history fetch failed.', { crop, location, error });
-      }
-      const fallback = getMockPriceHistory(crop, location, days);
-      await setCached(cacheKey, fallback, TTL_FALLBACK_SECONDS);
-      return fallback;
+        // Return empty/safe structure
+        return {
+           crop,
+           location,
+           unit: 'INR/kg',
+           rangeDays: days,
+           points: []
+        };
     }
   };
 
@@ -117,18 +116,84 @@ export const createPriceService = (options: PriceServiceOptions = {}): PriceServ
       await setCached(cacheKey, data, TTL_COMPARE_SECONDS);
       return data;
     } catch (error: any) {
-      if (error.message !== 'MANDI_API_BASE_URL not configured') {
         console.warn('[prices] Live compare prices fetch failed.', { crop, location, error });
-      }
-      const fallback = getMockComparePrices(crop, location);
-      await setCached(cacheKey, fallback, TTL_FALLBACK_SECONDS);
-      return fallback;
+        // Return empty/safe structure
+        return {
+            crop,
+            location,
+            unit: 'INR/kg',
+            averageNearbyPrice: 0,
+            bestPriceHighlight: { mandi: 'N/A', price: 0 },
+            comparedMandis: []
+        };
     }
   };
+
+  const getAvailableCrops = async (location: string): Promise<string[]> => {
+      const cacheKey = buildPriceCacheKey('crops', location);
+      const cached = await getListCached(cacheKey);
+      if (cached && cached.length > 0) return cached;
+      
+      try {
+           if (!provider) {
+             return [];
+           }
+           const data = await provider.getAvailableCrops(location);
+           if (data && data.length > 0) {
+               await setListCached(cacheKey, data); 
+               return data;
+           }
+      } catch (error) {
+           console.warn('[prices] Available crops fetch failed', { location, error });
+      }
+      return [];
+  };
+
+  const getStates = async (): Promise<string[]> => {
+      const cacheKey = buildPriceCacheKey('states', 'all');
+      const cached = await getListCached(cacheKey);
+      if (cached && cached.length > 0) return cached;
+      
+      try {
+          if (provider) {
+              const s = await provider.getStates();
+              if (s.length > 0) { 
+                  await setListCached(cacheKey, s); 
+                  return s; 
+              }
+          }
+      } catch (e) {
+          console.warn('[prices] States fetch failed', e);
+      }
+      return [];
+  }
+
+  const getDistricts = async (state: string): Promise<string[]> => {
+      const cacheKey = buildPriceCacheKey('districts', state);
+      const cached = await getListCached(cacheKey);
+      if (cached && cached.length > 0) return cached;
+      
+      try {
+          if (provider) {
+              const d = await provider.getDistricts(state);
+              if (d.length > 0) { 
+                  await setListCached(cacheKey, d); 
+                  return d; 
+              }
+          }
+      } catch (e) {
+          console.warn('[prices] Districts fetch failed', e);
+      }
+      return [];
+  }
 
   return {
     getCurrentPrices,
     getPriceHistory,
     comparePrices,
+    getAvailableCrops,
+    getStates,
+    getDistricts
   };
 };
+

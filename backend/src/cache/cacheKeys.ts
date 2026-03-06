@@ -10,7 +10,7 @@ const normalizePart = (value: string): string => {
 };
 
 export const buildPriceCacheKey = (
-  kind: 'current' | 'history' | 'compare',
+  kind: 'current' | 'history' | 'compare' | 'crops' | 'states' | 'districts',
   crop: string,
   location?: string,
   extra?: string

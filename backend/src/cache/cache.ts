@@ -5,6 +5,6 @@ export interface Cache {
 
 export const isCacheEnabled = (): boolean => {
   const flag = (process.env.PRICE_CACHE_ENABLED || '').toLowerCase().trim();
-  if (!flag) return true;
+  if (!flag) return false; // Default to FALSE if not specified
   return !(flag === 'false' || flag === '0' || flag === 'off');
 };
