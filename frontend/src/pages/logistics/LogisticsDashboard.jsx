@@ -169,7 +169,7 @@ const LogisticsDashboard = () => {
                                 <motion.div
                                     key={order.id}
                                     variants={itemVariants}
-                                    className="bg-white rounded-[2rem] border-2 border-neutral-light p-6 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group overflow-hidden relative"
+                                    className="bg-white rounded-4xl border-2 border-neutral-light p-6 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group overflow-hidden relative"
                                 >
                                     <div className="flex justify-between items-start mb-6">
                                         <div className="flex items-center gap-3">
@@ -237,7 +237,7 @@ const LogisticsDashboard = () => {
                                 <motion.div
                                     key={order.id}
                                     variants={itemVariants}
-                                    className="bg-white rounded-[2rem] border-2 border-neutral-light p-6 shadow-sm hover:shadow-xl transition-all overflow-hidden"
+                                    className="bg-white rounded-4xl border-2 border-neutral-light p-6 shadow-sm hover:shadow-xl transition-all overflow-hidden"
                                 >
                                     <div className="flex justify-between items-start mb-6">
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border-2 ${order.status === "DELIVERED" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :

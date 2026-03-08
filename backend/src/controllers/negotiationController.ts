@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Negotiation } from "../models/Negotiation";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { getIO } from "../socket";
 
 import { Crop } from "../models/Crop";
 
@@ -59,6 +60,13 @@ export const startNegotiation = async (
                 },
             ],
         });
+
+        try {
+            const io = getIO();
+            io.to(`user_${farmerId}`).emit('negotiation:new', negotiation);
+        } catch (err) {
+            console.error("Socket emit error:", err);
+        }
 
         res.status(201).json(negotiation);
     } catch (error: any) {
@@ -131,7 +139,26 @@ export const respondToNegotiation = async (
         }
 
         await negotiation.save();
-        res.json(negotiation);
+
+        const populatedNegotiation = await Negotiation.findById(negotiation._id)
+            .populate("cropId", "name unit location")
+            .populate("buyerId", "fullName phoneNumber")
+            .populate("farmerId", "fullName phoneNumber");
+
+        try {
+            const io = getIO();
+            // Ensure populatedNegotiation exists and has _id
+            if (populatedNegotiation) {
+                io.to(`negotiation_${populatedNegotiation._id}`).emit('negotiation:update', populatedNegotiation);
+                // Use populated fields which contain objects with _id
+                io.to(`user_${(populatedNegotiation.buyerId as any)._id}`).emit('negotiation:update', populatedNegotiation);
+                io.to(`user_${(populatedNegotiation.farmerId as any)._id}`).emit('negotiation:update', populatedNegotiation);
+            }
+        } catch (err) {
+            console.error("Socket emit error:", err);
+        }
+
+        res.json(populatedNegotiation);
     } catch (error: any) {
         if (error.name === "CastError") {
             return res.status(400).json({ message: "Invalid ID format" });

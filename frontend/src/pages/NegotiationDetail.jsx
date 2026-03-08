@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import negotiationService from '../services/negotiation.service';
+import socketService from '../services/socket.service';
 import { Loader2, ArrowLeft, CheckCircle2, XCircle, Send, ShieldCheck, User, Clock, IndianRupee } from 'lucide-react';
 import PrimaryButton from '../components/common/PrimaryButton';
 
@@ -40,6 +41,30 @@ const NegotiationDetail = () => {
             }
         };
         fetchNegotiation();
+
+         // Socket setup
+         const userData = JSON.parse(localStorage.getItem("user") || "{}");
+         const userId = userData._id || userData.id;
+         
+         const socket = socketService.connect(userId);
+         socketService.joinNegotiation(id);
+ 
+         const handleUpdate = (data) => {
+             console.log("Real-time update received:", data);
+             const transformed = negotiationService.transformNegotiation(data);
+             // Ensure we update state correctly
+             setNegotiation(prev => {
+                 // Optimization: only update if changed? For now, always update.
+                 return transformed;
+             });
+         };
+ 
+         socketService.on('negotiation:update', handleUpdate);
+ 
+         return () => {
+             socketService.leaveNegotiation(id);
+             socketService.off('negotiation:update', handleUpdate);
+         };
     }, [id]);
 
     const handleResponse = async (action) => {

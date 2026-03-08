@@ -220,7 +220,7 @@ const OrderStatus = () => {
                                 return (
                                     <div key={status.id} className="relative flex items-start gap-8 group">
                                         {/* Dot */}
-                                        <div className={`absolute -left-[5.5rem] w-14 h-14 rounded-full border-4 flex items-center justify-center z-10 transition-all duration-500 ${isCompleted
+                                        <div className={`absolute -left-22 w-14 h-14 rounded-full border-4 flex items-center justify-center z-10 transition-all duration-500 ${isCompleted
                                             ? "bg-primary border-white text-white shadow-lg shadow-primary/30"
                                             : "bg-white border-neutral-light text-accent"
                                             } ${isCurrent ? "scale-110" : ""}`}>
@@ -361,7 +361,7 @@ const OrderStatus = () => {
                         </button>
                     </div>
 
-                    <div className="bg-gradient-to-br from-primary to-primary-dark p-8 rounded-[2.5rem] text-white space-y-4 relative overflow-hidden">
+                    <div className="bg-linear-to-br from-primary to-primary-dark p-8 rounded-[2.5rem] text-white space-y-4 relative overflow-hidden">
                         <CircleDashed className="absolute top-0 right-0 w-32 h-32 text-white/5 -mr-12 -mt-12" />
                         <h3 className="text-lg font-black tracking-tight leading-snug">Secure Transaction Guarantee</h3>
                         <p className="text-xs text-white/70 font-medium leading-relaxed">
@@ -410,7 +410,7 @@ const OrderStatus = () => {
                                         value={reviewComment}
                                         onChange={(e) => setReviewComment(e.target.value)}
                                         placeholder="Tell us about the quality of the crop and the seller's service..."
-                                        className="w-full p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light focus:border-primary outline-none transition-all min-h-[120px] font-medium"
+                                        className="w-full p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light focus:border-primary outline-none transition-all min-h-30 font-medium"
                                     />
                                 </div>
 
@@ -478,7 +478,7 @@ const OrderStatus = () => {
                                     value={disputeDescription}
                                     onChange={(e) => setDisputeDescription(e.target.value)}
                                     placeholder="Please describe the issue in detail..."
-                                    className="w-full p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light focus:border-primary outline-none transition-all min-h-[150px] font-medium"
+                                    className="w-full p-6 bg-neutral-light/30 rounded-3xl border-2 border-neutral-light focus:border-primary outline-none transition-all min-h-37.5 font-medium"
                                 />
                             </div>
 

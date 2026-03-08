@@ -11,7 +11,6 @@
     "dev": "nodemon src/index.ts",
     "seed": "npm run seed:schemes && npm run seed:prices && npm run seed:quality",
     "seed:schemes": "ts-node src/utils/seedSchemes.ts",
-
     "seed:quality": "ts-node src/utils/seedQualityRules.ts"
   },
   "keywords": [],
@@ -38,12 +37,14 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.2",
+    "@types/socket.io": "^3.0.1",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "groq-sdk": "^0.37.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.22.0",
-    "redis": "^4.7.0"
+    "redis": "^4.7.0",
+    "socket.io": "^4.8.3"
   }
 }

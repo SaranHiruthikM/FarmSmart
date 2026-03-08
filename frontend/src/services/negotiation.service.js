@@ -102,7 +102,9 @@ const NegotiationService = {
         const data = response.data;
 
         return transformNegotiation(data);
-    }
+    },
+
+    transformNegotiation
 };
 
 export default NegotiationService;
