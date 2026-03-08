@@ -26,4 +26,7 @@ export interface MandiPriceProvider {
   getCurrentPrice(crop: string, location?: string): Promise<CurrentPriceResponse>;
   getPriceHistory(crop: string, location: string): Promise<PriceHistoryResponse>;
   comparePrices(crop: string, location: string): Promise<PriceCompareResponse>;
+  getAvailableCrops(location: string): Promise<string[]>;
+  getStates(): Promise<string[]>;
+  getDistricts(state: string): Promise<string[]>;
 }

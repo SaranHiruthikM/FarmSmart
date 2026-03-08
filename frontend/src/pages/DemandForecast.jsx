@@ -46,7 +46,7 @@ const DemandForecast = () => {
             setLoading(true);
             try {
                 const [forecast, recs] = await Promise.all([
-                    recommendationService.getDemandForecast(selectedCrop),
+                    recommendationService.getDemandForecast(selectedCrop, location),
                     recommendationService.getCropRecommendations(location)
                 ]);
                 setDemandData(forecast);
@@ -85,7 +85,17 @@ const DemandForecast = () => {
                     </div>
                     <PrimaryButton
                         className="h-[52px] px-8 text-xs font-black uppercase tracking-widest rounded-2xl whitespace-nowrap"
-                        onClick={() => { }}
+                        onClick={() => {
+                            setLoading(true);
+                            Promise.all([
+                                recommendationService.getDemandForecast(selectedCrop, location),
+                                recommendationService.getCropRecommendations(location)
+                            ]).then(([forecast, recs]) => {
+                                setDemandData(forecast);
+                                setRecommendations(recs);
+                                setLoading(false);
+                            });
+                        }}
                     >
                         <RefreshCw className="w-4 h-4 mr-2" /> Refresh Data
                     </PrimaryButton>
@@ -127,11 +137,11 @@ const DemandForecast = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-white border border-neutral-light rounded-2xl space-y-2">
                                 <h4 className="text-[10px] font-black text-accent uppercase tracking-widest">Active Buyers</h4>
-                                <p className="text-2xl font-black text-text-dark">24 <span className="text-xs text-accent font-medium ml-1">Bidding</span></p>
+                                <p className="text-2xl font-black text-text-dark">{demandData.metadata?.activeBuyers || 0} <span className="text-xs text-accent font-medium ml-1">Bidding</span></p>
                             </div>
                             <div className="p-4 bg-white border border-neutral-light rounded-2xl space-y-2">
-                                <h4 className="text-[10px] font-black text-accent uppercase tracking-widest">Region</h4>
-                                <p className="text-2xl font-black text-text-dark">Kovai <span className="text-xs text-accent font-medium ml-1">Belt</span></p>
+                                <h4 className="text-[10px] font-black text-accent uppercase tracking-widest">Total Supply</h4>
+                                <p className="text-2xl font-black text-text-dark">{demandData.metadata?.totalSupply || 0} <span className="text-xs text-accent font-medium ml-1">kg</span></p>
                             </div>
                         </div>
                     </div>
@@ -198,15 +208,13 @@ const DemandForecast = () => {
                     </div>
                     <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-neutral-light shadow-sm">
                         <span className="text-[10px] font-black text-accent uppercase tracking-widest ml-3">Location:</span>
-                        <select
+                        <input
+                            type="text"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
-                            className="bg-neutral-light/50 px-4 py-2 rounded-xl text-xs font-black text-text-dark border-none focus:ring-2 focus:ring-primary outline-none cursor-pointer"
-                        >
-                            <option value="Coimbatore">Coimbatore, TN</option>
-                            <option value="Nashik">Nashik, MH</option>
-                            <option value="Amritsar">Amritsar, PB</option>
-                        </select>
+                            placeholder="Enter district..."
+                            className="bg-neutral-light/50 px-4 py-2 rounded-xl text-xs font-black text-text-dark border-none focus:ring-2 focus:ring-primary outline-none"
+                        />
                     </div>
                 </div>
 

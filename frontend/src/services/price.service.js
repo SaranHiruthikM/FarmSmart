@@ -1,17 +1,18 @@
 import api from "./api";
 
 const priceService = {
-    // Get all available crops for selectors (Hardcoded for now as backend doesn't have a distinct list endpoint yet, or we can fetch unique from crops)
-    // Ideally we might want a distinct query on the backend. For now, let's keep a static list or fetch from crops endpoint if available.
-    getAvailableCrops: async () => {
-        // This could be replaced with an API call later
-        return [
-            { id: "Tomato", name: "Tomato" },
-            { id: "Rice", name: "Rice" },
-            { id: "Onion", name: "Onion" },
-            { id: "Potato", name: "Potato" },
-            { id: "Wheat", name: "Wheat" }
-        ];
+    // Get all available crops for selectors (Dynamic by location now)
+    getAvailableCrops: async (location) => {
+        try {
+            const params = { location };
+            const response = await api.get("/prices/crops", { params });
+            // If API returns mock static list or empty, ensure fallback
+            if (response.data && response.data.length > 0) return response.data;
+            throw new Error("No data");
+        } catch (e) {
+            console.error("Failed to get available crops", e);
+            return [];
+        }
     },
 
     // Get current day's prices
@@ -22,6 +23,26 @@ const priceService = {
         
         const response = await api.get("/prices/current", { params });
         return response.data;
+    },
+
+    getStates: async () => {
+        try {
+            const response = await api.get("/prices/states");
+            return response.data || [];
+        } catch (e) {
+            console.error("Failed to get states", e);
+            return [];
+        }
+    },
+
+    getDistricts: async (state) => {
+        try {
+            const response = await api.get("/prices/districts", { params: { state } });
+            return response.data || [];
+        } catch (e) {
+             console.error("Failed to get districts", e);
+             return [];
+        }
     },
 
     // Get historical trends

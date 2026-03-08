@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import priceService from "../services/price.service";
 import {
     TrendingUp,
@@ -23,7 +23,6 @@ import {
     Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import InputField from "../components/common/InputField";
 
 ChartJS.register(
     CategoryScale,
@@ -38,55 +37,119 @@ ChartJS.register(
 );
 
 const PriceInsights = () => {
-    const [selectedCrop, setSelectedCrop] = useState("Tomato");
-    const [location, setLocation] = useState("Coimbatore");
+    // Selection States
+    const [selectedState, setSelectedState] = useState("");
+    const [selectedDistrict, setSelectedDistrict] = useState("");
+    const [selectedCrop, setSelectedCrop] = useState("");
+    
+    // List States
+    const [statesList, setStatesList] = useState([]);
+    const [districtsList, setDistrictsList] = useState([]);
     const [availableCrops, setAvailableCrops] = useState([]);
+
+    // UI States
     const [timeFilter, setTimeFilter] = useState("30"); // Default 30 days
+    
+    // Dropdown UI
+    const [isDistrictDropdownOpen, setIsDistrictDropdownOpen] = useState(false);
+    const districtInputRef = useRef(null);
+
+    // Filter districts based on input for search
+    const filteredDistricts = useMemo(() => {
+        if (!selectedDistrict) return districtsList;
+        // Search logic
+        return districtsList.filter(d => 
+            d.toLowerCase().includes(selectedDistrict.toLowerCase())
+        );
+    }, [selectedDistrict, districtsList]);
     
     // Data States
     const [currentPrices, setCurrentPrices] = useState([]);
     const [historyData, setHistoryData] = useState([]);
     const [comparisonData, setComparisonData] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    // Initial Load
+    const [loading, setLoading] = useState(false);
+    
+    // 1. Load States on Mount
     useEffect(() => {
-        const loadCrops = async () => {
-            const crops = await priceService.getAvailableCrops();
-            setAvailableCrops(crops);
+        const init = async () => {
+            const states = await priceService.getStates();
+            setStatesList(states);
+            
+            // Auto-select Tamil Nadu if available, else first
+            const defaultState = states.find(s => s === "Tamil Nadu") || (states.length > 0 ? states[0] : "");
+            if (defaultState) {
+                setSelectedState(defaultState);
+            }
         };
-        loadCrops();
+        init();
     }, []);
 
-    // Fetch Data on Filter Change
+    // 2. Load Districts when State Changes
     useEffect(() => {
+        const loadDistricts = async () => {
+             if (!selectedState) return;
+             const districts = await priceService.getDistricts(selectedState);
+             setDistrictsList(districts);
+             // Clear dependant fields
+             setSelectedDistrict(""); 
+             setAvailableCrops([]);
+             setSelectedCrop("");
+        };
+        loadDistricts();
+    }, [selectedState]);
+
+    // 3. Load Crops when District is Chosen
+    // We only fetch crops when we have a valid district selected (exact match from list for safety)
+    useEffect(() => {
+        const isValidDistrict = districtsList.includes(selectedDistrict);
+        
+        if (isValidDistrict) {
+            const loadCrops = async () => {
+                try {
+                    const crops = await priceService.getAvailableCrops(selectedDistrict);
+                    setAvailableCrops(crops);
+                    // Default to first crop if available
+                    if (crops.length > 0) {
+                        setSelectedCrop(crops[0].name);
+                    } else {
+                        setSelectedCrop("");
+                    }
+                } catch (e) {
+                    console.error("Failed to load crops", e);
+                }
+            };
+            loadCrops();
+        } else {
+            setAvailableCrops([]);
+        }
+    }, [selectedDistrict, districtsList]);
+
+    // 4. Fetch Insights Data (Only if we have full selection)
+    useEffect(() => {
+        if (!selectedCrop || !selectedDistrict || !districtsList.includes(selectedDistrict)) return;
+
         const fetchData = async () => {
             setLoading(true);
             try {
                 // Fetch all data in parallel
                 const [cur, hist, comp] = await Promise.all([
-                    priceService.getCurrentPrices(selectedCrop, location),
-                    priceService.getHistoricalTrends(selectedCrop, location, parseInt(timeFilter) || 30),
-                    priceService.getComparison(selectedCrop, location)
+                    priceService.getCurrentPrices(selectedCrop, selectedDistrict),
+                    priceService.getHistoricalTrends(selectedCrop, selectedDistrict, parseInt(timeFilter) || 30),
+                    priceService.getComparison(selectedCrop, selectedDistrict)
                 ]);
 
-                // Backend (Mocks) returns objects with arrays inside, mapped to 'price'
-                // Frontend expects arrays with 'pricePerKg'
-                
-                // 1. Current Prices
                 if (cur && cur.regionalVariations) {
                     setCurrentPrices(cur.regionalVariations.map(p => ({
                         mandi: p.mandi,
-                        pricePerKg: p.price
+                        pricePerKg: p.price,
+                        location: p.location
                     })));
                 } else if (Array.isArray(cur)) {
-                    // Fallback if backend changes to array
                      setCurrentPrices(cur);
                 } else {
                     setCurrentPrices([]);
                 }
 
-                // 2. History Data
                 if (hist && hist.points) {
                     setHistoryData(hist.points.map(p => ({
                         date: p.date,
@@ -106,10 +169,21 @@ const PriceInsights = () => {
             }
         };
 
-        // Debounce fetching if needed, but for now direct call on change
         const timeoutId = setTimeout(fetchData, 500);
         return () => clearTimeout(timeoutId);
-    }, [selectedCrop, location, timeFilter]);
+    }, [selectedCrop, selectedDistrict, timeFilter]);
+
+    // Close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (districtInputRef.current && !districtInputRef.current.contains(event.target)) {
+                setIsDistrictDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
 
     // Computed Statistics (Memoized)
     const stats = useMemo(() => {
@@ -122,7 +196,7 @@ const PriceInsights = () => {
         const max = Math.max(...prices);
         
         // If we have comparison data use it, otherwise fallback to finding max price mandi
-        const bestMandiName = comparisonData?.mandi || 
+        const bestMandiName = comparisonData?.bestPriceHighlight?.mandi || 
                              currentPrices.find(p => p.pricePerKg === max)?.mandi || "N/A";
 
         return { avg, min, max, bestMandi: bestMandiName };
@@ -137,17 +211,19 @@ const PriceInsights = () => {
                 borderColor: '#166534',
                 backgroundColor: 'rgba(22, 101, 52, 0.1)',
                 fill: true,
-                tension: 0.4,
-                pointRadius: 4,
+                tension: 0.3, // Slightly smoother curve
+                pointRadius: historyData.length > 20 ? 2 : 4, // Smaller points for dense data
                 pointBackgroundColor: '#166534',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
+                spanGaps: true // Important for sparse data
             }
         ]
     };
 
     const chartOptions = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: { display: false },
             tooltip: {
@@ -164,13 +240,17 @@ const PriceInsights = () => {
         },
         scales: {
             y: {
-                beginAtZero: false,
+                beginAtZero: false, // Better to show variation unless 0 is relevant
                 grid: { color: 'rgba(0,0,0,0.05)' },
                 ticks: { color: '#8CA38D', font: { weight: 'bold' } }
             },
             x: {
                 grid: { display: false },
-                ticks: { color: '#8CA38D', font: { weight: 'bold' } }
+                ticks: { 
+                    color: '#8CA38D', 
+                    font: { weight: 'bold' },
+                    maxTicksLimit: 8 // Limit x-axis labels to prevent overcrowding
+                }
             }
         }
     };
@@ -193,39 +273,86 @@ const PriceInsights = () => {
                         <h1 className="text-3xl font-black text-text-dark tracking-tight">Market Insights</h1>
                         <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">Real-time price comparisons & historical trends.</p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* State Dropdown (New) */}
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em] ml-1">Select Crop</label>
+                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em] ml-1">State</label>
                             <select
-                                value={selectedCrop}
-                                onChange={(e) => setSelectedCrop(e.target.value)}
-                                className="w-full px-4 py-3 bg-neutral-light/30 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl outline-none font-black text-text-dark transition-all cursor-pointer"
+                                value={selectedState}
+                                onChange={(e) => setSelectedState(e.target.value)}
+                                className="w-full px-4 py-3 bg-neutral-light/30 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl outline-none font-black text-text-dark transition-all cursor-pointer text-sm"
                             >
-                                {availableCrops.map(c => (
-                                    <option key={c.id} value={c.name}>{c.name}</option>
+                                <option value="" disabled>Select State</option>
+                                {statesList.map(s => (
+                                    <option key={s} value={s}>{s}</option>
                                 ))}
                             </select>
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em] ml-1">Location (District)</label>
+
+                        {/* District Searchable Dropdown */}
+                        <div className="space-y-1.5 relative" ref={districtInputRef}>
+                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em] ml-1">District</label>
                             <div className="relative">
                                 <input
-                                    className="w-full px-11 py-3 bg-neutral-light/30 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl outline-none font-black text-text-dark placeholder:text-accent/30 transition-all"
-                                    placeholder="Enter District (e.g. Coimbatore)"
-                                    value={location}
-                                    onChange={(e) => setLocation(e.target.value)}
+                                    className={`w-full px-11 py-3 bg-neutral-light/30 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl outline-none font-black text-text-dark placeholder:text-accent/30 transition-all cursor-pointer ${!selectedState ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    placeholder={selectedState ? "Select District" : "Select State First"}
+                                    value={selectedDistrict}
+                                    onChange={(e) => {
+                                        setSelectedDistrict(e.target.value);
+                                        setIsDistrictDropdownOpen(true);
+                                    }}
+                                    onFocus={() => selectedState && setIsDistrictDropdownOpen(true)}
+                                    disabled={!selectedState}
                                 />
                                 <MapPin className="w-5 h-5 text-accent absolute left-4 top-1/2 -translate-y-1/2" />
                             </div>
+                            
+                            {/* Autocomplete Dropdown */}
+                            {isDistrictDropdownOpen && selectedState && (
+                                <div className="absolute z-50 w-full mt-2 bg-white rounded-2xl shadow-xl border border-neutral-light max-h-60 overflow-y-auto custom-scrollbar">
+                                    {filteredDistricts.length > 0 ? (
+                                        filteredDistricts.map((district, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="px-4 py-3 hover:bg-neutral-light/30 cursor-pointer font-bold text-text-dark text-sm border-b border-neutral-light/30 last:border-0"
+                                                onClick={() => {
+                                                    setSelectedDistrict(district);
+                                                    setIsDistrictDropdownOpen(false);
+                                                }}
+                                            >
+                                                {district}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="px-4 py-3 text-accent text-sm font-bold">No districts found</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Crop Dropdown */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em] ml-1">Crop</label>
+                            <select
+                                value={selectedCrop}
+                                onChange={(e) => setSelectedCrop(e.target.value)}
+                                className={`w-full px-4 py-3 bg-neutral-light/30 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl outline-none font-black text-text-dark transition-all cursor-pointer ${!selectedDistrict ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={!selectedDistrict || availableCrops.length === 0}
+                            >
+                                {availableCrops.length === 0 ? <option>No crops found</option> : null}
+                                {availableCrops.map(c => (
+                                    <option key={c.id || c} value={c.name || c}>{c.name || c}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex gap-2 p-1 bg-neutral-light/30 rounded-2xl border border-neutral-light/50">
                     {[
-                        { label: '7d', value: '7' },
                         { label: '30d', value: '30' },
-                        { label: '6m', value: '180' }
+                        { label: '6m', value: '180' },
+                        { label: '1y', value: '365' }
                     ].map(period => (
                         <button
                             key={period.value}
@@ -274,9 +401,9 @@ const PriceInsights = () => {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
                 {/* Historical Chart */}
-                <div className="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-neutral-light shadow-sm flex flex-col h-full">
+                <div className="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-neutral-light shadow-sm flex flex-col h-full min-h-[500px]">
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h3 className="text-xl font-black text-text-dark uppercase tracking-tight">Price Trend</h3>
@@ -288,11 +415,11 @@ const PriceInsights = () => {
                     </div>
                     
                     {historyData.length > 0 ? (
-                        <div className="flex-1 min-h-[300px] flex items-center justify-center">
+                        <div className="flex-1 w-full relative">
                             <Line data={chartData} options={chartOptions} />
                         </div>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center min-h-[200px] text-accent opacity-60">
+                        <div className="flex-1 flex flex-col items-center justify-center min-h-[300px] text-accent opacity-60">
                             <BarChart3 className="w-12 h-12 mb-2" />
                             <p>No historical data available for this range</p>
                         </div>
@@ -310,31 +437,31 @@ const PriceInsights = () => {
                 <div className="bg-white p-8 rounded-[2rem] border border-neutral-light shadow-sm flex flex-col h-full">
                     <div className="mb-8">
                         <h3 className="text-xl font-black text-text-dark uppercase tracking-tight">Nearby Mandis</h3>
-                        <p className="text-xs text-accent font-bold uppercase tracking-widest mt-1">Prices in {location}</p>
+                        <p className="text-xs text-accent font-bold uppercase tracking-widest mt-1">Prices in {selectedDistrict}</p>
                     </div>
 
                     <div className="space-y-4 flex-1 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
                         {currentPrices.length > 0 ? currentPrices.map((market, idx) => {
-                            const isBest = comparisonData ? market.mandi === comparisonData.mandi : market.pricePerKg === stats.max;
+                            const isBest = comparisonData?.bestPriceHighlight ? market.mandi === comparisonData.bestPriceHighlight.mandi : market.pricePerKg === stats.max;
                             
                             return (
                                 <div
                                     key={idx}
                                     className={`p-5 rounded-2xl border-2 transition-all flex items-center justify-between group ${isBest ? 'border-primary bg-primary/5 shadow-inner' : 'border-neutral-light hover:border-primary/20 bg-white'}`}
                                 >
-                                    <div className="space-y-1">
+                                    <div className="space-y-1 flex-1 min-w-0 mr-2">
                                         <div className="flex items-center gap-2">
-                                            <h4 className="font-black text-text-dark">{market.mandi}</h4>
+                                            <h4 className="font-black text-text-dark truncate max-w-[150px] md:max-w-full" title={market.mandi}>{market.mandi}</h4>
                                             {isBest && (
-                                                <span className="px-2 py-0.5 bg-primary text-[10px] font-black text-white rounded-full uppercase tracking-widest">Best Price</span>
+                                                <span className="px-2 py-0.5 bg-primary text-[10px] font-black text-white rounded-full uppercase tracking-widest shrink-0">Best</span>
                                             )}
                                         </div>
-                                        <div className="flex items-center text-[10px] text-accent font-bold uppercase tracking-widest">
-                                            <MapPin className="w-3 h-3 mr-1" />
-                                            {market.location?.district || location}
+                                        <div className="flex items-center text-[10px] text-accent font-bold uppercase tracking-widest truncate">
+                                            <MapPin className="w-3 h-3 mr-1 shrink-0" />
+                                            <span className="truncate" title={market.location?.district || selectedDistrict}>{market.location?.district || selectedDistrict}</span>
                                         </div>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-right shrink-0">
                                         <div className="text-lg font-black text-primary">₹{market.pricePerKg}</div>
                                         <p className="text-[10px] text-accent font-bold uppercase tracking-widest">Per kg</p>
                                     </div>
@@ -342,7 +469,7 @@ const PriceInsights = () => {
                             );
                         }) : (
                             <div className="text-center py-10 text-accent">
-                                <p>No market prices found for {location}.</p>
+                                <p>No market prices found for {selectedDistrict}.</p>
                                 <p className="text-xs mt-2">Try searching a different district.</p>
                             </div>
                         )}
@@ -387,14 +514,14 @@ const PriceInsights = () => {
 };
 
 const PriceCard = ({ label, value, unit, icon: Icon, color, bg, isText = false }) => (
-    <div className="bg-white p-6 rounded-[2rem] border border-neutral-light shadow-sm flex flex-col space-y-4 transition-all hover:shadow-md hover:translate-y-[-2px] group">
-        <div className={`w-12 h-12 ${bg} ${color} rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110`}>
+    <div className="bg-white p-6 rounded-[2rem] border border-neutral-light shadow-sm flex flex-col justify-between space-y-4 h-full transition-all hover:shadow-md hover:translate-y-[-2px] group">
+        <div className={`w-12 h-12 ${bg} ${color} rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 mb-2`}>
             <Icon className="w-6 h-6" />
         </div>
         <div>
             <p className="text-[10px] font-black text-accent uppercase tracking-[0.2em] mb-1">{label}</p>
             <div className="flex items-baseline gap-1">
-                <span className={`font-black tracking-tight ${isText ? 'text-xl text-text-dark' : 'text-3xl ' + color}`}>
+                <span className={`font-black tracking-tight ${isText ? 'text-xl text-text-dark line-clamp-1 break-all' : 'text-3xl ' + color}`} title={isText ? value : undefined}>
                     {value}
                 </span>
                 {!isText && unit && <span className="text-xs text-accent font-bold uppercase">{unit}</span>}

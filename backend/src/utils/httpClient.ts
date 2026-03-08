@@ -12,7 +12,7 @@ export async function fetchJson<T>(url: string, options: HttpRequestOptions = {}
   const {
     method = 'GET',
     headers = {},
-    timeoutMs = 7000,
+    timeoutMs = 30000,
     retries = 2,
     retryDelayMs = 250,
   } = options;
