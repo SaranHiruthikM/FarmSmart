@@ -39,6 +39,59 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
         calculateImpact();
     }, [formData.qualityGrade, formData.basePrice]);
 
+    // Voice Command Listener for Crop Form
+    useEffect(() => {
+        const processVoiceAction = (field, value) => {
+            if (!field || !value) return;
+
+            // Handle Nested Location Fields
+            if (['state', 'district', 'village'].includes(field)) {
+                setFormData(prev => ({
+                    ...prev,
+                    location: {
+                        ...prev.location,
+                        [field]: value
+                    }
+                }));
+                return;
+            }
+
+            // Handle Direct Fields (name, variety, quantity, basePrice, qualityGrade)
+            if (['name', 'variety', 'quantity', 'basePrice', 'qualityGrade'].includes(field)) {
+                // If user says "50 rupees" for price, strip "rupees" - simple heuristic
+                let cleanValue = value;
+                if (field === 'basePrice' || field === 'quantity') {
+                    cleanValue = value.replace(/[^0-9.]/g, ''); 
+                }
+                
+                setFormData(prev => ({ ...prev, [field]: cleanValue }));
+            }
+        };
+
+        // 1. Check pending actions (e.g. "Edit crop X" -> "Set price to Y")
+        // Note: Usually "Edit Crop X" just navigates. But "Set price to Y" might be said *after* appearing on this page.
+        // OR if user said "Change price of wheat to 50" -> Navigation -> Fill.
+        const pendingAction = sessionStorage.getItem('pendingVoiceAction');
+        if (pendingAction) {
+            try {
+                const action = JSON.parse(pendingAction);
+                if (action.type === 'fill-form' && Date.now() - action.timestamp < 10000) {
+                     processVoiceAction(action.field, action.value);
+                     sessionStorage.removeItem('pendingVoiceAction'); // Clear it
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // 2. Listen for live events
+        const handleVoiceEvent = (e) => {
+             const { field, value } = e.detail;
+             processVoiceAction(field, value);
+        };
+
+        window.addEventListener('voice-fill-form', handleVoiceEvent);
+        return () => window.removeEventListener('voice-fill-form', handleVoiceEvent);
+    }, []);
+
     const hints = qualityService.getGradeHints();
 
     const handleChange = (e) => {

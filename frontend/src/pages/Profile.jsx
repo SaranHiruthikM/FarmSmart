@@ -23,10 +23,6 @@ const Profile = () => {
     });
     const [message, setMessage] = useState({ type: "", text: "" });
 
-    useEffect(() => {
-        fetchProfile();
-    }, []);
-
     const fetchProfile = async () => {
         try {
             setLoading(true);
@@ -47,6 +43,63 @@ const Profile = () => {
             setLoading(false);
         }
     };
+
+    // Voice Command Handler
+    const processVoiceAction = (field, value) => {
+        if (!field || !value) return;
+
+        // Check if this field applies to Profile
+        const profileKeys = ['fullName', 'email', 'state', 'district', 'address', 'preferredLanguage', 'phoneNumber'];
+        
+        if (profileKeys.includes(field)) {
+            // Capitalize Name
+            let processedValue = value;
+            if (field === 'fullName') {
+                 processedValue = value.replace(/\b\w/g, l => l.toUpperCase());
+            }
+
+            setFormData(prev => ({ ...prev, [field]: processedValue }));
+            setMessage({ type: "info", text: `Updated ${field} to "${processedValue}". Click Save to confirm.` });
+            setIsEditing(true);
+        }
+    };
+
+    // 1. Initial Load
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    // 2. Check for pending actions whenever loading finishes
+    useEffect(() => {
+        if (!loading) {
+            const pendingString = sessionStorage.getItem('pendingVoiceAction');
+            if (pendingString) {
+                try {
+                    const action = JSON.parse(pendingString);
+                    // Check timestamp validity (10s)
+                    if (action.type === 'fill-form' && Date.now() - action.timestamp < 10000) {
+                        processVoiceAction(action.field, action.value);
+                    }
+                } catch (e) {
+                    console.error("Failed to parse pending voice action", e);
+                } finally { 
+                    // Always clear it so it doesn't re-apply on refresh
+                    sessionStorage.removeItem('pendingVoiceAction');
+                }
+            }
+        }
+    }, [loading]);
+
+    // 3. Listen for live voice commands
+    useEffect(() => {
+        const handleVoiceUpdate = (e) => {
+            const { field, value } = e.detail;
+            processVoiceAction(field, value);
+        };
+
+        window.addEventListener('voice-fill-form', handleVoiceUpdate);
+        return () => window.removeEventListener('voice-fill-form', handleVoiceUpdate);
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;

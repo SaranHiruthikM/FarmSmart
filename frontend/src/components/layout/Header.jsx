@@ -3,6 +3,7 @@ import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, AlertCi
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
+import LanguageSelector from "../common/LanguageSelector";
 
 const Header = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -43,6 +44,9 @@ const Header = () => {
                     />
                     <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
+
+                {/* Language Switcher */}
+                <LanguageSelector />
 
                 {/* Notifications */}
                 <div className="relative" ref={notifRef}>
