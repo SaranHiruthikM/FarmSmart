@@ -89,8 +89,21 @@ const priceService = {
             console.error("Failed to get AI analysis", e);
             return null;
         }
+    },
+
+    // Get ML-based price forecast
+    getForecast: async (crop, district, currentPrice, query = "") => {
+        try {
+            const response = await api.post("/prices/forecast", { crop, district, currentPrice, query });
+            return response.data.forecast;
+        } catch (e) {
+            console.error("Failed to get price forecast", e);
+            return null;
+        }
     }
+
 };
+
 
 
 export default priceService;
