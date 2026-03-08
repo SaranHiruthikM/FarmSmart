@@ -8,7 +8,8 @@ import {
     Info,
     BarChart3,
     Search,
-    Bell
+    Bell,
+    Sparkles
 } from "lucide-react";
 import {
     Chart as ChartJS,
@@ -41,7 +42,7 @@ const PriceInsights = () => {
     const [selectedState, setSelectedState] = useState("");
     const [selectedDistrict, setSelectedDistrict] = useState("");
     const [selectedCrop, setSelectedCrop] = useState("");
-    
+
     // List States
     const [statesList, setStatesList] = useState([]);
     const [districtsList, setDistrictsList] = useState([]);
@@ -49,7 +50,7 @@ const PriceInsights = () => {
 
     // UI States
     const [timeFilter, setTimeFilter] = useState("30"); // Default 30 days
-    
+
     // Dropdown UI
     const [isDistrictDropdownOpen, setIsDistrictDropdownOpen] = useState(false);
     const districtInputRef = useRef(null);
@@ -58,23 +59,27 @@ const PriceInsights = () => {
     const filteredDistricts = useMemo(() => {
         if (!selectedDistrict) return districtsList;
         // Search logic
-        return districtsList.filter(d => 
+        return districtsList.filter(d =>
             d.toLowerCase().includes(selectedDistrict.toLowerCase())
         );
     }, [selectedDistrict, districtsList]);
-    
+
     // Data States
     const [currentPrices, setCurrentPrices] = useState([]);
     const [historyData, setHistoryData] = useState([]);
+    const [isSimulatedData, setIsSimulatedData] = useState(false);
+    const [aiAnalysis, setAiAnalysis] = useState("");
     const [comparisonData, setComparisonData] = useState(null);
     const [loading, setLoading] = useState(false);
-    
+
+
+
     // 1. Load States on Mount
     useEffect(() => {
         const init = async () => {
             const states = await priceService.getStates();
             setStatesList(states);
-            
+
             // Auto-select Tamil Nadu if available, else first
             const defaultState = states.find(s => s === "Tamil Nadu") || (states.length > 0 ? states[0] : "");
             if (defaultState) {
@@ -87,13 +92,13 @@ const PriceInsights = () => {
     // 2. Load Districts when State Changes
     useEffect(() => {
         const loadDistricts = async () => {
-             if (!selectedState) return;
-             const districts = await priceService.getDistricts(selectedState);
-             setDistrictsList(districts);
-             // Clear dependant fields
-             setSelectedDistrict(""); 
-             setAvailableCrops([]);
-             setSelectedCrop("");
+            if (!selectedState) return;
+            const districts = await priceService.getDistricts(selectedState);
+            setDistrictsList(districts);
+            // Clear dependant fields
+            setSelectedDistrict("");
+            setAvailableCrops([]);
+            setSelectedCrop("");
         };
         loadDistricts();
     }, [selectedState]);
@@ -102,7 +107,7 @@ const PriceInsights = () => {
     // We only fetch crops when we have a valid district selected (exact match from list for safety)
     useEffect(() => {
         const isValidDistrict = districtsList.includes(selectedDistrict);
-        
+
         if (isValidDistrict) {
             const loadCrops = async () => {
                 try {
@@ -131,38 +136,65 @@ const PriceInsights = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Fetch all data in parallel
+                // Map time selection to CSV range string
+                const rangeMap = {
+                    "30": "30 days",
+                    "180": "6 month",
+                    "365": "year"
+                };
+
+                // Fetch Gov API data for Current and Comparison
+                // Fetch CSV Dataset data for Historical Trends (Visualizer)
                 const [cur, hist, comp] = await Promise.all([
                     priceService.getCurrentPrices(selectedCrop, selectedDistrict),
-                    priceService.getHistoricalTrends(selectedCrop, selectedDistrict, parseInt(timeFilter) || 30),
+                    priceService.getCsvHistoricalTrends(selectedCrop, rangeMap[timeFilter] || "30 days"),
                     priceService.getComparison(selectedCrop, selectedDistrict)
                 ]);
 
                 if (cur && cur.regionalVariations) {
+
                     setCurrentPrices(cur.regionalVariations.map(p => ({
                         mandi: p.mandi,
                         pricePerKg: p.price,
                         location: p.location
                     })));
                 } else if (Array.isArray(cur)) {
-                     setCurrentPrices(cur);
+                    setCurrentPrices(cur);
                 } else {
                     setCurrentPrices([]);
                 }
 
                 if (hist && hist.points) {
+                    setIsSimulatedData(hist.isSimulated || false);
                     setHistoryData(hist.points.map(p => ({
                         date: p.date,
                         pricePerKg: p.price
                     })));
                 } else if (Array.isArray(hist)) {
                     setHistoryData(hist);
+                    setIsSimulatedData(false);
                 } else {
                     setHistoryData([]);
+                    setIsSimulatedData(false);
                 }
 
+
                 setComparisonData(comp);
+
+                // Fetch AI Market Analysis (Dynamic)
+                if (hist && hist.points && hist.points.length > 0) {
+                    const timelineStr = rangeMap[timeFilter] || "30 days";
+                    priceService.getAiAnalysis(selectedCrop, timelineStr, hist.points.map(p => ({
+                        date: p.date,
+                        price: p.price
+                    }))).then(analysis => {
+                        if (analysis) setAiAnalysis(analysis);
+                    });
+                } else {
+                    setAiAnalysis("");
+                }
             } catch (err) {
+
                 console.error("Failed to fetch price insights:", err);
             } finally {
                 setLoading(false);
@@ -194,10 +226,10 @@ const PriceInsights = () => {
         const avg = (sum / prices.length).toFixed(2);
         const min = Math.min(...prices);
         const max = Math.max(...prices);
-        
+
         // If we have comparison data use it, otherwise fallback to finding max price mandi
-        const bestMandiName = comparisonData?.bestPriceHighlight?.mandi || 
-                             currentPrices.find(p => p.pricePerKg === max)?.mandi || "N/A";
+        const bestMandiName = comparisonData?.bestPriceHighlight?.mandi ||
+            currentPrices.find(p => p.pricePerKg === max)?.mandi || "N/A";
 
         return { avg, min, max, bestMandi: bestMandiName };
     }, [currentPrices, comparisonData]);
@@ -246,8 +278,8 @@ const PriceInsights = () => {
             },
             x: {
                 grid: { display: false },
-                ticks: { 
-                    color: '#8CA38D', 
+                ticks: {
+                    color: '#8CA38D',
                     font: { weight: 'bold' },
                     maxTicksLimit: 8 // Limit x-axis labels to prevent overcrowding
                 }
@@ -306,7 +338,7 @@ const PriceInsights = () => {
                                 />
                                 <MapPin className="w-5 h-5 text-accent absolute left-4 top-1/2 -translate-y-1/2" />
                             </div>
-                            
+
                             {/* Autocomplete Dropdown */}
                             {isDistrictDropdownOpen && selectedState && (
                                 <div className="absolute z-50 w-full mt-2 bg-white rounded-2xl shadow-xl border border-neutral-light max-h-60 overflow-y-auto custom-scrollbar">
@@ -406,14 +438,20 @@ const PriceInsights = () => {
                 <div className="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-neutral-light shadow-sm flex flex-col h-full min-h-[500px]">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h3 className="text-xl font-black text-text-dark uppercase tracking-tight">Price Trend</h3>
+                            <div className="flex items-center gap-3">
+                                <h3 className="text-xl font-black text-text-dark uppercase tracking-tight">Price Trend</h3>
+                                {isSimulatedData && (
+                                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-black rounded-lg uppercase tracking-widest border border-amber-200">Simulated</span>
+                                )}
+                            </div>
                             <p className="text-xs text-accent font-bold uppercase tracking-widest mt-1">Market fluctuations over last {timeFilter} days</p>
                         </div>
+
                         <div className="p-3 bg-neutral-light/30 rounded-2xl">
                             <BarChart3 className="w-5 h-5 text-primary" />
                         </div>
                     </div>
-                    
+
                     {historyData.length > 0 ? (
                         <div className="flex-1 w-full relative">
                             <Line data={chartData} options={chartOptions} />
@@ -425,11 +463,48 @@ const PriceInsights = () => {
                         </div>
                     )}
 
-                    <div className="mt-6 p-4 bg-green-50/50 rounded-2xl border border-green-100/50 flex items-start gap-4">
-                        <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-green-800 font-bold leading-relaxed uppercase tracking-wider">
-                            Market Analysis: Based on current trends, prices for <span className="text-primary font-black">{selectedCrop}</span> are {historyData.length > 1 && historyData[historyData.length-1].pricePerKg > historyData[0].pricePerKg ? 'RISING' : 'STABLE'}.
-                        </p>
+                    <div className="mt-8 relative group overflow-hidden">
+                        {/* Premium Glassmorphism Background */}
+                        <div className={`absolute inset-0 bg-gradient-to-br transition-all duration-500 rounded-[2rem] ${aiAnalysis ? 'from-primary/10 via-white/5 to-primary/5 border-primary/20 shadow-[0_0_20px_rgba(34,197,94,0.1)]' : 'from-amber-50 to-white border-amber-100 shadow-sm'} border-2`}></div>
+
+                        <div className="relative p-7 flex items-start gap-6">
+                            {/* Smart Icon Container */}
+                            <div className={`p-4 rounded-2xl shrink-0 transition-all duration-500 group-hover:rotate-12 ${aiAnalysis ? 'bg-primary/20 text-primary shadow-lg shadow-primary/10' : 'bg-amber-100 text-amber-600'}`}>
+                                {aiAnalysis ? (
+                                    <div className="relative">
+                                        <Sparkles className="w-6 h-6 animate-pulse" />
+                                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full animate-ping"></div>
+                                    </div>
+                                ) : (
+                                    <Info className="w-6 h-6" />
+                                )}
+                            </div>
+
+                            <div className="space-y-3 flex-1">
+                                <div className="flex items-center gap-3">
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.15em] border shadow-sm transition-colors duration-500 ${aiAnalysis
+                                            ? 'bg-primary text-white border-primary/20 shadow-primary/20'
+                                            : 'bg-amber-100 text-amber-700 border-amber-200'
+                                        }`}>
+                                        {aiAnalysis ? 'Smart Advisor' : 'Status Notice'}
+                                    </span>
+                                    {aiAnalysis && (
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/50 border border-primary/10 rounded-full">
+                                            <div className="w-1 h-1 bg-primary rounded-full animate-pulse"></div>
+                                            <span className="text-[9px] font-bold text-primary/70 uppercase tracking-widest">Llama 3.3 Engine</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <p className={`text-[13px] font-bold leading-relaxed tracking-wide transition-all duration-500 ${aiAnalysis ? 'text-gray-800' : 'text-amber-800 italic uppercase'}`}>
+                                    {aiAnalysis || (isSimulatedData ? (
+                                        "Notice: Real market history for this crop is unavailable; showing simulated trend based on regional averages."
+                                    ) : (
+                                        <>Market Analysis: Based on current trends, prices for <span className="text-primary font-black">{selectedCrop}</span> are {historyData.length > 1 && historyData[historyData.length - 1].pricePerKg > historyData[0].pricePerKg ? 'RISING' : 'STABLE'}.</>
+                                    ))}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -443,7 +518,7 @@ const PriceInsights = () => {
                     <div className="space-y-4 flex-1 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
                         {currentPrices.length > 0 ? currentPrices.map((market, idx) => {
                             const isBest = comparisonData?.bestPriceHighlight ? market.mandi === comparisonData.bestPriceHighlight.mandi : market.pricePerKg === stats.max;
-                            
+
                             return (
                                 <div
                                     key={idx}
