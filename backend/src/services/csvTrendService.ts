@@ -116,6 +116,63 @@ export const getCsvTrends = async (cropName: string, range: string): Promise<Csv
     };
 };
 
+/**
+ * Gets the most recent price for a specific crop and district from the CSV.
+ * This is used by the AI Advisor as the "Source of Truth" for current prices.
+ */
+export const getLatestCsvPrice = async (cropName: string, districtName: string): Promise<{ price: number, date: string } | null> => {
+    const csvPath = path.join(process.cwd(), 'dataset', 'Agriculture_price_dataset.csv');
+    if (!fs.existsSync(csvPath)) return null;
+
+    const searchCrop = cropName.trim().toLowerCase();
+    const searchDistrict = districtName.trim().toLowerCase();
+
+    let latestPrice = -1;
+    let latestDate: Date | null = null;
+    let latestDateStr = '';
+
+    const fileStream = fs.createReadStream(csvPath);
+    const rl = readline.createInterface({
+        input: fileStream,
+        crlfDelay: Infinity
+    });
+
+    let lineCount = 0;
+    for await (const line of rl) {
+        lineCount++;
+        if (lineCount === 1) continue;
+
+        const cols = parseCsvLine(line);
+        if (cols.length < 10) continue;
+
+        const commodity = cols[3]?.trim().toLowerCase();
+        const district = cols[1]?.trim().toLowerCase();
+
+        // Match crop and district
+        if ((commodity === searchCrop || commodity.includes(searchCrop) || searchCrop.includes(commodity)) &&
+            (district === searchDistrict || district.includes(searchDistrict) || searchDistrict.includes(district))) {
+
+            const modalPrice = parseFloat(cols[8]);
+            const dateStr = cols[9]?.trim();
+            const dateObj = parseCsvDate(dateStr);
+
+            if (!isNaN(modalPrice) && dateObj) {
+                if (!latestDate || dateObj > latestDate) {
+                    latestDate = dateObj;
+                    latestPrice = modalPrice / 100; // Quintal to Kg
+                    latestDateStr = dateStr;
+                }
+            }
+        }
+    }
+
+    if (latestPrice !== -1) {
+        return { price: latestPrice, date: latestDateStr };
+    }
+
+    return null;
+};
+
 const parseCsvLine = (line: string): string[] => {
     const result: string[] = [];
     let cur = '';

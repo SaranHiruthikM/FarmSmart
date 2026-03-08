@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { comparePrices, getCurrentPrices, getPriceHistory, getAvailableCrops, getStates, getDistricts, getCsvPriceTrends, getAiPriceAnalysis } from "../controllers/prices.controller";
+import { comparePrices, getCurrentPrices, getPriceHistory, getAvailableCrops, getStates, getDistricts, getCsvPriceTrends, getAiPriceAnalysis, getForecastAnalysis } from "../controllers/prices.controller";
 
 const router = Router();
 
@@ -13,6 +13,7 @@ const router = Router();
  * GET /prices/districts?state=
  * GET /prices/csv-trends?crop=&range=
  * POST /prices/ai-analysis
+ * POST /prices/forecast
  */
 router.get("/current", getCurrentPrices);
 router.get("/history", getPriceHistory);
@@ -22,7 +23,9 @@ router.get("/states", getStates);
 router.get("/districts", getDistricts);
 router.get("/csv-trends", getCsvPriceTrends);
 router.post("/ai-analysis", getAiPriceAnalysis);
+router.post("/forecast", getForecastAnalysis);
 
 export default router;
+
 
 
