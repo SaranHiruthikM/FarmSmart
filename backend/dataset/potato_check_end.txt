@@ -1,0 +1,20 @@
+Uttar Pradesh,auraiya,Achalda,Potato,Badshah,FAQ,1100,1250,1200,6/11/2025
+Tamilnadu,erode,Gobichettipalayam(Uzhavar Sandhai ),Potato,(Red Nanital),Local,3500,4000,4000,6/11/2025
+Uttar Pradesh,lucknow,Lucknow,Potato,Desi,FAQ,1210,1310,1260,6/11/2025
+Tamilnadu,theni,Kambam(Uzhavar Sandhai ),Potato,(Red Nanital),Local,3000,3200,3200,6/11/2025
+Tamilnadu,coimbatore,Sulur(Uzhavar Sandhai ),Potato,(Red Nanital),Local,5000,5800,5800,6/11/2025
+Uttar Pradesh,ambedkarnagar,Akbarpur,Potato,Desi,FAQ,1240,1300,1270,6/11/2025
+Tamilnadu,theni,Chinnamanur(Uzhavar Sandhai ),Potato,(Red Nanital),Local,3200,3200,3200,6/11/2025
+Tamilnadu,the nilgiris,Coonoor(Uzhavar Sandhai ),Potato,(Red Nanital),Local,4000,5000,5000,6/11/2025
+Maharashtra,pune,Pune(Khadiki),Potato,Local,Local,1200,1500,1350,6/11/2025
+Gujarat,ahmedabad,Ahmedabad(Chimanbhai Patal Market Vasana),Potato,Desi,FAQ,900,1300,1200,6/11/2025
+West Bengal,puruliya,Purulia,Potato,Jyoti,FAQ,1240,1260,1250,6/11/2025
+Tamilnadu,dharmapuri,Dharmapuri(Uzhavar Sandhai ),Potato,(Red Nanital),Local,3200,3400,3400,6/11/2025
+Nagaland,kohima,Kohima,Potato,Potato,FAQ,4000,4200,4100,6/11/2025
+Tamilnadu,dharmapuri,AJattihalli(Uzhavar Sandhai ),Potato,(Red Nanital),Local,3200,3400,3400,6/11/2025
+Gujarat,ahmedabad,Ahmedabad(Chimanbhai Patal Market Vasana),Potato,Chips,FAQ,1600,2000,1900,6/11/2025
+Rajasthan,sirohi,Abu Road,Potato,Other,FAQ,1475,1525,1500,6/11/2025
+Tamilnadu,coimbatore,Udumalpet,Potato,(Red Nanital),Local,3800,5800,5800,6/11/2025
+Tamilnadu,namakkal,Kumarapalayam(Uzhavar Sandhai ),Potato,(Red Nanital),Local,3000,3500,3500,6/11/2025
+Orissa,dhenkanal,Kamakhyanagar,Potato,Potato,Non-FAQ,1900,2200,2000,6/11/2025
+Tamilnadu,dindigul,Vedasanthur(Uzhavar Sandhai ),Potato,(Red Nanital),Local,3500,4000,4000,6/11/2025

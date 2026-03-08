@@ -20,7 +20,7 @@ const priceService = {
         const params = {};
         if (crop) params.crop = crop;
         if (location) params.location = location;
-        
+
         const response = await api.get("/prices/current", { params });
         return response.data;
     },
@@ -40,12 +40,12 @@ const priceService = {
             const response = await api.get("/prices/districts", { params: { state } });
             return response.data || [];
         } catch (e) {
-             console.error("Failed to get districts", e);
-             return [];
+            console.error("Failed to get districts", e);
+            return [];
         }
     },
 
-    // Get historical trends
+    // Get historical trends from Gov API
     getHistoricalTrends: async (crop, location, days = 30) => {
         const params = {
             days
@@ -57,9 +57,17 @@ const priceService = {
         return response.data;
     },
 
+    // Get historical trends specifically from CSV Dataset
+    getCsvHistoricalTrends: async (crop, range = "30 days") => {
+        const params = { crop, range };
+        const response = await api.get("/prices/csv-trends", { params });
+        return response.data;
+    },
+
+
     // Get market comparisons (Best Price)
     getComparison: async (crop, location) => {
-         const params = {};
+        const params = {};
         if (crop) params.crop = crop;
         if (location) params.location = location;
 
@@ -67,10 +75,22 @@ const priceService = {
             const response = await api.get("/prices/compare", { params });
             return response.data;
         } catch (error) {
-             // If 404 (no data), return null or valid structure
-             return null;
+            // If 404 (no data), return null or valid structure
+            return null;
+        }
+    },
+
+    // Get AI-powered market analysis
+    getAiAnalysis: async (crop, timeline, points) => {
+        try {
+            const response = await api.post("/prices/ai-analysis", { crop, timeline, points });
+            return response.data.analysis;
+        } catch (e) {
+            console.error("Failed to get AI analysis", e);
+            return null;
         }
     }
 };
+
 
 export default priceService;

@@ -19,7 +19,7 @@ export async function getCurrentPrices(req: Request, res: Response) {
   const priceService = createPriceService();
   const crop = String(req.query.crop ?? "").trim();
   const location = String(req.query.location ?? "").trim();
-  
+
   if (!crop) {
     return res.status(400).json({ error: "crop query parameter is required." });
   }
@@ -64,16 +64,16 @@ export async function comparePrices(req: Request, res: Response) {
 export async function getAvailableCrops(req: Request, res: Response) {
   const priceService = createPriceService();
   const location = String(req.query.location ?? "").trim();
-  
+
   // If no location provided, generic list or error?
   // For now, let's defer to service handling or return empty if stricter
   if (!location) {
-      // return res.status(400).json({ error: "location is required" });
-      // or return all known crops?
-      // Service expects location string.
-      // Let's passed empty string if it handles it, or return error.
-      // The frontend generally calls this with a district.
-      return res.status(400).json({ error: "location query parameter is required." });
+    // return res.status(400).json({ error: "location is required" });
+    // or return all known crops?
+    // Service expects location string.
+    // Let's passed empty string if it handles it, or return error.
+    // The frontend generally calls this with a district.
+    return res.status(400).json({ error: "location query parameter is required." });
   }
 
   const data = await priceService.getAvailableCrops(location);
@@ -83,3 +83,39 @@ export async function getAvailableCrops(req: Request, res: Response) {
   return res.status(200).json(crops);
 }
 
+export async function getCsvPriceTrends(req: Request, res: Response) {
+  const crop = String(req.query.crop ?? "").trim();
+  const range = String(req.query.range ?? "30 days").trim();
+
+  if (!crop) {
+    return res.status(400).json({ error: "crop is required" });
+  }
+
+  try {
+    const { getCsvTrends } = await import("../services/csvTrendService");
+    const data = await getCsvTrends(crop, range);
+    return res.status(200).json(data);
+  } catch (error: any) {
+    console.error("Error in getCsvPriceTrends:", error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+export async function getAiPriceAnalysis(req: Request, res: Response) {
+  const crop = String(req.body.crop ?? "").trim();
+  const timeline = String(req.body.timeline ?? "30 days").trim();
+  const points = req.body.points || [];
+
+  if (!crop || !points.length) {
+    return res.status(400).json({ error: "crop and points are required" });
+  }
+
+  try {
+    const { getAiMarketAnalysis } = await import("../services/marketAnalysisService");
+    const analysis = await getAiMarketAnalysis(crop, timeline, points);
+    return res.status(200).json({ analysis });
+  } catch (error: any) {
+    console.error("Error in getAiPriceAnalysis:", error);
+    return res.status(500).json({ error: error.message });
+  }
+}
