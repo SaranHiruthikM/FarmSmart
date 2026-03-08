@@ -3,6 +3,7 @@ import InputField from "../common/InputField";
 import PrimaryButton from "../common/PrimaryButton";
 import { Loader2, Info, MapPin, Scale, BadgeIndianRupee, TrendingUp, HelpCircle } from "lucide-react";
 import qualityService from "../../services/quality.service";
+import ContextualSchemeAlert from "../schemes/ContextualSchemeAlert";
 
 const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) => {
     const [formData, setFormData] = useState({
@@ -61,9 +62,9 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
                 // If user says "50 rupees" for price, strip "rupees" - simple heuristic
                 let cleanValue = value;
                 if (field === 'basePrice' || field === 'quantity') {
-                    cleanValue = value.replace(/[^0-9.]/g, ''); 
+                    cleanValue = value.replace(/[^0-9.]/g, '');
                 }
-                
+
                 setFormData(prev => ({ ...prev, [field]: cleanValue }));
             }
         };
@@ -76,16 +77,16 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
             try {
                 const action = JSON.parse(pendingAction);
                 if (action.type === 'fill-form' && Date.now() - action.timestamp < 10000) {
-                     processVoiceAction(action.field, action.value);
-                     sessionStorage.removeItem('pendingVoiceAction'); // Clear it
+                    processVoiceAction(action.field, action.value);
+                    sessionStorage.removeItem('pendingVoiceAction'); // Clear it
                 }
             } catch (e) { console.error(e); }
         }
 
         // 2. Listen for live events
         const handleVoiceEvent = (e) => {
-             const { field, value } = e.detail;
-             processVoiceAction(field, value);
+            const { field, value } = e.detail;
+            processVoiceAction(field, value);
         };
 
         window.addEventListener('voice-fill-form', handleVoiceEvent);
@@ -297,6 +298,12 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
                     {isLoading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : buttonLabel}
                 </PrimaryButton>
             </div>
+
+            {/* Contextual Subsidy Buddy */}
+            <ContextualSchemeAlert
+                currentCrop={formData.name}
+                currentState={formData.location.state}
+            />
         </form>
     );
 };

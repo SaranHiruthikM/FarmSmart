@@ -7,6 +7,7 @@ export interface IScheme extends Document {
     applyLink: string;
     eligibilityCriteria: string; // Text description
     applicableStates?: string[]; // For filtering
+    triggerCrops?: string[]; // Crops that trigger this scheme alert
 }
 
 const SchemeSchema = new Schema<IScheme>({
@@ -16,6 +17,7 @@ const SchemeSchema = new Schema<IScheme>({
     applyLink: { type: String },
     eligibilityCriteria: { type: String },
     applicableStates: [String],
+    triggerCrops: [String],
 });
 
 export const Scheme = model<IScheme>("Scheme", SchemeSchema);
