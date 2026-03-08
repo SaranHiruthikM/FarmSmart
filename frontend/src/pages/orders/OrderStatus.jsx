@@ -24,6 +24,7 @@ const OrderStatus = () => {
     const { orderId } = useParams();
     const user = authService.getCurrentUser();
     const isFarmer = user?.role?.toLowerCase() === "farmer";
+    const isLogistics = user?.role?.toLowerCase() === "logistics";
 
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -53,7 +54,7 @@ const OrderStatus = () => {
 
     useEffect(() => {
         const fetchOrderData = async () => {
-             setLoading(true);
+            setLoading(true);
             try {
                 // Fetch Order
                 const data = await orderService.getOrderById(orderId);
@@ -172,13 +173,13 @@ const OrderStatus = () => {
                         }`}>
                         {currentStatus}
                     </span>
-                    {isFarmer && (
+                    {isLogistics && (
                         <div className="relative group">
                             <button className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-primary/20">
                                 UPDATE STATUS <ChevronDown className="w-4 h-4" />
                             </button>
                             <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-neutral-light rounded-2xl shadow-xl hidden group-hover:block z-10 overflow-hidden">
-                                {statuses.map((s) => (
+                                {statuses.filter(s => ["SHIPPED", "DELIVERED"].includes(s.id)).map((s) => (
                                     <button
                                         key={s.id}
                                         onClick={() => handleUpdateStatus(s.id)}
@@ -192,6 +193,7 @@ const OrderStatus = () => {
                     )}
                 </div>
             </div>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Timeline Section */}
@@ -263,19 +265,37 @@ const OrderStatus = () => {
                                         {orderDetails.trackingId} <ExternalLink className="w-3 h-3" />
                                     </p>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Carrier</p>
-                                        <p className="text-sm font-bold">SmartLogistics</p>
+                                {order.logisticsDetails ? (
+                                    <div className="space-y-4 pt-2 border-t border-neutral-light">
+                                        <div>
+                                            <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Driver Name</p>
+                                            <p className="text-sm font-bold">{order.logisticsDetails.driverName}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Vehicle Number</p>
+                                            <p className="text-sm font-bold">{order.logisticsDetails.vehicleNumber}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Contact</p>
+                                            <p className="text-sm font-bold">{order.logisticsDetails.contactNumber}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Weight</p>
-                                        <p className="text-sm font-bold">{orderDetails.quantity}</p>
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Carrier</p>
+                                            <p className="text-sm font-bold">SmartLogistics</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-accent uppercase tracking-tighter">Weight</p>
+                                            <p className="text-sm font-bold">{orderDetails.quantity}</p>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 {/* Sidebar - Order Information */}

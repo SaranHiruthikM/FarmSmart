@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { TrendingUp, Users, DollarSign, ShoppingBag, Loader2 } from "lucide-react";
+import { TrendingUp, Users, DollarSign, ShoppingBag, Loader2, Truck, CheckCircle2 } from "lucide-react";
 import authService from "../services/auth.service";
 import negotiationService from "../services/negotiation.service";
 import salesService from "../services/sales.service";
 import cropService from "../services/crop.service";
+import orderService from "../services/order.service";
 
 const Dashboard = () => {
   const user = authService.getCurrentUser();
-  const firstName = user?.fullName?.split(' ')[0] || "Farmer";
+  const firstName = user?.fullName?.split(' ')[0] || user?.role || "User";
   const isFarmer = user?.role?.toLowerCase() === "farmer";
+  const isLogistics = user?.role?.toLowerCase() === "logistics";
 
   const [stats, setStats] = useState({
     totalCrops: 0,
@@ -26,6 +28,27 @@ const Dashboard = () => {
     try {
       setLoading(true);
 
+      const role = user?.role?.toLowerCase();
+      const isLogistics = role === "logistics";
+
+      if (isLogistics) {
+        const [myOrders, availableOrders] = await Promise.all([
+          orderService.getMyOrders(),
+          orderService.getAvailableOrders()
+        ]);
+
+        const activeCount = myOrders.filter(o => ["CONFIRMED", "SHIPPED"].includes(o.status)).length;
+        const completedCount = myOrders.filter(o => ["DELIVERED", "COMPLETED"].includes(o.status)).length;
+
+        setStats({
+          activeDeliveries: activeCount,
+          completedDeliveries: completedCount,
+          newRequests: availableOrders.length,
+          marketTrends: "+10%"
+        });
+        return;
+      }
+
       // Parallel data fetching for performance
       const promises = [
         negotiationService.getMyNegotiations(),
@@ -40,7 +63,6 @@ const Dashboard = () => {
 
       const negotiations = results[0] || [];
       // Active Bids: Negotiations that are PENDING or have active counter offers
-      // Filter out those that are strictly REJECTED or ACCEPTED and old
       const activeBidsCount = negotiations.filter(n =>
         n.status === 'pending' || n.status === 'counter_offer' ||
         (n.status !== 'accepted' && n.status !== 'rejected')
@@ -71,6 +93,7 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
 
   if (loading) {
     return (
@@ -111,13 +134,40 @@ const Dashboard = () => {
             />
           </>
         )}
-        <StatCard
-          title="Active Bids"
-          value={stats.activeBids}
-          change="Ongoing"
-          icon={Users}
-          color="bg-purple-50 text-purple-600"
-        />
+        {isLogistics && (
+          <>
+            <StatCard
+              title="Active Deliveries"
+              value={stats.activeDeliveries}
+              change="In Transit"
+              icon={Truck}
+              color="bg-blue-50 text-blue-600"
+            />
+            <StatCard
+              title="Completed"
+              value={stats.completedDeliveries}
+              change="Success"
+              icon={CheckCircle2}
+              color="bg-green-50 text-green-600"
+            />
+            <StatCard
+              title="New Requests"
+              value={stats.newRequests}
+              change="Marketplace"
+              icon={ShoppingBag}
+              color="bg-purple-50 text-purple-600"
+            />
+          </>
+        )}
+        {!isLogistics && (
+          <StatCard
+            title="Active Bids"
+            value={stats.activeBids}
+            change="Ongoing"
+            icon={Users}
+            color="bg-purple-50 text-purple-600"
+          />
+        )}
         <StatCard
           title="Market Trends"
           value={stats.marketTrends}
@@ -126,6 +176,7 @@ const Dashboard = () => {
           color="bg-orange-50 text-orange-600"
         />
       </div>
+
 
       {/* Placeholder for Charts/Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

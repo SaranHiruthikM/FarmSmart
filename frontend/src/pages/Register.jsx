@@ -112,13 +112,13 @@ const Register = () => {
             {/* Role Selector */}
             <div>
               <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">I am a</label>
-              <div className="grid grid-cols-2 gap-2 p-1 rounded-xl border border-accent/20 bg-neutral-light">
+              <div className="grid grid-cols-3 gap-2 p-1 rounded-xl border border-accent/20 bg-neutral-light">
                 <button
                   type="button"
                   onClick={() => setRole("farmer")}
-                  className={`py-2 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${role === "farmer"
-                      ? "bg-white text-primary shadow-sm"
-                      : "text-accent hover:text-text-dark"
+                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${role === "farmer"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-accent hover:text-text-dark"
                     }`}
                 >
                   Farmer
@@ -126,15 +126,26 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setRole("buyer")}
-                  className={`py-2 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${role === "buyer"
-                      ? "bg-white text-primary shadow-sm"
-                      : "text-accent hover:text-text-dark"
-                      }`}
+                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${role === "buyer"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-accent hover:text-text-dark"
+                    }`}
                 >
                   Buyer
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setRole("logistics")}
+                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${role === "logistics"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-accent hover:text-text-dark"
+                    }`}
+                >
+                  Logistics
+                </button>
               </div>
             </div>
+
 
             {/* Name Input */}
             <div>

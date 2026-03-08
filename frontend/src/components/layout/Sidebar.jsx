@@ -20,24 +20,29 @@ import authService from "../../services/auth.service";
 const Sidebar = () => {
     const location = useLocation();
     const user = authService.getCurrentUser();
-    const isAdminOrFarmer = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "farmer";
+    const role = user?.role?.toLowerCase();
+    const isAdmin = role === "admin";
+    const isFarmer = role === "farmer";
+    const isBuyer = role === "buyer";
+    const isLogistics = role === "logistics";
 
     const menuItems = [
-        { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-        { label: "Crop Listing & Marketplace", icon: Store, path: "/dashboard/marketplace" },
-        { label: "Price Comparison & Insights", icon: TrendingUp, path: "/dashboard/insights" },
-        { label: "Demand Forecasting", icon: LineChart, path: "/dashboard/forecast" },
-        { label: "Quality-Based Pricing", icon: Award, path: "/dashboard/pricing" },
-        { label: "Negotiation & Bidding", icon: Handshake, path: "/dashboard/negotiation" },
-        { label: "Orders & Transactions", icon: Receipt, path: "/dashboard/orders" },
-        { label: "Logistics & Location", icon: Truck, path: "/dashboard/logistics" },
-        { label: "Ratings, Reviews & Trust", icon: Star, path: "/dashboard/reviews" },
-        { label: "Dispute Resolution", icon: ShieldAlert, path: "/dashboard/disputes" },
-        ...(isAdminOrFarmer ? [{ label: "Manage Disputes (Admin)", icon: ShieldAlert, path: "/dashboard/admin/disputes" }] : []),
-        ...(user?.role?.toLowerCase() === "farmer" ? [{ label: "Sales & Revenue", icon: TrendingUp, path: "/dashboard/sales" }] : []),
-        { label: "Notifications & Alerts", icon: Bell, path: "/dashboard/notifications" },
-        { label: "Gov Schemes & Advisory", icon: Landmark, path: "/dashboard/schemes" },
-    ];
+        { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard", roles: ["farmer", "buyer", "logistics", "admin"] },
+        { label: "Crop Marketplace", icon: Store, path: "/dashboard/marketplace", roles: ["farmer", "buyer"] },
+        { label: "Price Insights", icon: TrendingUp, path: "/dashboard/insights", roles: ["farmer", "buyer"] },
+        { label: "Demand Forecasting", icon: LineChart, path: "/dashboard/forecast", roles: ["farmer", "admin"] },
+        { label: "Quality Pricing", icon: Award, path: "/dashboard/pricing", roles: ["farmer", "buyer"] },
+        { label: "Negotiations", icon: Handshake, path: "/dashboard/negotiation", roles: ["farmer", "buyer"] },
+        { label: "Orders & History", icon: Receipt, path: "/dashboard/orders", roles: ["farmer", "buyer", "logistics"] },
+        { label: "Logistics Hub", icon: Truck, path: "/dashboard/logistics", roles: ["logistics"] },
+        { label: "Reviews & Trust", icon: Star, path: "/dashboard/reviews", roles: ["farmer", "buyer", "logistics"] },
+        { label: "Dispute Support", icon: ShieldAlert, path: "/dashboard/disputes", roles: ["farmer", "buyer", "logistics"] },
+        { label: "Admin Disputes", icon: ShieldAlert, path: "/dashboard/admin/disputes", roles: ["admin"] },
+        { label: "Sales & Revenue", icon: TrendingUp, path: "/dashboard/sales", roles: ["farmer"] },
+        { label: "Notifications", icon: Bell, path: "/dashboard/notifications", roles: ["farmer", "buyer", "logistics", "admin"] },
+        { label: "Gov Schemes", icon: Landmark, path: "/dashboard/schemes", roles: ["farmer", "buyer"] },
+    ].filter(item => item.roles.includes(role));
+
 
     return (
         <div className="w-72 h-screen bg-[#F1F8F1] border-r border-green-100 flex flex-col font-sans shrink-0">

@@ -17,8 +17,11 @@ const transformOrder = (order) => {
     buyerName: order.buyerId?.fullName || "Buyer",
     farmerId: order.farmerId?._id || order.farmerId,
     buyerId: order.buyerId?._id || order.buyerId,
+    farmerAddress: order.farmerId?.address || order.farmerId?.district + ", " + order.farmerId?.state,
+    buyerAddress: order.shippingAddress || order.buyerId?.address || order.buyerId?.district + ", " + order.buyerId?.state,
     timeline: order.status || [], // Backend: status array of objects { status, timestamp }
-    negotiationId: order.negotiationId
+    negotiationId: order.negotiationId,
+    logisticsDetails: order.logisticsDetails || null
   };
 };
 
@@ -74,6 +77,32 @@ const OrderService = {
   getNegotiationById: async (id) => {
     const response = await api.get(`/negotiations/${id}`);
     return response.data;
+  },
+
+  // Logistics: Get available orders in marketplace
+  getAvailableOrders: async () => {
+    try {
+      const response = await api.get("/orders/available");
+      return Array.isArray(response.data)
+        ? response.data.map(transformOrder)
+        : [];
+    } catch (error) {
+      console.error("Error fetching available orders:", error);
+      return [];
+    }
+  },
+
+  // Logistics: Accept an order
+  acceptOrder: async (id) => {
+    const response = await api.put(`/orders/${id}/accept`);
+    return transformOrder(response.data);
+  },
+
+  // Logistics: Update driver and vehicle info
+  updateLogisticsDetails: async (id, details) => {
+    // details: { driverName, vehicleNumber, contactNumber, estimatedDelivery }
+    const response = await api.patch(`/orders/${id}/logistics`, details);
+    return transformOrder(response.data);
   }
 };
 
