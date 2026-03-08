@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
+dotenv.config();
+
 import app from './app';
 import connectDB from './config/db';
 import { seedSchemesAndAdvisory } from './utils/seedSchemes';
 import { createServer } from 'http';
 import { initSocket } from './socket';
-
-dotenv.config();
 
 // Connect to Database
 connectDB().then(() => {
