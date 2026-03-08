@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import cropService from "../services/crop.service";
 import CropCard from "../components/marketplace/CropCard";
 import InputField from "../components/common/InputField";
@@ -9,6 +9,7 @@ const Marketplace = () => {
     const [crops, setCrops] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showFilters, setShowFilters] = useState(false);
+    const location = useLocation();
     const [filters, setFilters] = useState({
         name: "",
         state: "",
@@ -16,8 +17,15 @@ const Marketplace = () => {
     });
 
     useEffect(() => {
-        fetchCrops();
-    }, []);
+        const params = new URLSearchParams(location.search);
+        const nameParam = params.get('name');
+        if (nameParam) {
+            setFilters(prev => ({ ...prev, name: nameParam }));
+            fetchCrops({ name: nameParam });
+        } else {
+            fetchCrops();
+        }
+    }, [location.search]);
 
     const fetchCrops = async (appliedFilters = {}) => {
         setLoading(true);

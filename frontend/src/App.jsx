@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import authService from "./services/auth.service";
 
 import Login from "./pages/Login";
@@ -39,6 +39,9 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
+  const location = useLocation();
+  const isPublicRoute = (location.pathname === '/' || location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/otp');
+
   return (
     <>
       <Routes>
@@ -105,7 +108,7 @@ function App() {
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
 
-      <GlobalVoiceButton />
+      {!isPublicRoute && <GlobalVoiceButton />}
     </>
   );
 }
