@@ -119,3 +119,39 @@ export async function getAiPriceAnalysis(req: Request, res: Response) {
     return res.status(500).json({ error: error.message });
   }
 }
+
+export async function getForecastAnalysis(req: Request, res: Response) {
+  const crop = String(req.body.crop ?? "").trim();
+  const district = String(req.body.district ?? "").trim();
+  const currentPrice = Number(req.body.currentPrice);
+  const query = String(req.body.query ?? "").trim();
+
+  if (!crop || !district || isNaN(currentPrice)) {
+    return res.status(400).json({ error: "crop, district, and currentPrice are required" });
+  }
+
+  try {
+    const { handleChatForecast, getPricePrediction } = await import("../services/predictionService");
+
+    let forecast;
+    if (query) {
+      forecast = await handleChatForecast(query, crop, district, currentPrice);
+    } else {
+      // Logic for the original simple button if no specific query
+      const prediction = await getPricePrediction(crop, district, currentPrice);
+      const now = new Date();
+      const targetMonth = now.getMonth() + 2;
+      const targetYear = now.getFullYear();
+      const monthName = new Date(targetYear, targetMonth - 1).toLocaleString('default', { month: 'long' });
+
+      forecast = `Based on our Random Forest ML model, we predict the price for ${crop} in ${monthName} ${targetYear} in ${district} will be around ₹${prediction!.predicted_price}/kg.`;
+    }
+
+    return res.status(200).json({ forecast });
+  } catch (error: any) {
+    console.error("Error in getForecastAnalysis:", error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+
