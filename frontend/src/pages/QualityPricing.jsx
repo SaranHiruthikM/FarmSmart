@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Award,
     BadgeIndianRupee,
@@ -15,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 const QualityPricing = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [basePrice, setBasePrice] = useState(100);
 
     const grades = [
@@ -55,14 +57,14 @@ const QualityPricing = () => {
                     <Award className="w-32 h-32" />
                 </div>
                 <div className="relative z-10">
-                    <h1 className="text-4xl font-black text-text-dark tracking-tight">Quality-Based Pricing</h1>
-                    <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">Maximize your profit by grading your harvest.</p>
+                    <h1 className="text-4xl font-black text-text-dark tracking-tight">{t('qualityPricing.title')}</h1>
+                    <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">{t('qualityPricing.subtitle')}</p>
                 </div>
                 <PrimaryButton
                     className="relative z-10 px-8 py-4 text-xs font-black uppercase tracking-widest rounded-2xl"
                     onClick={() => navigate("/dashboard/add-crop")}
                 >
-                    Grade & List Crop <ArrowRight className="w-4 h-4 ml-2" />
+                    {t('qualityPricing.gradeListBtn')} <ArrowRight className="w-4 h-4 ml-2" />
                 </PrimaryButton>
             </div>
 
@@ -70,13 +72,13 @@ const QualityPricing = () => {
             <div className="bg-linear-to-br from-text-dark to-neutral-900 p-8 rounded-4xl text-white shadow-xl shadow-black/10">
                 <div className="max-w-4xl mx-auto space-y-10">
                     <div className="text-center space-y-2">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">Price Impact Calculator</h2>
-                        <p className="text-xs opacity-60 font-medium uppercase tracking-[0.2em]">Estimate your earnings based on quality</p>
+                        <h2 className="text-2xl font-black uppercase tracking-tight">{t('qualityPricing.calcTitle')}</h2>
+                        <p className="text-xs opacity-60 font-medium uppercase tracking-[0.2em]">{t('qualityPricing.calcSub')}</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
                         <div className="space-y-4">
-                            <label className="text-[10px] font-black opacity-60 uppercase tracking-widest">Enter Base Price (₹/kg)</label>
+                            <label className="text-[10px] font-black opacity-60 uppercase tracking-widest">{t('qualityPricing.enterBase')}</label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-black text-xl">₹</span>
                                 <input
@@ -99,7 +101,7 @@ const QualityPricing = () => {
                                             {grade.impact}
                                         </div>
                                     </div>
-                                    <h4 className="font-bold text-sm mb-1">{grade.name}</h4>
+                                    <h4 className="font-bold text-sm mb-1">{t(`qualityPricing.grades.${grade.id}.name`, { defaultValue: grade.name })}</h4>
                                     <p className="text-2xl font-black text-white">₹{(basePrice * grade.multiplier).toFixed(0)}</p>
                                 </div>
                             ))}
@@ -111,8 +113,8 @@ const QualityPricing = () => {
             {/* Quality Standards Guide */}
             <div className="space-y-6">
                 <div>
-                    <h2 className="text-2xl font-black text-text-dark tracking-tight uppercase">Grading Standards Guide</h2>
-                    <p className="text-accent font-bold uppercase tracking-widest text-[10px] mt-1">Helpful parameters for accurate classification</p>
+                    <h2 className="text-2xl font-black text-text-dark tracking-tight uppercase">{t('qualityPricing.guideTitle')}</h2>
+                    <p className="text-accent font-bold uppercase tracking-widest text-[10px] mt-1">{t('qualityPricing.guideSub')}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -123,24 +125,24 @@ const QualityPricing = () => {
                                     {grade.id}
                                 </div>
                                 <div className="space-y-0.5">
-                                    <h3 className="font-black text-text-dark text-lg">{grade.name}</h3>
-                                    <p className={`text-[10px] font-black uppercase tracking-widest ${grade.color === 'green' ? 'text-green-600' : grade.color === 'yellow' ? 'text-yellow-600' : 'text-red-600'}`}>{grade.impact} Market Price</p>
+                                    <h3 className="font-black text-text-dark text-lg">{t(`qualityPricing.grades.${grade.id}.name`, { defaultValue: grade.name })}</h3>
+                                    <p className={`text-[10px] font-black uppercase tracking-widest ${grade.color === 'green' ? 'text-green-600' : grade.color === 'yellow' ? 'text-yellow-600' : 'text-red-600'}`}>{grade.impact} {t('qualityPricing.marketPrice')}</p>
                                 </div>
                             </div>
 
                             <div className="flex-1 space-y-6">
                                 <div className="p-4 bg-neutral-light/30 rounded-2xl space-y-2 border border-neutral-light/50">
                                     <h4 className="text-[10px] font-black text-accent uppercase tracking-widest flex items-center gap-2">
-                                        <Info className="w-3 h-3" /> Appearance
+                                        <Info className="w-3 h-3" /> {t('qualityPricing.appearance')}
                                     </h4>
                                     <p className="text-sm font-bold text-text-dark leading-relaxed">
-                                        {grade.description}
+                                        {t(`qualityPricing.grades.${grade.id}.desc`, { defaultValue: grade.description })}
                                     </p>
                                 </div>
 
                                 <div className="p-4 border border-neutral-light rounded-2xl">
-                                    <h4 className="text-[10px] font-black text-accent uppercase tracking-widest mb-2">Best Suited For</h4>
-                                    <p className="text-sm font-black text-text-dark">{grade.suitability}</p>
+                                    <h4 className="text-[10px] font-black text-accent uppercase tracking-widest mb-2">{t('qualityPricing.bestSuitedFor')}</h4>
+                                    <p className="text-sm font-black text-text-dark">{t(`qualityPricing.grades.${grade.id}.suited`, { defaultValue: grade.suitability })}</p>
                                 </div>
                             </div>
                         </div>
@@ -154,16 +156,14 @@ const QualityPricing = () => {
                     <ShieldCheck className="w-12 h-12 text-primary" />
                 </div>
                 <div className="space-y-2">
-                    <h4 className="font-black text-green-900 uppercase tracking-[0.2em] text-sm">Why Grade Your Crops? 🧐</h4>
-                    <p className="text-xs text-green-700 font-bold leading-relaxed max-w-2xl">
-                        Buyers are willing to pay a premium for consistent quality. By accurately grading your produce as **Grade A**, you can earn up to **15% more** than the average market rate. Transparency builds trust and leads to repeat buyers!
-                    </p>
+                    <h4 className="font-black text-green-900 uppercase tracking-[0.2em] text-sm">{t('qualityPricing.whyGrade')}</h4>
+                    <p className="text-xs text-green-700 font-bold leading-relaxed max-w-2xl whitespace-pre-wrap">{t('qualityPricing.whyGradeDesc')}</p>
                 </div>
                 <PrimaryButton
                     className="md:ml-auto px-8 py-4 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-2xl whitespace-nowrap"
                     onClick={() => navigate("/dashboard/marketplace")}
                 >
-                    View Premium Listings
+                    {t('qualityPricing.viewPremium')}
                 </PrimaryButton>
             </div>
         </div>

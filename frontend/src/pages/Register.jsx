@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home, Languages } from "lucide-react";
 import authService from "../services/auth.service";
 import AuthCard from "../components/common/AuthCard"; // Keeping for reference if needed elsewhere, but not using here.
 const Register = () => {
@@ -14,13 +14,23 @@ const Register = () => {
   const [address, setAddress] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [preferredLanguage, setPreferredLanguage] = useState("en");
 
-  const navigate = useNavigate();
+  const languages = [
+    { code: "en", name: "English", native: "English" },
+    { code: "ta", name: "Tamil", native: "தமிழ்" },
+    { code: "hi", name: "Hindi", native: "हिन्दी" },
+    { code: "ml", name: "Malayalam", native: "മലയാളം" },
+    { code: "te", name: "Telugu", native: "తెలుగు" },
+    { code: "kn", name: "Kannada", native: "ಕನ್ನಡ" },
+  ];
+
+  const { t } = useTranslation();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!name || !phone || !password || !state || !district) {
-      setError("Please fill in all required fields");
+      setError(t('common.fillRequired'));
       return;
     }
 
@@ -36,14 +46,14 @@ const Register = () => {
         district,
         address,
         role: role.toUpperCase(), // Backend expects uppercase Role enum
-        // preferredLanguage: 'en' // Defaulting to en, could expand if UI supports it
+        preferredLanguage
       });
 
       // Navigate to OTP page
       navigate("/otp", { state: { phoneNumber: phone } });
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      setError(err.response?.data?.message || t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -62,14 +72,14 @@ const Register = () => {
 
         <div className="relative z-10 space-y-6 max-w-lg">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium border border-white/10 mb-2">
-            <Sprout className="w-4 h-4" /> Join our community today
+            <Sprout className="w-4 h-4" /> {t('auth.joinCommunity')}
           </div>
           <h2 className="text-5xl font-bold leading-tight">
-            Start Your <br />
-            <span className="text-primary-light">Growth Journey</span>
+            {t('auth.startJourney')} <br />
+            <span className="text-primary-light">{t('auth.growthJourney')}</span>
           </h2>
           <p className="text-lg text-white/90 font-medium">
-            Create an account to access real-time market data, weather insights, and expert farming advice.
+            {t('auth.heroDescription')}
           </p>
         </div>
 
@@ -92,8 +102,8 @@ const Register = () => {
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 md:px-12 lg:px-20 bg-white text-text-dark relative">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold tracking-tight text-text-dark">Create Account</h2>
-            <p className="mt-2 text-accent">Join thousands of farmers and buyers</p>
+            <h2 className="text-3xl font-bold tracking-tight text-text-dark">{t('auth.createAccount')}</h2>
+            <p className="mt-2 text-accent">{t('auth.subtitle')}</p>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-5">
@@ -111,7 +121,7 @@ const Register = () => {
 
             {/* Role Selector */}
             <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">I am a</label>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.role')}</label>
               <div className="grid grid-cols-3 gap-2 p-1 rounded-xl border border-accent/20 bg-neutral-light">
                 <button
                   type="button"
@@ -121,7 +131,7 @@ const Register = () => {
                     : "text-accent hover:text-text-dark"
                     }`}
                 >
-                  Farmer
+                  {t('auth.farmer')}
                 </button>
                 <button
                   type="button"
@@ -131,7 +141,7 @@ const Register = () => {
                     : "text-accent hover:text-text-dark"
                     }`}
                 >
-                  Buyer
+                  {t('auth.buyer')}
                 </button>
                 <button
                   type="button"
@@ -141,7 +151,7 @@ const Register = () => {
                     : "text-accent hover:text-text-dark"
                     }`}
                 >
-                  Logistics
+                  {t('auth.logistics')}
                 </button>
               </div>
             </div>
@@ -149,7 +159,7 @@ const Register = () => {
 
             {/* Name Input */}
             <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Full Name</label>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.fullName')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
@@ -159,14 +169,14 @@ const Register = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="John Doe"
+                  placeholder={t('auth.fullNamePlaceholder')}
                 />
               </div>
             </div>
 
             {/* Phone Input */}
             <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Phone Number</label>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.phoneNumber')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Phone className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
@@ -176,14 +186,14 @@ const Register = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Enter your phone number"
+                  placeholder={t('auth.phoneNumberPlaceholder')}
                 />
               </div>
             </div>
 
             {/* Password Input */}
             <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Password</label>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.password')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
@@ -193,14 +203,14 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Create a password"
+                  placeholder={t('auth.passwordPlaceholder')}
                 />
               </div>
             </div>
 
             {/* State Input */}
             <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">State</label>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.state')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
@@ -210,14 +220,14 @@ const Register = () => {
                   value={state}
                   onChange={(e) => setState(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Enter your state"
+                  placeholder={t('auth.statePlaceholder')}
                 />
               </div>
             </div>
 
             {/* District Input */}
             <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">District</label>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.district')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
@@ -227,14 +237,14 @@ const Register = () => {
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Enter your district"
+                  placeholder={t('auth.districtPlaceholder')}
                 />
               </div>
             </div>
 
             {/* Address Input */}
             <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Address (Optional)</label>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.address')} ({t('common.optional')})</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Home className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
@@ -244,8 +254,29 @@ const Register = () => {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Village, Street, etc."
+                  placeholder={t('auth.addressPlaceholder')}
                 />
+              </div>
+            </div>
+
+            {/* Language Selector */}
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.preferredLanguage')}</label>
+              <div className="grid grid-cols-3 gap-2 p-1 rounded-xl border border-accent/20 bg-neutral-light">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => setPreferredLanguage(lang.code)}
+                    className={`py-2 px-1 rounded-lg text-xs font-semibold transition-all duration-200 flex flex-col items-center justify-center gap-0.5 ${preferredLanguage === lang.code
+                      ? "bg-white text-primary shadow-sm border border-primary/10"
+                      : "text-accent hover:text-text-dark hover:bg-white/50"
+                      }`}
+                  >
+                    <span>{lang.native}</span>
+                    <span className="text-[10px] opacity-60 font-normal">{lang.name}</span>
+                  </button>
+                ))}
               </div>
             </div>
 

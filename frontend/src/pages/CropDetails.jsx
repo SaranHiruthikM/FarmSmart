@@ -53,7 +53,7 @@ const CropDetails = () => {
                         console.error("Failed to fetch reviews", err);
                         setReviews([]);
                     }
-                     // Use the pre-calculated rating from crop data which comes from User model
+                    // Use the pre-calculated rating from crop data which comes from User model
                     setAvgRating(data.farmerRating || 0);
                 }
             } catch (error) {
@@ -265,39 +265,39 @@ const CropDetails = () => {
                                 </div>
                             ) : (
                                 (crop.quantity || 0) > 0 ? ( /* Only show buy options if stock exists */
-                                <div className="flex-1 flex gap-3"> {/* Changed to flex gap-3 to accomodate two buttons */}
-                                    <PrimaryButton
-                                        className="flex-1 py-4 text-lg flex items-center justify-center gap-2"
-                                        onClick={() => {
-                                            if (userRole === "buyer") {
-                                                setNegotiationMode('buy');
-                                                setIsNegotiationModalOpen(true);
-                                            } else {
-                                                alert("Interest noted! Farmer will be notified.");
-                                            }
-                                        }}
-                                    >
-                                        {userRole === "buyer" ? (
-                                            <>
-                                                <ShoppingBag className="w-5 h-5" />
-                                                Buy Now
-                                            </>
-                                        ) : "Express Interest"}
-                                    </PrimaryButton>
-
-                                    {userRole === "buyer" && (
-                                        <button
+                                    <div className="flex-1 flex gap-3"> {/* Changed to flex gap-3 to accomodate two buttons */}
+                                        <PrimaryButton
+                                            className="flex-1 py-4 text-lg flex items-center justify-center gap-2"
                                             onClick={() => {
-                                                setNegotiationMode('negotiate');
-                                                setIsNegotiationModalOpen(true);
+                                                if (userRole === "buyer") {
+                                                    setNegotiationMode('buy');
+                                                    setIsNegotiationModalOpen(true);
+                                                } else {
+                                                    alert("Interest noted! Farmer will be notified.");
+                                                }
                                             }}
-                                            className="flex-1 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
                                         >
-                                            <BadgeIndianRupee className="w-5 h-5" />
-                                            Make an Offer
-                                        </button>
-                                    )}
-                                </div>
+                                            {userRole === "buyer" ? (
+                                                <>
+                                                    <ShoppingBag className="w-5 h-5" />
+                                                    Buy Now
+                                                </>
+                                            ) : "Express Interest"}
+                                        </PrimaryButton>
+
+                                        {userRole === "buyer" && (
+                                            <button
+                                                onClick={() => {
+                                                    setNegotiationMode('negotiate');
+                                                    setIsNegotiationModalOpen(true);
+                                                }}
+                                                className="flex-1 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <BadgeIndianRupee className="w-5 h-5" />
+                                                Make an Offer
+                                            </button>
+                                        )}
+                                    </div>
                                 ) : (
                                     <div className="flex-1 p-4 bg-neutral-100 rounded-2xl text-center font-bold text-neutral-400 border-2 border-dashed border-neutral-300">
                                         Out of Stock
@@ -397,7 +397,7 @@ const CropDetails = () => {
                         // Navigate to orders list? or order detail? 
                         // Assuming dashboard supports order view. But usually users want to see their new order.
                         // Since we don't have order detail page ready/confirmed, standard is dashboard/orders
-                        navigate('/dashboard/orders'); 
+                        navigate('/dashboard/orders');
                     } else {
                         // Result is a Negotiation
                         alert("Negotiation started successfully!");
