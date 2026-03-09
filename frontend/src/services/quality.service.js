@@ -28,13 +28,31 @@ const qualityService = {
         }
     },
 
-    // Evaluate quality (if needed for submitting evaluation explicitly)
+    // Verify quality impact
     evaluateQuality: async (data) => {
         try {
             const response = await api.post("/quality/evaluate", data);
             return response.data;
         } catch (error) {
             console.error("Error evaluating quality:", error);
+            throw error;
+        }
+    },
+
+    // Analyze quality from image upload
+    analyzeImage: async (imageFile) => {
+        try {
+            const formData = new FormData();
+            formData.append('image', imageFile);
+            
+            const response = await api.post("/quality/analyze", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error analyzing image:", error);
             throw error;
         }
     },
