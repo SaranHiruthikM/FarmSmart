@@ -1,5 +1,7 @@
 import { Negotiation } from '../models/Negotiation';
 import { Crop } from '../models/Crop';
+import { MarketPrice } from '../models/MarketPrice';
+import { getPricePrediction } from './predictionService';
 import Groq from 'groq-sdk';
 
 const getGroq = () => {
@@ -26,21 +28,51 @@ export const getDemandAnalysis = async (cropName: string, location: string) => {
         cropId: { $in: cropIds }
     });
 
-    // 3. Determine Demand Level heuristics
+    // 3. Get Price History & Trend
+    // TODO: Improve loose matching for location
+    const recentPrices = await MarketPrice.find({
+        crop: new RegExp(cropName, "i"),
+        "location.district": new RegExp(location, "i") // simple regex match
+    }).sort({ date: -1 }).limit(30);
+
+    // If no recent prices found, use a fallback
+    let currentPrice = 25;
+    let priceTrendLabel = "steady";
+    
+    if (recentPrices.length > 0) {
+        currentPrice = recentPrices[0].pricePerKg; // Most recent
+        if (recentPrices.length > 5) {
+            const olderPrice = recentPrices[recentPrices.length - 1].pricePerKg;
+            const change = ((currentPrice - olderPrice) / olderPrice) * 100;
+            if (change > 5) priceTrendLabel = "rising";
+            else if (change < -5) priceTrendLabel = "falling";
+        }
+    }
+
+    // 4. ML Price Prediction (Next Month)
+    const prediction = await getPricePrediction(cropName, location, currentPrice);
+    
+    // 5. Determine Demand Level heuristics (Enhanced)
     let demandLevel = 'Low';
 
+    // If active buyers are high OR price is predicted to rise significantly
     if (activeNegotiations > 10 || (activeNegotiations > 0 && activeNegotiations >= crops.length * 2)) {
         demandLevel = 'High';
     } else if (activeNegotiations > 0 || totalNegotiations > 0) {
         demandLevel = 'Medium';
     }
+    
+    // If no active buyers but price is skyrocketing, demand is technically high (market shortage)
+    if (demandLevel === 'Low' && priceTrendLabel === 'rising' && prediction && prediction.predicted_price > currentPrice * 1.1) {
+         demandLevel = 'Medium';
+    }
 
     // Default Fallback values
-    let explanation = `There are currently ${activeNegotiations} active buyer bids for the ${totalSupply}kg of available supply in the market.`;
+    let explanation = `There are currently ${activeNegotiations} active buyer bids. Market supply is ${totalSupply}kg.`;
     let sellRecommendation = {
         action: demandLevel === 'High' ? 'Sell Now' : 'Wait',
-        reason: 'Based on current buyer activity in your region.',
-        trend: demandLevel === 'High' ? 'up' : demandLevel === 'Low' ? 'down' : 'steady'
+        reason: 'Based on current buyer activity and price trends.',
+        trend: priceTrendLabel
     };
 
     const groq = getGroq();
@@ -50,15 +82,23 @@ export const getDemandAnalysis = async (cropName: string, location: string) => {
             You are an expert AI agriculture advisor for Indian farmers.
             Analyze this market data and provide a concise JSON response.
             
-            Crop: ${cropName}
-            Location: ${location}
-            Active Buyers: ${activeNegotiations}
-            Total Farmers Listing: ${crops.length}
-            Total Supply: ${totalSupply} kg
-            Computed demand: ${demandLevel}
+            Context:
+            - Crop: ${cropName}
+            - Location: ${location}
+            - Active Buyers: ${activeNegotiations}
+            - Total Farmers Listing: ${crops.length}
+            - Total Supply: ${totalSupply} kg
+            - Current Market Price: ₹${currentPrice}/kg
+            - Recent Price Trend: ${priceTrendLabel}
+            - ML Model Prediction (Next Month): ₹${prediction ? prediction.predicted_price.toFixed(2) : 'N/A'}/kg
+            - Computed Demand Level: ${demandLevel}
             
-            Explain the demand in 1-2 sentences. 
-            Recommend 'Sell Now' or 'Wait' with a reason and trend ('up', 'down', 'steady').
+            Task:
+            1. Explain the market situation in 1-2 sentences. Mention price trend if significant.
+            2. Recommend 'Sell Now' or 'Wait'. 
+               - If price is rising and predicted to go higher -> Wait.
+               - If price is likely to fall or demand is high now -> Sell.
+               - If no active buyers -> Wait (unless price is crashing).
             
             Return strictly valid JSON:
             {
@@ -66,7 +106,7 @@ export const getDemandAnalysis = async (cropName: string, location: string) => {
                 "sellRecommendation": {
                     "action": "...",
                     "reason": "...",
-                    "trend": "..."
+                    "trend": "..." 
                 }
             }
             `;
@@ -92,7 +132,10 @@ export const getDemandAnalysis = async (cropName: string, location: string) => {
         activeBuyers: activeNegotiations,
         totalSupply,
         explanation,
-        sellRecommendation
+        sellRecommendation,
+        currentPrice,
+        priceTrend: priceTrendLabel,
+        predictedPrice: prediction ? prediction.predicted_price : null
     };
 };
 
