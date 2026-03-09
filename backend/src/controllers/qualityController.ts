@@ -1,5 +1,37 @@
 import { Request, Response } from "express";
 import { QualityRule } from "../models/QualityRule";
+import { analyzeCropQuality } from "../services/visionService";
+
+/**
+ * POST /quality/analyze
+ * Analyze image and return crop quality analysis + price info
+ */
+export const analyzeImageQuality = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.file) {
+            res.status(400).json({ message: "No image file uploaded" });
+            return;
+        }
+
+        const analysis = await analyzeCropQuality(req.file.buffer, req.file.mimetype);
+
+        // Fetch Rule for the detected grade
+        const rule = await QualityRule.findOne({ grade: analysis.grade });
+
+        res.json({
+            ...analysis,
+            impact: rule ? {
+                originalPrice: "Base Price",
+                multiplier: rule.multiplier,
+                qualityStandard: rule.description
+            } : null,
+            suggestedAction: rule?.grade === 'C' ? 'Sell quickly or discount due to quality' : 'Premium listing recommended'
+        });
+    } catch (error) {
+        console.error("Error analyzing image:", error);
+        res.status(500).json({ message: "Failed to analyze image quality" });
+    }
+};
 
 /**
  * POST /quality/evaluate

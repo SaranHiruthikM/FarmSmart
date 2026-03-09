@@ -17,7 +17,10 @@ export const getForecast = async (req: Request, res: Response): Promise<any> => 
             sellRecommendation: data.sellRecommendation,
             metadata: {
                 activeBuyers: data.activeBuyers,
-                totalSupply: data.totalSupply
+                totalSupply: data.totalSupply,
+                currentPrice: data.currentPrice,
+                priceTrend: data.priceTrend,
+                predictedPrice: data.predictedPrice
             }
         });
     } catch (error) {
