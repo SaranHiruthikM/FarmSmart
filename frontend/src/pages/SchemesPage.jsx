@@ -2,6 +2,7 @@ import React from "react";
 import SchemesList from "../components/schemes/SchemesList";
 import EligibilityChecker from "../components/schemes/EligibilityChecker";
 import AdvisoryFeed from "../components/schemes/AdvisoryFeed";
+import AiCropDoctor from "../components/schemes/AiCropDoctor";
 
 const SchemesPage = () => {
     return (
@@ -20,6 +21,7 @@ const SchemesPage = () => {
                 {/* Right Column: Eligibility & Advisory (Takes up 1/3 of space) */}
                 <div className="space-y-6">
                     <EligibilityChecker />
+                    <AiCropDoctor />
                     <AdvisoryFeed />
                 </div>
             </div>
