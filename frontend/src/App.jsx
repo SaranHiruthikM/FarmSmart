@@ -28,6 +28,16 @@ import SalesRevenue from "./pages/SalesRevenue";
 import Profile from "./pages/Profile";
 import LogisticsDashboard from "./pages/logistics/LogisticsDashboard";
 
+// Admin / Official
+import AdminLogin from "./pages/admin/AdminLogin";
+import OfficialLayout from "./components/layout/OfficialLayout";
+import OfficialDashboard from "./pages/official/OfficialDashboard";
+import KycVerification from "./pages/official/KycVerification";
+import SchemesManager from "./pages/official/SchemesManager";
+import AdvisoryManager from "./pages/official/AdvisoryManager";
+import DisputeTribunal from "./pages/official/DisputeTribunal";
+import QualityStandards from "./pages/official/QualityStandards";
+
 // Protected Route Wrapper for Public Pages (Login/Register)
 // If authenticated, redirect to dashboard.
 const PublicRoute = ({ children }) => {
@@ -42,6 +52,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/admin-login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/otp" element={<PublicRoute><Otp /></PublicRoute>} />
 
@@ -100,6 +111,18 @@ function App() {
 
         {/* Fallback for dashboard */}
         <Route path="*" element={<div className="p-10 text-center text-gray-500">Page under construction</div>} />
+      </Route>
+
+      {/* Official Admin Routes */}
+      <Route path="/official" element={<OfficialLayout />}>
+        <Route index element={<Navigate to="/official/dashboard" replace />} />
+        <Route path="dashboard" element={<OfficialDashboard />} />
+        <Route path="kyc" element={<KycVerification />} />
+        <Route path="schemes" element={<SchemesManager />} />
+        <Route path="advisories" element={<AdvisoryManager />} />
+        <Route path="disputes" element={<DisputeTribunal />} />
+        <Route path="quality" element={<QualityStandards />} />
+        <Route path="*" element={<div className="p-10 text-center text-slate-500">Page under construction</div>} />
       </Route>
 
       {/* Global Fallback */}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Leaf, Phone, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Leaf, Phone, Lock, ArrowRight, Loader2, ShieldAlert } from "lucide-react";
 import authService from "../services/auth.service";
 import LanguageSelector from "../components/common/LanguageSelector";
 import loginImage from "../assets/Images/loginPageImage.jpg";
@@ -166,6 +166,12 @@ const Login = () => {
                   Create Account
                 </Link>
               </p>
+              
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <Link to="/admin-login" className="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-2">
+                  <ShieldAlert className="w-4 h-4" /> Cooperative Official Access
+                </Link>
+              </div>
             </div>
           </form>
         </div>

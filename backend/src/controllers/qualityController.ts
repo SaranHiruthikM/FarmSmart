@@ -50,3 +50,48 @@ export const getPriceImpact = async (req: Request, res: Response): Promise<void>
         finalPrice,
     });
 };
+
+/**
+ * GET /quality
+ * Get all quality rules (Admin/Public)
+ */
+export const getQualityRules = async (req: Request, res: Response): Promise<void> => {
+    try {
+        let rules = await QualityRule.find();
+        
+        // Auto-seed default rules if database is completely empty
+        if (rules.length === 0) {
+            const defaultRules = [
+                { grade: "A", multiplier: 1.5, description: "Export quality, premium size, minimal moisture.", minSize: 80, maxMoisture: 10 },
+                { grade: "B", multiplier: 1.0, description: "Standard market quality, average size, normal moisture.", minSize: 50, maxMoisture: 14 },
+                { grade: "C", multiplier: 0.7, description: "Lower grade, smaller size or higher moisture. Good for processing.", minSize: 0, maxMoisture: 20 },
+            ];
+            
+            await QualityRule.insertMany(defaultRules);
+            rules = await QualityRule.find();
+        }
+
+        res.json(rules);
+    } catch (error) {
+        console.error("Get Quality Rules Error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+/**
+ * PUT /quality/:id
+ * Update a quality rule (Admin)
+ */
+export const updateQualityRule = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const rule = await QualityRule.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!rule) {
+            res.status(404).json({ message: "Rule not found" });
+            return;
+        }
+        res.json({ message: "Quality rule updated", rule });
+    } catch (error) {
+        console.error("Update Quality Rule Error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
