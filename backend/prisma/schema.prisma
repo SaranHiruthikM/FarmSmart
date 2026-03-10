@@ -44,6 +44,8 @@ model User {
   preferredLanguage String   @default("en")
   
   isVerified        Boolean  @default(false)
+  kycDocumentUrl    String?
+  kycStatus         String   @default("NOT_SUBMITTED") // PENDING, APPROVED, REJECTED, NOT_SUBMITTED
   isActive          Boolean  @default(true)
   
   createdAt         DateTime @default(now())
@@ -60,5 +62,50 @@ model VerificationCode {
   createdAt DateTime         @default(now())
 
   @@index([contact])
+}
+
+model Scheme {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  description         String
+  benefits            String[]
+  applyLink           String?
+  eligibilityCriteria String?
+  applicableStates    String[]
+}
+
+model Advisory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  type      String   @default("tip")
+  title     String
+  content   String
+  crop      String?
+  state     String?
+  scheduledDate DateTime?
+  isScheduled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Dispute {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId      String   @unique @db.ObjectId
+  raisedBy     String   @db.ObjectId
+  raisedByRole String
+  reason       String
+  description  String
+  status       String   @default("OPEN")
+  adminRemark  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model QualityRule {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  grade       String @unique
+  multiplier  Float
+  description String
+  minSize     Float    @default(0)
+  maxMoisture Float    @default(100)
 }
 
