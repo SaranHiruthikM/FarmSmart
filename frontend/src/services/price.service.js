@@ -83,7 +83,8 @@ const priceService = {
     // Get AI-powered market analysis
     getAiAnalysis: async (crop, timeline, points) => {
         try {
-            const response = await api.post("/prices/ai-analysis", { crop, timeline, points });
+            const language = localStorage.getItem('i18nextLng') || "en";
+            const response = await api.post("/prices/ai-analysis", { crop, timeline, points, language });
             return response.data.analysis;
         } catch (e) {
             console.error("Failed to get AI analysis", e);
@@ -94,7 +95,8 @@ const priceService = {
     // Get ML-based price forecast
     getForecast: async (crop, district, currentPrice, query = "") => {
         try {
-            const response = await api.post("/prices/forecast", { crop, district, currentPrice, query });
+            const language = localStorage.getItem('i18nextLng') || "en";
+            const response = await api.post("/prices/forecast", { crop, district, currentPrice, query, language });
             return response.data.forecast;
         } catch (e) {
             console.error("Failed to get price forecast", e);

@@ -13,7 +13,8 @@ import {
     ShieldAlert,
     Bell,
     Landmark,
-    Leaf
+    Leaf,
+    Sprout
 } from "lucide-react";
 import authService from "../../services/auth.service";
 import { useTranslation } from "react-i18next";
@@ -41,6 +42,7 @@ const Sidebar = () => {
         { label: t('nav.disputes'), icon: ShieldAlert, path: "/dashboard/disputes", roles: ["farmer", "buyer", "logistics"] },
         { label: t('nav.adminDisputes'), icon: ShieldAlert, path: "/dashboard/admin/disputes", roles: ["admin"] },
         { label: t('nav.sales'), icon: TrendingUp, path: "/dashboard/sales", roles: ["farmer"] },
+        { label: t('nav.planning'), icon: Sprout, path: "/dashboard/planning", roles: ["farmer"] },
         { label: t('nav.notifications'), icon: Bell, path: "/dashboard/notifications", roles: ["farmer", "buyer", "logistics", "admin"] },
         { label: t('nav.schemes'), icon: Landmark, path: "/dashboard/schemes", roles: ["farmer", "buyer"] },
     ].filter(item => item.roles.includes(role));

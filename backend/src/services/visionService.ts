@@ -11,7 +11,7 @@ const getGroq = () => {
     return new Groq({ apiKey: process.env.GROQ_API_KEY });
 };
 
-export const analyzeCropQuality = async (imageBuffer: Buffer, mimeType: string) => {
+export const analyzeCropQuality = async (imageBuffer: Buffer, mimeType: string, language: string = "English") => {
     const base64Image = imageBuffer.toString("base64");
     
     // 1. Try Gemini First
@@ -23,6 +23,7 @@ export const analyzeCropQuality = async (imageBuffer: Buffer, mimeType: string) 
             const prompt = `
             You are an expert agricultural quality inspector.
             Analyze this image of a crop very strictly.
+            The response must be in "${language}" (only values, keep keys in English).
             
             1. Identify the crop (e.g., Tomato, Potato).
             2. Detect any visual defects (spots, rot, unripe, shape issues, pests).
@@ -31,15 +32,15 @@ export const analyzeCropQuality = async (imageBuffer: Buffer, mimeType: string) 
                - Grade B (Standard): Minor shape irregularities, very slight marks, readable but not perfect.
                - Grade C (Low/Fair): Visible spots, cuts, rot, or serious deformation.
             4. Estimate a "Confidence Score" (0-100%).
-            5. List the specific defects found.
+            5. List the specific defects found (in ${language}).
         
             Return ONLY valid JSON (no markdown):
             {
               "cropName": "string",
               "grade": "A" | "B" | "C",
               "confidence": number,
-              "defects": ["string", "string"],
-              "analysis": "Single sentence summary of why this grade was given."
+              "defects": ["string (in ${language})", "string (in ${language})"],
+              "analysis": "Single sentence summary of why this grade was given (in ${language})."
             }
             `;
 
@@ -76,13 +77,14 @@ export const analyzeCropQuality = async (imageBuffer: Buffer, mimeType: string) 
                             text: `
                             You are an expert agricultural quality inspector. Analyze this image of a crop strictly.
                             Identify crop, defects, grade (A/B/C), confidence.
+                            Response MUST be in "${language}" language (values only).
                             Return ONLY valid JSON (no markdown block):
                             {
-                              "cropName": "string",
+                              "cropName": "string (in ${language})",
                               "grade": "A" | "B" | "C",
                               "confidence": number,
-                              "defects": ["string"],
-                              "analysis": "string"
+                              "defects": ["string (in ${language})"],
+                              "analysis": "string (in ${language})"
                             }
                             `
                         },

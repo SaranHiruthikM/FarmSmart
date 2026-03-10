@@ -19,6 +19,12 @@ function LanguageSelector() {
 
   const currentLang = languages.find(l => l.code === i18n?.language) || languages[0];
 
+  const handleLanguageChange = (code) => {
+    i18n.changeLanguage(code);
+    localStorage.setItem('i18nextLng', code);
+    setIsOpen(false);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -55,10 +61,7 @@ function LanguageSelector() {
               {languages.map((lang) => (
                 <button
                   key={lang.code}
-                  onClick={() => {
-                    i18n.changeLanguage(lang.code);
-                    setIsOpen(false);
-                  }}
+                  onClick={() => handleLanguageChange(lang.code)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     currentLang.code === lang.code
                       ? "bg-nature-50 text-nature-700"

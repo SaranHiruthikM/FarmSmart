@@ -105,6 +105,7 @@ export async function getAiPriceAnalysis(req: Request, res: Response) {
   const crop = String(req.body.crop ?? "").trim();
   const timeline = String(req.body.timeline ?? "30 days").trim();
   const points = req.body.points || [];
+  const language = req.body.language || "English";
 
   if (!crop || !points.length) {
     return res.status(400).json({ error: "crop and points are required" });
@@ -112,7 +113,7 @@ export async function getAiPriceAnalysis(req: Request, res: Response) {
 
   try {
     const { getAiMarketAnalysis } = await import("../services/marketAnalysisService");
-    const analysis = await getAiMarketAnalysis(crop, timeline, points);
+    const analysis = await getAiMarketAnalysis(crop, timeline, points, language);
     return res.status(200).json({ analysis });
   } catch (error: any) {
     console.error("Error in getAiPriceAnalysis:", error);
@@ -125,6 +126,7 @@ export async function getForecastAnalysis(req: Request, res: Response) {
   const district = String(req.body.district ?? "").trim();
   const currentPrice = Number(req.body.currentPrice);
   const query = String(req.body.query ?? "").trim();
+  const language = req.body.language || "English";
 
   if (!crop || !district || isNaN(currentPrice)) {
     return res.status(400).json({ error: "crop, district, and currentPrice are required" });
@@ -135,7 +137,7 @@ export async function getForecastAnalysis(req: Request, res: Response) {
 
     let forecast;
     if (query) {
-      forecast = await handleChatForecast(query, crop, district, currentPrice);
+      forecast = await handleChatForecast(query, crop, district, currentPrice, language);
     } else {
       // Logic for the original simple button if no specific query
       const prediction = await getPricePrediction(crop, district, currentPrice);
