@@ -97,21 +97,30 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-100">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <Loader2 className="w-10 h-10 text-green-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">Loading your dashboard...</p>
+          <Loader2 className="w-12 h-12 text-nature-600 animate-spin mx-auto mb-4" />
+          <p className="text-nature-500 font-medium">Cultivating your dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
       {/* Welcome Section */}
-      <div>
-        <h1 className="text-3xl font-bold text-[#1a1f1b]">Dashboard</h1>
-        <p className="text-[#5C715E] mt-1">Welcome back, {firstName}! Here's what's happening today.</p>
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-nature-800 to-nature-600 p-8 shadow-xl shadow-nature-900/20 text-white">
+        <div className="relative z-10">
+            <h1 className="text-4xl font-black tracking-tight mb-2">Dashboard</h1>
+            <p className="text-nature-100/90 text-lg font-medium max-w-2xl">
+                Welcome back, {firstName}! 
+                <span className="block text-sm opacity-80 font-normal mt-1">Here's a summary of your agricultural activities and market insights.</span>
+            </p>
+        </div>
+        
+        {/* Decorative Circles */}
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-20 w-40 h-40 bg-nature-400/20 rounded-full blur-2xl"></div>
       </div>
 
       {/* Stats Grid */}
@@ -123,14 +132,14 @@ const Dashboard = () => {
               value={stats.totalCrops}
               change="Posted"
               icon={ShoppingBag}
-              color="bg-blue-50 text-blue-600"
+              variant="nature"
             />
             <StatCard
               title="Total Revenue"
               value={`₹${stats.totalRevenue.toLocaleString()}`}
               change="Earned"
               icon={DollarSign}
-              color="bg-green-50 text-green-600"
+              variant="secondary"
             />
           </>
         )}
@@ -138,24 +147,24 @@ const Dashboard = () => {
           <>
             <StatCard
               title="Active Deliveries"
-              value={stats.activeDeliveries}
+              value={stats.activeDeliveries || 0}
               change="In Transit"
               icon={Truck}
-              color="bg-blue-50 text-blue-600"
+              variant="blue"
             />
             <StatCard
               title="Completed"
-              value={stats.completedDeliveries}
+              value={stats.completedDeliveries || 0}
               change="Success"
               icon={CheckCircle2}
-              color="bg-green-50 text-green-600"
+              variant="nature"
             />
             <StatCard
               title="New Requests"
-              value={stats.newRequests}
+              value={stats.newRequests || 0}
               change="Marketplace"
               icon={ShoppingBag}
-              color="bg-purple-50 text-purple-600"
+              variant="subtle"
             />
           </>
         )}
@@ -165,7 +174,7 @@ const Dashboard = () => {
             value={stats.activeBids}
             change="Ongoing"
             icon={Users}
-            color="bg-purple-50 text-purple-600"
+            variant="subtle"
           />
         )}
         <StatCard
@@ -173,43 +182,87 @@ const Dashboard = () => {
           value={stats.marketTrends}
           change="High Demand"
           icon={TrendingUp}
-          color="bg-orange-50 text-orange-600"
+          variant="accent"
         />
       </div>
 
 
-      {/* Placeholder for Charts/Recent Activity */}
+      {/* Charts/Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-96 flex items-center justify-center text-gray-400">
-          {/* Future: Revenue Chart */}
-          <div className="text-center">
-            <TrendingUp className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-            <p>Revenue Analytics (Coming Soon)</p>
-          </div>
+        <div className="lg:col-span-2 glass-panel p-8 rounded-3xl min-h-[400px] flex flex-col relative overflow-hidden group">
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-xl text-nature-800">Revenue Analytics</h3>
+                <div className="flex gap-2">
+                    <span className="w-3 h-3 rounded-full bg-nature-500"></span>
+                    <span className="w-3 h-3 rounded-full bg-secondary-light"></span>
+                </div>
+            </div>
+          
+            {/* Future: Chart Placeholder with improved look */}
+            <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60 group-hover:opacity-100 transition-opacity">
+                <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
+                    <TrendingUp className="w-12 h-12 text-nature-300" />
+                </div>
+                <p className="text-nature-800 font-bold">Analytics Module Loading...</p>
+                <p className="text-nature-500 text-sm mt-1">Detailed charts coming soon to this view.</p>
+            </div>
+            
+            {/* Fake chart lines for visual fill */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 opacity-10 pointer-events-none flex items-end justify-around px-8">
+                {[40, 70, 45, 90, 60, 80, 50, 75, 60].map((h, i) => (
+                    <div key={i} style={{ height: `${h}%` }} className="w-8 bg-nature-600 rounded-t-lg mx-1"></div>
+                ))}
+            </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-96 flex items-center justify-center text-gray-400">
-          {/* Future: Recent Activity List */}
-          <div className="text-center">
-            <Users className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-            <p>Recent Activity (Coming Soon)</p>
-          </div>
+
+        <div className="glass-panel p-8 rounded-3xl min-h-[400px] relative overflow-hidden">
+            <h3 className="font-bold text-xl text-nature-800 mb-6">Recent Activity</h3>
+            
+            <div className="flex-1 flex flex-col items-center justify-center text-center h-64">
+                <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
+                    <Users className="w-12 h-12 text-nature-300" />
+                </div>
+                <p className="text-nature-800 font-bold">No Recent Activity</p>
+                <p className="text-nature-500 text-sm mt-1">Your latest actions will appear here.</p>
+            </div>
         </div>
       </div>
     </div>
   );
 };
 
-const StatCard = ({ title, value, change, icon: Icon, color }) => (
-  <div className="bg-white p-6 rounded-2xl border border-green-50 shadow-sm hover:shadow-md transition-shadow">
-    <div className="flex items-center justify-between mb-4">
-      <div className={`p-3 rounded-xl ${color || 'bg-gray-50 text-gray-600'}`}>
-        <Icon className="w-6 h-6" />
-      </div>
-      <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-1 rounded-full">{change}</span>
-    </div>
-    <h3 className="text-3xl font-bold text-[#1a1f1b]">{value}</h3>
-    <p className="text-sm text-[#5C715E] font-medium mt-1">{title}</p>
-  </div>
-);
+const StatCard = ({ title, value, change, icon: Icon, variant = 'nature' }) => {
+    
+    const variants = {
+        nature: "bg-nature-50 text-nature-600 ring-nature-100",
+        secondary: "bg-amber-50 text-amber-600 ring-amber-100",
+        blue: "bg-sky-50 text-sky-600 ring-sky-100",
+        subtle: "bg-slate-50 text-slate-600 ring-slate-100",
+        accent: "bg-rose-50 text-rose-600 ring-rose-100",
+    };
+
+    const iconBg = variants[variant] || variants.nature;
+
+    return (
+        <div className="glass-card p-6 rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="flex items-start justify-between mb-4 relative z-10">
+                <div className={`p-3.5 rounded-2xl ring-1 ring-inset ${iconBg} shadow-sm transition-colors duration-300`}>
+                    <Icon className="w-6 h-6" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-wider bg-white/50 backdrop-blur-sm px-2.5 py-1 rounded-full text-nature-800 border border-white/60">
+                    {change}
+                </span>
+            </div>
+            
+            <div className="relative z-10">
+                <h3 className="text-3xl font-black text-nature-900 tracking-tight">{value}</h3>
+                <p className="text-sm font-bold text-nature-500 mt-1 uppercase tracking-wide">{title}</p>
+            </div>
+            
+            {/* Hover Gradient Effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        </div>
+    );
+};
 
 export default Dashboard;

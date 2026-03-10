@@ -119,32 +119,32 @@ function Notifications() {
   );
 
   return (
-    <div className="w-full max-w-[1920px] mx-auto px-8 py-12">
+    <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 py-6 md:py-12">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-12">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 gap-6">
         <div>
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-green-100 rounded-2xl">
-              <Bell className="w-8 h-8 text-green-700" />
+          <div className="flex items-center gap-3 md:gap-4 mb-2">
+            <div className="p-2 md:p-3 bg-green-100 rounded-2xl shrink-0">
+              <Bell className="w-6 h-6 md:w-8 md:h-8 text-green-700" />
             </div>
-            <h1 className="text-4xl font-black text-gray-900 tracking-tight">Notifications</h1>
+            <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight">Notifications</h1>
           </div>
-          <p className="text-gray-500 text-lg font-medium ml-2">Stay updated with your farm activities</p>
+          <p className="text-gray-500 text-sm md:text-lg font-medium ml-1 md:ml-2">Stay updated with your farm activities</p>
         </div>
 
-        <div className="flex bg-gray-100 p-2 rounded-2xl mt-6 md:mt-0 shadow-sm border border-gray-200">
+        <div className="flex bg-gray-100 p-1.5 md:p-2 rounded-2xl shadow-sm border border-gray-200 self-start md:self-auto w-full md:w-auto">
           <button
             onClick={() => setFilter('ALL')}
-            className={`px-8 py-3 rounded-xl text-base font-bold transition-all ${filter === 'ALL' ? 'bg-white text-gray-900 shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 md:flex-none px-4 md:px-8 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold transition-all ${filter === 'ALL' ? 'bg-white text-gray-900 shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
           >
             All
           </button>
           <button
             onClick={() => setFilter('UNREAD')}
-            className={`px-8 py-3 rounded-xl text-base font-bold transition-all flex items-center gap-3 ${filter === 'UNREAD' ? 'bg-green-600 text-white shadow-lg shadow-green-200' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 md:flex-none px-4 md:px-8 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold transition-all flex items-center justify-center gap-2 md:gap-3 ${filter === 'UNREAD' ? 'bg-green-600 text-white shadow-lg shadow-green-200' : 'text-gray-500 hover:text-gray-700'}`}
           >
             Unread
-            {unreadCount > 0 && <span className={`text-xs px-2 py-1 rounded-lg ${filter === 'UNREAD' ? 'bg-white/20 text-white' : 'bg-green-500 text-white'}`}>{unreadCount}</span>}
+            {unreadCount > 0 && <span className={`text-[10px] md:text-xs px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg ${filter === 'UNREAD' ? 'bg-white/20 text-white' : 'bg-green-500 text-white'}`}>{unreadCount}</span>}
           </button>
         </div>
       </div>

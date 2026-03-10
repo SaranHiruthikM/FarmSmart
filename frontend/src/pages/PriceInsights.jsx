@@ -618,7 +618,7 @@ const PriceInsights = () => {
                         {/* Premium Glassmorphism Background */}
                         <div className={`absolute inset-0 bg-gradient-to-br transition-all duration-500 rounded-[2rem] ${aiAnalysis ? 'from-primary/10 via-white/5 to-primary/5 border-primary/20 shadow-[0_0_20px_rgba(34,197,94,0.1)]' : 'from-amber-50 to-white border-amber-100 shadow-sm'} border-2`}></div>
 
-                        <div className="relative p-7 flex items-start gap-6">
+                        <div className="relative p-5 md:p-7 flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 text-center md:text-left">
                             {/* Smart Icon Container */}
                             <div className={`p-4 rounded-2xl shrink-0 transition-all duration-500 group-hover:rotate-12 ${aiAnalysis ? 'bg-primary/20 text-primary shadow-lg shadow-primary/10' : 'bg-amber-100 text-amber-600'}`}>
                                 {aiAnalysis ? (
@@ -631,8 +631,8 @@ const PriceInsights = () => {
                                 )}
                             </div>
 
-                            <div className="space-y-3 flex-1">
-                                <div className="flex items-center gap-3">
+                            <div className="space-y-3 flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.15em] border shadow-sm transition-colors duration-500 ${aiAnalysis
                                         ? 'bg-primary text-white border-primary/20 shadow-primary/20'
                                         : 'bg-amber-100 text-amber-700 border-amber-200'

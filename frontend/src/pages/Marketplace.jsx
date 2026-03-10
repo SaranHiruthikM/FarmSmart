@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import cropService from "../services/crop.service";
 import CropCard from "../components/marketplace/CropCard";
-import InputField from "../components/common/InputField";
-import { Loader2, Search, Filter, Plus } from "lucide-react";
+import { Loader2, Search, Filter, Plus, Leaf } from "lucide-react";
 
 const Marketplace = () => {
     const [crops, setCrops] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showFilters, setShowFilters] = useState(false);
-    const location = useLocation();
     const [filters, setFilters] = useState({
         name: "",
         state: "",
@@ -17,24 +15,16 @@ const Marketplace = () => {
     });
 
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const nameParam = params.get('name');
-        if (nameParam) {
-            setFilters(prev => ({ ...prev, name: nameParam }));
-            fetchCrops({ name: nameParam });
-        } else {
-            fetchCrops();
-        }
-    }, [location.search]);
+        fetchCrops();
+    }, []);
 
-    const fetchCrops = async (appliedFilters = {}) => {
+    const fetchCrops = async () => {
         setLoading(true);
         try {
-            // Merge current state filters with any direct overrides if needed
-            const query = { ...filters, ...appliedFilters };
+            const query = { ...filters };
             // Remove empty keys
             Object.keys(query).forEach(key => !query[key] && delete query[key]);
-
+            
             const data = await cropService.getAllCrops(query);
             setCrops(data);
         } catch (error) {
@@ -58,93 +48,140 @@ const Marketplace = () => {
         if (window.confirm("Are you sure you want to delete this listing?")) {
             try {
                 await cropService.deleteCrop(id);
-                setCrops(crops.filter(crop => crop._id !== id));
+                // Optimistically remove from UI
+                setCrops(currentCrops => currentCrops.filter(crop => crop.id !== id));
             } catch (error) {
                 console.error("Failed to delete crop", error);
-                alert("Failed to delete crop");
+                alert("Failed to delete crop. Please try again.");
             }
         }
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-8 pb-8">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-text-dark tracking-tight">Marketplace</h1>
-                    <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">Discover fresh crops directly from farmers.</p>
+                   <h1 className="text-3xl md:text-4xl font-black text-nature-900 tracking-tight flex items-center gap-3">
+                        <Leaf className="w-8 h-8 md:w-10 md:h-10 text-nature-600 fill-nature-100" />
+                        Marketplace
+                   </h1>
+                   <p className="text-nature-600 font-medium text-base md:text-lg mt-2 max-w-2xl">
+                        Discover fresh, locally sourced crops directly from verified farmers. 
+                        Fair prices, transparent quality.
+                   </p>
                 </div>
-                <div className="flex gap-3">
+                
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`flex items-center gap-2 px-6 py-3.5 border-2 font-black rounded-2xl transition-all text-sm tracking-wider ${showFilters ? 'bg-neutral-light border-neutral-light text-text-dark' : 'bg-white border-neutral-light text-secondary hover:border-primary/50 hover:text-primary'}`}
+                        className={`flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold transition-all duration-300 border ${
+                            showFilters 
+                            ? 'bg-nature-100 text-nature-800 border-nature-200 shadow-inner' 
+                            : 'glass-card text-nature-700 hover:bg-white hover:text-nature-900 border-white/60'
+                        }`}
                     >
                         <Filter className="w-5 h-5" /> 
-                        {showFilters ? "HIDE FILTERS" : "SHOW FILTERS"}
+                        {showFilters ? "Hide Filters" : "Filter Crops"}
                     </button>
+                    
                     <Link
                         to="/dashboard/add-crop"
-                        className="flex items-center gap-2 px-8 py-3.5 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:bg-green-600 hover:-translate-y-1 transition-all text-sm tracking-wider"
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-nature-600 hover:bg-nature-700 text-white font-bold rounded-2xl shadow-lg shadow-nature-600/30 hover:-translate-y-1 transition-all duration-300"
                     >
-                        <Plus className="w-5 h-5 stroke-[3px]" /> ADD NEW CROP
+                        <Plus className="w-5 h-5 stroke-[3px]" /> 
+                        List New Crop
                     </Link>
                 </div>
             </div>
 
-            {/* Filters */}
-            {showFilters && (
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-neutral-light animate-in slide-in-from-top-2 duration-200">
-                    <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                        <InputField
-                            label="Search Crop"
-                            name="name"
-                            value={filters.name}
-                            onChange={handleFilterChange}
-                            placeholder="e.g. Rice"
-                        />
-                        <InputField
-                            label="State"
-                            name="state"
-                            value={filters.state}
-                            onChange={handleFilterChange}
-                            placeholder="Filter by State"
-                        />
-                        <InputField
-                            label="District"
-                            name="district"
-                            value={filters.district}
-                            onChange={handleFilterChange}
-                            placeholder="Filter by District"
-                        />
-                        <div className="mb-4">
+            {/* Glass Filter Panel */}
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showFilters ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="glass-panel p-6 rounded-3xl mb-2">
+                    <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-nature-700 ml-1">Crop Name</label>
+                            <div className="relative">
+                                <Search className="absolute left-4 top-3.5 w-5 h-5 text-nature-400" />
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={filters.name}
+                                    onChange={handleFilterChange}
+                                    placeholder="Search e.g. Rice"
+                                    className="w-full pl-12 pr-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-nature-700 ml-1">State</label>
+                            <input
+                                type="text"
+                                name="state"
+                                value={filters.state}
+                                onChange={handleFilterChange}
+                                placeholder="Filter by State"
+                                className="w-full px-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
+                            />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-nature-700 ml-1">District</label>
+                            <input
+                                type="text"
+                                name="district"
+                                value={filters.district}
+                                onChange={handleFilterChange}
+                                placeholder="Filter by District"
+                                className="w-full px-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
+                            />
+                        </div>
+
+                        <div className="flex items-end">
                             <button
                                 type="submit"
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-white font-bold rounded-xl hover:bg-secondary-dark transition shadow-lg shadow-secondary/20"
+                                className="w-full py-3 bg-nature-800 text-white font-bold rounded-xl hover:bg-nature-900 transition-colors shadow-lg shadow-nature-800/20"
                             >
-                                <Search className="w-4 h-4" /> Search
+                                Apply Filters
                             </button>
                         </div>
                     </form>
                 </div>
-            )}
+            </div>
 
-            {/* Content */}
+            {/* Content Grid */}
             {loading ? (
-                <div className="flex justify-center py-20">
-                    <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]">
+                    <Loader2 className="w-12 h-12 text-nature-600 animate-spin mb-4" />
+                    <p className="text-nature-600 font-medium animate-pulse">Fetching fresh listings...</p>
                 </div>
             ) : crops.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-accent/30">
-                    <Filter className="w-12 h-12 text-accent mx-auto mb-3 opacity-50" />
-                    <h3 className="text-lg font-bold text-text-dark">No crops found</h3>
-                    <p className="text-accent">Try adjusting your filters.</p>
+                <div className="glass-panel text-center py-24 rounded-3xl border border-dashed border-nature-300/50">
+                    <div className="bg-nature-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Leaf className="w-10 h-10 text-nature-400" />
+                    </div>
+                    <h3 className="text-2xl font-black text-nature-800 mb-2">No crops found</h3>
+                    <p className="text-nature-500 max-w-md mx-auto">
+                        We couldn't find any listings matching your specific criteria. Try adjusting your filters or search for something else.
+                    </p>
+                    <button 
+                        onClick={() => {
+                            setFilters({ name: "", state: "", district: "" });
+                            fetchCrops();
+                        }}
+                        className="mt-6 text-nature-700 font-bold hover:text-nature-900 hover:underline underline-offset-4"
+                    >
+                        Clear all filters
+                    </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {crops.map((crop) => (
                         <CropCard
-                            key={crop._id}
+                            key={crop._id || crop.id}
                             crop={crop}
-                            onDelete={() => handleDelete(crop._id)}
+                            onDelete={() => handleDelete(crop._id || crop.id)}
                         />
                     ))}
                 </div>

@@ -1,41 +1,57 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  Leaf,
+  ShieldCheck,
+  Star,
+  MessageSquarePlus,
+  ShoppingCart,
+  Gavel,
+  Loader2,
+  Share2,
+  Tractor,
+  Sprout,
+  CheckCircle2,
+  LayoutGrid,
+  Bell,
+  Info
+} from "lucide-react";
 import cropService from "../services/crop.service";
 import notificationService from "../services/notification.service";
 import reviewService from "../services/review.service";
 import authService from "../services/auth.service";
-import { Loader2, ArrowLeft, MapPin, BadgeIndianRupee, Share2, ShieldCheck, Bell, User, Calendar, Info, MessageSquarePlus, ShoppingBag } from "lucide-react";
-import PrimaryButton from "../components/common/PrimaryButton";
 import NegotiationModal from "../components/marketplace/NegotiationModal";
 import ReviewModal from "../components/common/ReviewModal";
-import { Star, CheckCircle, Award } from "lucide-react";
+import PrimaryButton from "../components/common/PrimaryButton";
 
 const CropDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [crop, setCrop] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [userRole, setUserRole] = useState("buyer"); // In real app, get from auth context
+    const [userRole, setUserRole] = useState("buyer");
     const [alertPrice, setAlertPrice] = useState("");
     const [alertSuccess, setAlertSuccess] = useState(false);
     const [isNegotiationModalOpen, setIsNegotiationModalOpen] = useState(false);
-    const [negotiationMode, setNegotiationMode] = useState('negotiate');
+    const [negotiationMode, setNegotiationMode] = useState('buy');
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [avgRating, setAvgRating] = useState(0);
 
     useEffect(() => {
-        const fetchCrop = async () => {
+        const fetchCropDetails = async () => {
             try {
                 const data = await cropService.getCropById(id);
                 setCrop(data);
 
                 const userData = authService.getCurrentUser() || {};
-                // Backend uses _id, mock used id. Support both.
                 const userId = userData._id || userData.id;
 
-                if (userData.role === "FARMER" || userData.role === "farmer") { // Check both case just in case
-                    if (data.farmer === userId) {
+                if (userData.role === "FARMER" || userData.role === "farmer") {
+                     if (data.farmer === userId) {
                         setUserRole("owner");
                     } else {
                         setUserRole("farmer");
@@ -44,8 +60,7 @@ const CropDetails = () => {
                     setUserRole("buyer");
                 }
 
-                // Fetch reviews for the farmer
-                if (data.farmer) {
+                 if (data.farmer) {
                     try {
                         const farmerReviews = await reviewService.getReviewsByUserId(data.farmer);
                         setReviews(farmerReviews);
@@ -53,16 +68,15 @@ const CropDetails = () => {
                         console.error("Failed to fetch reviews", err);
                         setReviews([]);
                     }
-                     // Use the pre-calculated rating from crop data which comes from User model
                     setAvgRating(data.farmerRating || 0);
                 }
-            } catch (error) {
-                console.error("Failed to load crop", error);
+            } catch (err) {
+                console.error("Failed to load crop details.", err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchCrop();
+        fetchCropDetails();
     }, [id]);
 
     const handleSetAlert = async () => {
@@ -78,313 +92,314 @@ const CropDetails = () => {
     };
 
     if (loading) return (
-        <div className="flex flex-col items-center justify-center py-32 space-y-4">
-            <Loader2 className="animate-spin text-primary w-12 h-12" />
-            <p className="text-accent font-medium animate-pulse">Fetching crop details...</p>
+        <div className="flex justify-center items-center min-h-screen bg-nature-50">
+            <Loader2 className="w-12 h-12 text-nature-600 animate-spin" />
         </div>
     );
 
     if (!crop) return (
-        <div className="text-center py-32 space-y-6">
-            <div className="bg-red-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
-                <ShieldCheck className="w-10 h-10 text-red-400" />
+        <div className="flex flex-col justify-center items-center min-h-screen bg-nature-50 text-center p-6">
+            <div className="glass-panel p-8 rounded-2xl max-w-md w-full">
+                <Leaf className="w-16 h-16 text-nature-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-nature-800 mb-2">Crop Not Found</h2>
+                <p className="text-nature-600 mb-6">The crop you are looking for does not exist or has been removed.</p>
+                <PrimaryButton onClick={() => navigate("/dashboard/marketplace")}>
+                    Back to Marketplace
+                </PrimaryButton>
             </div>
-            <div className="space-y-2">
-                <h3 className="text-2xl font-bold text-text-dark">Crop Not Found</h3>
-                <p className="text-accent">The crop listing you are looking for might have been removed or is unavailable.</p>
-            </div>
-            <button
-                onClick={() => navigate("/dashboard/marketplace")}
-                className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-green-600 transition shadow-lg"
-            >
-                Back to Marketplace
-            </button>
         </div>
     );
 
+    const isOwner = userRole === "owner";
+
     return (
-        <div className="max-w-6xl mx-auto px-4 py-6">
-            <button
-                onClick={() => navigate("/dashboard/marketplace")}
-                className="group flex items-center text-accent hover:text-primary transition-all font-medium mb-8"
-            >
-                <div className="bg-white p-2 rounded-lg border border-neutral-light group-hover:border-primary/30 mr-3 transition-colors shadow-sm">
-                    <ArrowLeft className="w-4 h-4" />
-                </div>
-                Back to Marketplace
-            </button>
+        <div className="min-h-screen bg-gradient-to-br from-nature-50 via-nature-100 to-nature-200 p-4 md:p-8 relative overflow-hidden">
+             {/* Decorative Background Elements */}
+            <div className="absolute top-0 left-0 w-96 h-96 bg-nature-300/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-nature-400/10 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
-            <div className="bg-white rounded-[2rem] shadow-xl shadow-black/5 border border-neutral-light overflow-hidden">
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                    {/* Left: Visual & Seller Info */}
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 relative flex flex-col items-center justify-center p-8 lg:p-14 border-r border-neutral-light/50">
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                        <span className="text-9xl transform hover:scale-110 transition-transform duration-500 cursor-default z-10">🌾</span>
-
-                        {/* Farmer Info Box */}
-                        <div className="mt-12 w-full bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-white z-10 shadow-sm">
-                            <h3 className="text-xs font-black text-accent uppercase tracking-widest mb-4 flex items-center">
-                                <User className="w-3 h-3 mr-2" /> Seller Information
-                            </h3>
-                            <div className="flex items-center">
-                                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black mr-4">
-                                    {crop.farmerName?.[0] || 'F'}
-                                </div>
-                                <div>
-                                    <p className="font-black text-text-dark">{crop.farmerName || 'Farmer Partner'}</p>
-                                    <div className="flex flex-wrap gap-2 mt-1">
-                                        <p className="text-xs text-accent font-medium">Verified Farmer Since 2023</p>
-                                        <div className="flex items-center bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-blue-100">
-                                            <Award className="w-2.5 h-2.5 mr-1" /> Top Rated
-                                        </div>
-                                        <div className="flex items-center bg-green-50 text-green-600 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-green-100">
-                                            <CheckCircle className="w-2.5 h-2.5 mr-1" /> Verified
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl text-xs font-bold text-accent shadow-sm border border-white/50 z-10 flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5" />
-                            Listed {new Date(crop.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </div>
+            <div className="max-w-7xl mx-auto relative z-10">
+                {/* Header Navigation */}
+                <button
+                    onClick={() => navigate("/dashboard/marketplace")}
+                    className="flex items-center gap-2 text-nature-700 hover:text-nature-900 mb-6 transition-colors group"
+                >
+                    <div className="p-2 bg-white/40 rounded-xl group-hover:bg-white/60 transition-all shadow-sm">
+                        <ArrowLeft className="w-5 h-5" />
                     </div>
+                    <span className="font-bold">Back to Marketplace</span>
+                </button>
 
-                    {/* Right: Details & Actions */}
-                    <div className="p-8 lg:p-14 space-y-10">
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-start gap-4">
-                                <div className="space-y-1">
-                                    <h1 className="text-4xl font-black text-text-dark tracking-tight">{crop.name}</h1>
-                                    <p className="text-xl text-accent font-medium">{crop.variety || 'Standard Variety'}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Left Column: Image & Quick Stats */}
+                    <div className="space-y-6">
+                        <div className="glass-panel p-2 rounded-3xl overflow-hidden shadow-xl shadow-nature-900/5 relative aspect-square group">
+                            {crop.images && crop.images.length > 0 ? (
+                                <img
+                                    src={crop.images[0]}
+                                    alt={crop.name}
+                                    className="w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-700"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-nature-100 to-nature-200 flex flex-col items-center justify-center text-nature-400 rounded-2xl relative overflow-hidden">
+                                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                                    <Leaf className="w-24 h-24 mb-4 opacity-50" />
+                                    <span className="font-bold text-lg">No Image Available</span>
                                 </div>
-                                <div className={`px-4 py-2 rounded-2xl text-sm font-black shadow-sm flex items-center gap-2 ${crop.qualityGrade === 'A' ? 'bg-green-50 text-green-700 border border-green-100' :
-                                    crop.qualityGrade === 'B' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100' :
-                                        'bg-red-50 text-red-700 border border-red-100'
-                                    }`}>
-                                    <ShieldCheck className="w-4 h-4" />
-                                    GRADE {crop.qualityGrade}
+                            )}
+                            
+                            {/* Quality Badge Floating */}
+                            <div className="absolute top-6 left-6">
+                                <span className={`
+                                    px-4 py-1.5 rounded-full text-sm font-bold shadow-lg backdrop-blur-md border border-white/20
+                                    ${crop.qualityGrade === 'A' ? 'bg-emerald-500/90 text-white' : 
+                                      crop.qualityGrade === 'B' ? 'bg-yellow-500/90 text-white' : 
+                                      'bg-orange-500/90 text-white'}
+                                `}>
+                                    Grade {crop.qualityGrade}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Quick Stats Grid */}
+                        <div className="grid grid-cols-2 gap-3 md:gap-4">
+                            <div className="glass-panel p-3 md:p-5 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 md:gap-4 hover:bg-white/60 transition-colors">
+                                <div className="p-2 md:p-3 bg-nature-100 text-nature-600 rounded-xl shrink-0">
+                                    <Sprout className="w-5 h-5 md:w-6 md:h-6" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-[10px] md:text-xs text-nature-500 font-bold uppercase tracking-wider truncate">Quantity</p>
+                                    <p className="text-base md:text-lg font-bold text-nature-800 truncate">{crop.quantity} {crop.unit || 'Kg'}</p>
+                                </div>
+                            </div>
+                             <div className="glass-panel p-3 md:p-5 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 md:gap-4 hover:bg-white/60 transition-colors">
+                                <div className="p-2 md:p-3 bg-nature-100 text-nature-600 rounded-xl shrink-0">
+                                    <LayoutGrid className="w-5 h-5 md:w-6 md:h-6" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-[10px] md:text-xs text-nature-500 font-bold uppercase tracking-wider truncate">Variety</p>
+                                    <p className="text-base md:text-lg font-bold text-nature-800 truncate">{crop.variety || 'Standard'}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-8 py-8 border-y border-neutral-light/50">
-                            <div className="space-y-1">
-                                <p className="text-xs font-bold text-accent uppercase tracking-widest">Market Price / {crop.unit}</p>
-                                <div className="flex flex-col">
-                                    <div className="flex items-baseline text-4xl font-black text-primary">
-                                        <span className="text-2xl mr-0.5">₹</span>
-                                        {crop.finalPrice || crop.basePrice}
-                                        <span className="text-lg text-accent font-medium ml-1">/{crop.unit}</span>
-                                    </div>
-                                    {crop.finalPrice !== crop.basePrice && (
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-xs text-accent font-bold line-through">₹{crop.basePrice}</span>
-                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${crop.qualityGrade === 'A' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                {crop.qualityGrade === 'A' ? '+15% Grade A Bonus' : '-10% Grade C Adjustment'}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-xs font-bold text-accent uppercase tracking-widest">Available Stock</p>
-                                <div className="flex items-center text-3xl font-black text-text-dark">
-                                    {crop.quantity}
-                                    <span className="text-lg text-accent font-medium ml-2 uppercase">{crop.unit}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xs font-black text-accent uppercase tracking-widest">Location Info</h3>
-                                <div className="flex items-center text-primary text-xs font-bold gap-1">
-                                    <Info className="w-3.5 h-3.5" /> Exact Location shared on deal
-                                </div>
-                            </div>
-                            <div className="flex items-start p-5 bg-neutral-light/30 rounded-2xl border border-neutral-light/50 group transition-colors hover:border-primary/20">
-                                <div className="bg-red-50 p-3 rounded-xl mr-4 group-hover:scale-110 transition-transform">
-                                    <MapPin className="w-6 h-6 text-red-400" />
-                                </div>
-                                <div>
-                                    <p className="font-black text-text-dark text-lg">{crop.location?.district}, {crop.location?.state}</p>
-                                    <p className="text-accent font-medium text-sm">{crop.location?.village || 'Village Area'}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Price Alert Setup Section */}
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-black text-accent uppercase tracking-widest">Price Alert Setup</h3>
-                            <div className="flex items-end gap-3 p-4 bg-yellow-50/50 rounded-2xl border border-yellow-100">
-                                <div className="flex-1 space-y-1">
-                                    <label className="text-xs font-bold text-yellow-700">Notify me when price reaches (≥)</label>
+                        {/* Price Alert Setup */}
+                        <div className="glass-panel p-4 md:p-6 rounded-2xl">
+                             <div className="flex items-center gap-2 mb-4">
+                                <Bell className="w-4 h-4 text-nature-500" />
+                                <h3 className="text-xs font-black text-nature-500 uppercase tracking-widest">Price Alert</h3>
+                             </div>
+                             
+                            <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+                                <div className="flex-1 space-y-1 w-full">
+                                    <label className="text-xs font-bold text-nature-600">Notify when price reaches (≥)</label>
                                     <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-nature-400 font-bold">₹</span>
                                         <input
                                             type="number"
                                             value={alertPrice}
                                             onChange={(e) => setAlertPrice(e.target.value)}
                                             placeholder={crop.finalPrice || crop.basePrice}
-                                            className="w-full pl-7 pr-4 py-2 border border-yellow-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none bg-white text-sm font-semibold"
+                                            className="w-full pl-7 pr-4 py-2.5 bg-nature-50/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:outline-none text-nature-800 font-bold text-sm"
                                         />
                                     </div>
                                 </div>
                                 <button
                                     onClick={handleSetAlert}
-                                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-xl flex items-center gap-2 transition-colors mb-[1px]"
+                                    className="w-full sm:w-auto px-4 py-2.5 bg-nature-600 hover:bg-nature-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-nature-600/20 mb-[1px]"
                                 >
-                                    <Bell className="w-4 h-4" />
-                                    Set Alert
+                                    Set
                                 </button>
                             </div>
-                            {alertSuccess && (
-                                <p className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg inline-block animate-pulse">
-                                    Price alert set successfully!
+                             {alertSuccess && (
+                                <p className="text-xs font-bold text-emerald-600 mt-2 flex items-center gap-1">
+                                    <CheckCircle2 className="w-3 h-3" /> Alert set successfully!
                                 </p>
                             )}
                         </div>
+                    </div>
 
-                        <div className="pt-6 flex gap-4">
-                            {userRole === "owner" ? (
-                                <div className="flex-1 flex gap-4">
-                                    <PrimaryButton
-                                        className="flex-1 py-4 text-lg"
-                                        onClick={() => navigate(`/dashboard/my-crops/edit/${crop._id}`)}
-                                    >
-                                        Edit Listing
-                                    </PrimaryButton>
-                                    <button
-                                        className="px-6 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all"
-                                        onClick={() => {/* Trigger update quantity modal */ }}
-                                    >
-                                        Update Stock
-                                    </button>
-                                </div>
-                            ) : (
-                                (crop.quantity || 0) > 0 ? ( /* Only show buy options if stock exists */
-                                <div className="flex-1 flex gap-3"> {/* Changed to flex gap-3 to accomodate two buttons */}
-                                    <PrimaryButton
-                                        className="flex-1 py-4 text-lg flex items-center justify-center gap-2"
-                                        onClick={() => {
-                                            if (userRole === "buyer") {
-                                                setNegotiationMode('buy');
-                                                setIsNegotiationModalOpen(true);
-                                            } else {
-                                                alert("Interest noted! Farmer will be notified.");
-                                            }
-                                        }}
-                                    >
-                                        {userRole === "buyer" ? (
-                                            <>
-                                                <ShoppingBag className="w-5 h-5" />
-                                                Buy Now
-                                            </>
-                                        ) : "Express Interest"}
-                                    </PrimaryButton>
+                    {/* Right Column: Details & Actions */}
+                    <div className="space-y-6">
+                        <div className="glass-panel p-8 rounded-3xl relative overflow-hidden">
+                             {/* Background Decoration */}
+                             <div className="absolute top-0 right-0 w-32 h-32 bg-nature-400/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-                                    {userRole === "buyer" && (
-                                        <button
-                                            onClick={() => {
-                                                setNegotiationMode('negotiate');
-                                                setIsNegotiationModalOpen(true);
-                                            }}
-                                            className="flex-1 py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
-                                        >
-                                            <BadgeIndianRupee className="w-5 h-5" />
-                                            Make an Offer
-                                        </button>
-                                    )}
-                                </div>
-                                ) : (
-                                    <div className="flex-1 p-4 bg-neutral-100 rounded-2xl text-center font-bold text-neutral-400 border-2 border-dashed border-neutral-300">
-                                        Out of Stock
+                            <div className="relative">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h1 className="text-4xl font-black text-nature-900 tracking-tight">{crop.name}</h1>
+                                    <div className="flex items-center gap-2 bg-white/50 px-3 py-1.5 rounded-full border border-white/30 backdrop-blur-sm">
+                                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                        <span className="font-bold text-nature-800">{Number(avgRating).toFixed(1)}</span>
+                                        <span className="text-xs text-nature-500">({reviews.length})</span>
                                     </div>
-                                )
-                            )}
-                            <button className="p-4 border border-neutral-light rounded-2xl hover:bg-neutral-light hover:text-primary transition-all shadow-sm group">
-                                <Share2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-nature-600 mb-6 text-sm">
+                                    <div className="flex items-center gap-1.5 bg-nature-100/50 px-2 py-1 rounded-lg">
+                                        <MapPin className="w-4 h-4 text-nature-500" />
+                                        <span className="font-bold">
+                                            {crop.location?.district || "District"}, {crop.location?.state || "State"}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 bg-nature-100/50 px-2 py-1 rounded-lg">
+                                        <Calendar className="w-4 h-4 text-nature-500" />
+                                        <span className="font-medium">
+                                            Listed {new Date(crop.createdAt || Date.now()).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="prose prose-nature text-nature-700/80 mb-8 leading-relaxed font-medium">
+                                    {crop.description || "No description provided by the farmer. Contact the seller for more details about farming practices and crop quality."}
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row gap-4 items-end sm:items-center justify-between p-6 bg-nature-50/80 rounded-2xl border border-nature-100 mb-8 shadow-inner">
+                                    <div>
+                                        <p className="text-xs font-black text-nature-400 uppercase tracking-widest mb-1">Asking Price</p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-4xl font-black text-nature-800">₹{crop.finalPrice || crop.basePrice}</span>
+                                            <span className="text-nature-500 font-bold">/ {crop.unit || 'Kg'}</span>
+                                        </div>
+                                         {crop.finalPrice !== crop.basePrice && (
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-xs text-nature-400 font-bold line-through">₹{crop.basePrice}</span>
+                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-emerald-100 text-emerald-700`}>
+                                                   Adjusted Price
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {!isOwner && (
+                                        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                            {crop.quantity > 0 ? (
+                                                <>
+                                                    {userRole === "buyer" && (
+                                                        <button 
+                                                            onClick={() => {
+                                                                setNegotiationMode('negotiate');
+                                                                setIsNegotiationModalOpen(true);
+                                                            }}
+                                                            className="px-5 py-3 rounded-xl border-2 border-nature-200 bg-white/50 text-nature-700 font-bold hover:bg-white hover:border-nature-300 transition-all flex items-center justify-center gap-2"
+                                                        >
+                                                            <Gavel className="w-5 h-5" />
+                                                            Negotiate
+                                                        </button>
+                                                    )}
+                                                    <PrimaryButton 
+                                                        onClick={() => {
+                                                            setNegotiationMode('buy');
+                                                            setIsNegotiationModalOpen(true);
+                                                        }}
+                                                        className="flex items-center justify-center gap-2 px-8 shadow-lg shadow-nature-600/20"
+                                                    >
+                                                        <ShoppingCart className="w-5 h-5" />
+                                                        {userRole === "buyer" ? "Buy Now" : "Express Interest"}
+                                                    </PrimaryButton>
+                                                </>
+                                            ) : (
+                                                 <div className="px-6 py-3 bg-neutral-100 rounded-xl border border-neutral-200 text-neutral-400 font-bold flex items-center gap-2 cursor-not-allowed">
+                                                    Out of Stock
+                                                 </div>
+                                            )}
+                                        </div>
+                                    )}
+                                     {isOwner && (
+                                         <PrimaryButton 
+                                            onClick={() => navigate(`/dashboard/my-crops/edit/${crop._id}`)}
+                                            className="px-8"
+                                         >
+                                            Edit Listing
+                                         </PrimaryButton>
+                                     )}
+                                </div>
+
+                                <div className="flex items-center gap-3 justify-center text-xs font-bold text-nature-600 uppercase tracking-widest bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+                                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                    Verified Secure Transaction
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Farmer Info */}
+                        <div className="glass-panel p-6 rounded-3xl flex items-center justify-between group hover:bg-white/60 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 bg-nature-100 rounded-2xl flex items-center justify-center text-nature-600 font-bold text-xl group-hover:bg-nature-200 transition-colors">
+                                    <Tractor className="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-nature-400 font-black uppercase tracking-wider mb-1">Farmer Partner</p>
+                                    <h3 className="font-bold text-nature-900 text-lg flex items-center gap-2">
+                                        {crop.farmerName || "Verified Farmer"}
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500 fill-emerald-100" />
+                                    </h3>
+                                    <div className="flex items-center gap-1 text-xs text-nature-500 font-medium">
+                                       Member since 2023
+                                    </div>
+                                </div>
+                            </div>
+                            <button className="p-3 bg-white hover:bg-nature-50 rounded-xl text-nature-600 transition-all shadow-sm border border-nature-100">
+                                <MessageSquarePlus className="w-5 h-5" />
                             </button>
                         </div>
-
-                        <div className="flex items-center gap-3 p-4 bg-green-50/50 rounded-2xl border border-green-100 justify-center">
-                            <div className="bg-green-100 p-1.5 rounded-full">
-                                <ShieldCheck className="w-4 h-4 text-green-700" />
-                            </div>
-                            <span className="text-[10px] font-black text-green-800 uppercase tracking-[0.2em]">Verified Secure Listing</span>
-                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Ratings & Reviews Section */}
-            <div className="mt-12 space-y-8 pb-12">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div className="space-y-1">
-                        <h2 className="text-3xl font-black text-text-dark tracking-tight italic">Ratings & Reviews</h2>
-                        <div className="flex items-center gap-3">
-                            <div className="flex items-center bg-primary text-white px-3 py-1 rounded-xl text-lg font-black">
-                                <Star className="w-5 h-5 mr-1.5 fill-white" />
-                                {avgRating}
-                            </div>
-                            <p className="text-accent font-bold uppercase tracking-widest text-xs">Based on {reviews.length} Verified {reviews.length === 1 ? 'Review' : 'Reviews'}</p>
+                 {/* Ratings & Reviews Section */}
+                <div className="mt-12 mb-16">
+                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+                        <div>
+                            <h2 className="text-3xl font-black text-nature-900 tracking-tight">Ratings & Reviews</h2>
+                            <p className="text-nature-500 mt-1 font-medium">Feedback from other buyers</p>
                         </div>
+                        
+                        {(userRole === "buyer" && !isOwner) && (
+                            <button
+                                onClick={() => setIsReviewModalOpen(true)}
+                                className="px-6 py-3 bg-white/40 border border-white/50 text-nature-800 font-bold rounded-2xl hover:bg-white/70 transition-all shadow-sm backdrop-blur-md flex items-center gap-2"
+                            >
+                                <Star className="w-4 h-4" />
+                                Write a Review
+                            </button>
+                        )}
                     </div>
 
-                    {userRole === "buyer" && (
-                        <button
-                            onClick={() => setIsReviewModalOpen(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-white border border-neutral-light text-text-dark font-bold rounded-xl hover:border-primary hover:text-primary transition-all shadow-sm group"
-                        >
-                            <MessageSquarePlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                            Write a Review
-                        </button>
-                    )}
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {reviews.length > 0 ? (
-                        reviews.map((review) => (
-                            <div key={review.id} className="bg-white p-6 rounded-3xl border-2 border-neutral-light shadow-sm space-y-4 hover:border-primary/20 transition-all group">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-neutral-light rounded-2xl flex items-center justify-center text-primary font-black group-hover:bg-primary group-hover:text-white transition-colors">
-                                            {review.reviewerName[0]}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {reviews.length > 0 ? (
+                            reviews.map((review) => (
+                                <div key={review.id} className="glass-panel p-6 rounded-3xl hover:bg-white/60 transition-colors">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-nature-100 rounded-2xl flex items-center justify-center text-nature-700 font-bold">
+                                                {(review.reviewerName && review.reviewerName[0]) || 'U'}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-nature-900 text-sm">{review.reviewerName || 'Anonymous'}</h4>
+                                                <p className="text-xs text-nature-400 font-medium">{new Date(review.date).toLocaleDateString()}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-text-dark flex items-center gap-2">
-                                                {review.reviewerName}
-                                                <span className="text-[9px] bg-neutral-light text-accent px-2 py-0.5 rounded-md font-black uppercase tracking-tighter">{review.reviewerRole}</span>
-                                            </h4>
-                                            <p className="text-xs text-accent font-medium">{new Date(review.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                        <div className="flex text-amber-400">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className={`w-4 h-4 ${i < review.rating ? "fill-current" : "text-nature-200 fill-nature-200"}`} />
+                                            ))}
                                         </div>
                                     </div>
-                                    <div className="flex text-primary">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? "fill-primary" : "text-neutral-light"}`} />
-                                        ))}
-                                    </div>
+                                    <p className="text-nature-700 text-sm leading-relaxed italic border-l-2 border-nature-200 pl-3">
+                                        "{review.comment}"
+                                    </p>
                                 </div>
-                                <p className="text-text-dark font-medium leading-relaxed italic text-sm">
-                                    "{review.comment}"
-                                </p>
+                            ))
+                        ) : (
+                             <div className="col-span-full py-16 text-center text-nature-400 bg-white/20 rounded-[2.5rem] border-2 border-dashed border-nature-200/50 backdrop-blur-sm">
+                                <Star className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                <p className="font-medium">No reviews yet available for this seller.</p>
                             </div>
-                        ))
-                    ) : (
-                        <div className="lg:col-span-2 bg-neutral-light/30 p-12 rounded-[2.5rem] border-2 border-dashed border-neutral-light text-center space-y-4">
-                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto text-accent shadow-sm">
-                                <Star className="w-8 h-8" />
-                            </div>
-                            <div className="space-y-1">
-                                <h3 className="text-xl font-black text-text-dark tracking-tight">No Reviews Yet</h3>
-                                <p className="text-accent font-medium max-w-md mx-auto">Be the first to review this seller's produce after your first successful transaction!</p>
-                            </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
+
             <NegotiationModal
                 isOpen={isNegotiationModalOpen}
                 onClose={() => setIsNegotiationModalOpen(false)}
@@ -392,16 +407,16 @@ const CropDetails = () => {
                 mode={negotiationMode}
                 onSuccess={(result) => {
                     if (negotiationMode === 'buy') {
-                        // Result is an Order
-                        alert("Purchase successful! Order Created.");
-                        // Navigate to orders list? or order detail? 
-                        // Assuming dashboard supports order view. But usually users want to see their new order.
-                        // Since we don't have order detail page ready/confirmed, standard is dashboard/orders
+                        alert("Order placed successfully!");
                         navigate('/dashboard/orders'); 
                     } else {
-                        // Result is a Negotiation
-                        alert("Negotiation started successfully!");
-                        navigate(`/dashboard/negotiations/${result._id}`);
+                        alert("Negotiation started! Check your negotiations tab.");
+                        // The result usually contains the new negotiation ID
+                        if (result && result._id) {
+                             navigate(`/dashboard/negotiations`); // Or specific ID if routes exist
+                        } else {
+                             navigate(`/dashboard/negotiations`);
+                        }
                     }
                 }}
             />

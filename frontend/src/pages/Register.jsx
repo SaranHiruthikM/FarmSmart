@@ -50,232 +50,236 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex font-sans bg-white">
-      {/* Left Side - Branding (Green) */}
-      <div className="hidden lg:flex w-1/2 bg-primary relative flex-col justify-between p-12 text-white overflow-hidden">
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-            <Leaf className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">FarmSmart</h1>
-        </div>
-
-        <div className="relative z-10 space-y-6 max-w-lg">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium border border-white/10 mb-2">
-            <Sprout className="w-4 h-4" /> Join our community today
-          </div>
-          <h2 className="text-5xl font-bold leading-tight">
-            Start Your <br />
-            <span className="text-primary-light">Growth Journey</span>
-          </h2>
-          <p className="text-lg text-white/90 font-medium">
-            Create an account to access real-time market data, weather insights, and expert farming advice.
-          </p>
-        </div>
-
-        <div className="relative z-10 flex gap-4 text-sm text-white/80 font-medium">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-1 bg-white/30 rounded-full"></div>
-            <span>Transparent Pricing</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-1 bg-white/30 rounded-full"></div>
-            <span>Direct Access</span>
-          </div>
-        </div>
-
-        {/* Decorative Circle */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen relative flex items-center justify-center p-4 lg:p-8 overflow-hidden bg-nature-50">
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-nature-100 mix-blend-multiply opacity-50"></div>
+        <div className="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-nature-300 to-nature-500 opacity-20 filter blur-[100px] animate-float"></div>
+        <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-gradient-to-t from-secondary-light to-secondary opacity-20 filter blur-[80px] animate-pulse-slow"></div>
       </div>
 
-      {/* Right Side - Form (White) */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 md:px-12 lg:px-20 bg-white text-text-dark relative">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold tracking-tight text-text-dark">Create Account</h2>
-            <p className="mt-2 text-accent">Join thousands of farmers and buyers</p>
+      {/* Main Glass Card */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-6xl grid lg:grid-cols-5 rounded-[2.5rem] overflow-hidden glass-panel shadow-2xl relative z-10"
+      >
+        
+        {/* Left Side (Branding - Dark Green Glass) */}
+        <div className="col-span-2 hidden lg:flex flex-col justify-between p-12 relative overflow-hidden bg-nature-900/40 backdrop-blur-md border-r border-white/10">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-nature-950/20 to-nature-950/80"></div>
+          
+          <div className="relative z-10">
+            <Link to="/" className="inline-flex items-center gap-2 mb-8 group hover:opacity-80 transition-opacity">
+               <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-md border border-white/10 shadow-sm group-hover:scale-105 transition-transform">
+                  <Leaf className="w-6 h-6 text-nature-100" />
+               </div>
+               <span className="text-xl font-bold text-white tracking-tight">FarmSmart</span>
+            </Link>
+            
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-nature-50 text-xs font-bold border border-white/10 mb-6 backdrop-blur-sm shadow-sm">
+                <Sprout className="w-3.5 h-3.5" /> 
+                <span className="uppercase tracking-wider">Join 10,000+ Farmers</span>
+            </div>
+            
+            <h2 className="text-4xl font-black text-white leading-tight drop-shadow-md">
+              Plant the Seeds <br />
+              of <span className="text-nature-400">Success</span>
+            </h2>
+            <p className="mt-6 text-nature-100 text-base font-medium leading-relaxed max-w-sm">
+              Create an account to unlock real-time market data, fair pricing, and a community that supports your growth.
+            </p>
           </div>
 
-          <form onSubmit={handleRegister} className="space-y-5">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="p-3 rounded-lg bg-secondary-light/20 border border-secondary text-secondary text-sm flex items-center font-medium"
-              >
-                <span className="mr-2">⚠️</span> {error}
-              </motion.div>
-            )}
+          <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
+                  <div className="w-10 h-10 rounded-full bg-nature-500/20 flex items-center justify-center text-nature-300 font-bold border border-white/10">1</div>
+                  <div className="text-sm">
+                      <p className="text-white font-bold">Sign Up</p>
+                      <p className="text-nature-200/80 mt-0.5">Quick & easy registration</p>
+                  </div>
+              </div>
+              <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
+                  <div className="w-10 h-10 rounded-full bg-nature-500/20 flex items-center justify-center text-nature-300 font-bold border border-white/10">2</div>
+                  <div className="text-sm">
+                      <p className="text-white font-bold">Get Verified</p>
+                      <p className="text-nature-200/80 mt-0.5">Secure identity protection</p>
+                  </div>
+              </div>
+          </div>
+        </div>
 
+        {/* Right Side (Form - Light Glass) */}
+        <div className="col-span-3 flex flex-col p-6 sm:p-8 md:p-12 bg-white/60 backdrop-blur-xl relative h-[90vh] lg:h-auto overflow-y-auto scrollbar-hide">
+          <div className="w-full max-w-lg mx-auto">
+            
+            <div className="mb-8">
+              <div className="lg:hidden flex items-center justify-center mb-6">
+                <div className="bg-gradient-to-br from-nature-500 to-nature-700 p-3 rounded-2xl shadow-lg shadow-nature-500/30 text-white">
+                    <Leaf className="w-8 h-8" />
+                </div>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-nature-900 tracking-tight text-center lg:text-left">Create Account</h2>
+              <p className="mt-2 text-nature-600 font-medium text-center lg:text-left">Fill in your details to get started</p>
+            </div>
 
-
-            {/* Role Selector */}
-            <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">I am a</label>
-              <div className="grid grid-cols-3 gap-2 p-1 rounded-xl border border-accent/20 bg-neutral-light">
-                <button
-                  type="button"
-                  onClick={() => setRole("farmer")}
-                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${role === "farmer"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-accent hover:text-text-dark"
-                    }`}
+            <form onSubmit={handleRegister} className="space-y-6">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: "auto", y: 0 }}
+                  className="bg-red-50 border border-red-100 text-red-600 text-sm p-4 rounded-xl flex items-start gap-3 shadow-sm"
                 >
-                  Farmer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("buyer")}
-                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${role === "buyer"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-accent hover:text-text-dark"
-                    }`}
-                >
-                  Buyer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("logistics")}
-                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${role === "logistics"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-accent hover:text-text-dark"
-                    }`}
-                >
-                  Logistics
-                </button>
-              </div>
-            </div>
-
-
-            {/* Name Input */}
-            <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Full Name</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
-                </div>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="John Doe"
-                />
-              </div>
-            </div>
-
-            {/* Phone Input */}
-            <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Phone Number</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
-                </div>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Enter your phone number"
-                />
-              </div>
-            </div>
-
-            {/* Password Input */}
-            <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
-                </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Create a password"
-                />
-              </div>
-            </div>
-
-            {/* State Input */}
-            <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">State</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
-                </div>
-                <input
-                  type="text"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Enter your state"
-                />
-              </div>
-            </div>
-
-            {/* District Input */}
-            <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">District</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
-                </div>
-                <input
-                  type="text"
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Enter your district"
-                />
-              </div>
-            </div>
-
-            {/* Address Input */}
-            <div>
-              <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Address (Optional)</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Home className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
-                </div>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                  placeholder="Village, Street, etc."
-                />
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Create Account <ArrowRight className="ml-2 w-4 h-4" />
-                </>
+                  <span className="font-bold text-lg leading-none">!</span>
+                  <span className="font-medium leading-snug">{error}</span>
+                </motion.div>
               )}
-            </motion.button>
 
-            <div className="text-center mt-6">
-              <p className="text-sm text-accent">
+              {/* Role Selection */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-nature-700 uppercase tracking-wide ml-1">I am a</label>
+                <div className="grid grid-cols-3 gap-3 p-1.5 rounded-2xl bg-white/50 border border-nature-200">
+                  {['farmer', 'buyer', 'logistics'].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(r)}
+                      className={`py-2.5 rounded-xl text-sm font-bold capitalize transition-all duration-300 ${role === r
+                        ? "bg-nature-600 text-white shadow-lg shadow-nature-600/20 scale-100"
+                        : "text-nature-600 hover:bg-white/80 hover:text-nature-800"
+                        }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Grid for Name & Phone */}
+              <div className="grid md:grid-cols-2 gap-5">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-nature-700 uppercase tracking-wide ml-1">Full Name</label>
+                  <div className="relative group">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-nature-400 group-focus-within:text-nature-600 transition-colors" />
+                    <input
+                      type="text"
+                      placeholder="John Doe"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white border border-nature-200 text-nature-900 placeholder-nature-300 focus:outline-none focus:ring-4 focus:ring-nature-500/10 focus:border-nature-500 transition-all shadow-sm group-hover:shadow-md"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                    <label className="text-xs font-bold text-nature-700 uppercase tracking-wide ml-1">Phone</label>
+                    <div className="relative group">
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-nature-400 group-focus-within:text-nature-600 transition-colors" />
+                        <input
+                        type="tel"
+                        placeholder="9876543210"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white border border-nature-200 text-nature-900 placeholder-nature-300 focus:outline-none focus:ring-4 focus:ring-nature-500/10 focus:border-nature-500 transition-all shadow-sm group-hover:shadow-md"
+                        />
+                    </div>
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1">
+                  <label className="text-xs font-bold text-nature-700 uppercase tracking-wide ml-1">Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-nature-400 group-focus-within:text-nature-600 transition-colors" />
+                    <input
+                        type="password"
+                        placeholder="Create a strong password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white border border-nature-200 text-nature-900 placeholder-nature-300 focus:outline-none focus:ring-4 focus:ring-nature-500/10 focus:border-nature-500 transition-all shadow-sm group-hover:shadow-md"
+                    />
+                  </div>
+              </div>
+
+              {/* Location Grid */}
+              <div className="grid md:grid-cols-2 gap-5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-nature-700 uppercase tracking-wide ml-1">State</label>
+                    <div className="relative group">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-nature-400 group-focus-within:text-nature-600 transition-colors" />
+                        <input
+                        type="text"
+                        placeholder="State"
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white border border-nature-200 text-nature-900 placeholder-nature-300 focus:outline-none focus:ring-4 focus:ring-nature-500/10 focus:border-nature-500 transition-all shadow-sm group-hover:shadow-md"
+                        />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-nature-700 uppercase tracking-wide ml-1">District</label>
+                    <div className="relative group">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-nature-400 group-focus-within:text-nature-600 transition-colors" />
+                        <input
+                        type="text"
+                        placeholder="District"
+                        value={district}
+                        onChange={(e) => setDistrict(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white border border-nature-200 text-nature-900 placeholder-nature-300 focus:outline-none focus:ring-4 focus:ring-nature-500/10 focus:border-nature-500 transition-all shadow-sm group-hover:shadow-md"
+                        />
+                    </div>
+                  </div>
+              </div>
+
+              {/* Address */}
+              <div className="space-y-1">
+                  <label className="text-xs font-bold text-nature-700 uppercase tracking-wide ml-1">Address <span className="text-nature-400 font-normal normal-case">(Optional)</span></label>
+                  <div className="relative group">
+                    <Home className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-nature-400 group-focus-within:text-nature-600 transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Village, Street, Landmark..."
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white border border-nature-200 text-nature-900 placeholder-nature-300 focus:outline-none focus:ring-4 focus:ring-nature-500/10 focus:border-nature-500 transition-all shadow-sm group-hover:shadow-md"
+                    />
+                  </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-nature-600 to-nature-500 hover:from-nature-700 hover:to-nature-600 text-white font-bold text-lg shadow-lg shadow-nature-500/30 hover:shadow-nature-500/50 transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                    {isLoading ? (
+                    <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Creating Account...</span>
+                    </>
+                    ) : (
+                    <>
+                        <span>Get Started</span>
+                        <ArrowRight className="w-5 h-5" />
+                    </>
+                    )}
+                </button>
+              </div>
+
+            </form>
+
+            <div className="mt-8 text-center pb-4">
+              <p className="text-nature-600 font-medium text-sm">
                 Already have an account?{" "}
-                <Link to="/" className="font-bold text-primary hover:text-primary-dark hover:underline transition-all">
+                <Link to="/login" className="font-bold text-nature-800 hover:text-nature-900 underline decoration-2 decoration-nature-400 hover:decoration-nature-600 underline-offset-4 transition-all">
                   Sign In
                 </Link>
               </p>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

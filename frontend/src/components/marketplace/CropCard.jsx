@@ -1,7 +1,6 @@
+import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
-// import mockReviewService from "../../services/review.mock"; // Removed
-import { Link, useNavigate } from "react-router-dom";
-import { MapPin, Scale, BadgeIndianRupee, ChevronRight, Edit, Trash2, Award, CheckCircle } from "lucide-react";
+import { MapPin, Scale, ChevronRight, Edit, Trash2, Award, Gem, Sprout } from "lucide-react";
 
 const CropCard = ({ crop, onDelete }) => {
     const navigate = useNavigate();
@@ -9,12 +8,7 @@ const CropCard = ({ crop, onDelete }) => {
     // Check ownership
     const currentUser = authService.getCurrentUser();
     const currentUserId = currentUser?._id || currentUser?.id;
-    // crop.farmer is the ID string from our service transformation
     const isOwner = currentUser && (currentUser.role === "FARMER" || currentUser.role === "farmer") && crop.farmer === currentUserId;
-
-    // Get rating data
-    const avgRating = crop.farmerRating || 0;
-    const isTopRated = avgRating >= 4.0;
 
     const handleCardClick = () => {
         navigate(`/dashboard/marketplace/${crop._id}`);
@@ -27,106 +21,106 @@ const CropCard = ({ crop, onDelete }) => {
 
     const handleDelete = (e) => {
         e.stopPropagation();
-        onDelete();
+        if (onDelete) onDelete();
     };
+
+    // Quality Badge Logic
+    const getQualityColor = (grade) => {
+        switch(grade) {
+            case 'A': return 'bg-nature-100 text-nature-700 border-nature-200 ring-nature-100';
+            case 'B': return 'bg-amber-50 text-amber-700 border-amber-200 ring-amber-50';
+            default: return 'bg-orange-50 text-orange-700 border-orange-200 ring-orange-50';
+        }
+    }
 
     return (
         <div
             onClick={handleCardClick}
-            className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-neutral-light group overflow-hidden flex flex-col h-full cursor-pointer"
+            className="group relative glass-card rounded-3xl overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-nature-900/5 transition-all duration-300 cursor-pointer flex flex-col h-full border border-white/60"
         >
-            {/* Image Section */}
-            <div className="h-48 bg-gradient-to-br from-green-50 to-emerald-50 relative flex items-center justify-center group-hover:bg-green-100/50 transition-colors">
-                <div className="text-secondary opacity-40 flex flex-col items-center group-hover:scale-110 transition-transform duration-500">
-                    <span className="text-5xl">🌾</span>
+            {/* Image Placeholder with Gradient */}
+            <div className="h-48 relative overflow-hidden bg-gradient-to-br from-nature-50 to-emerald-50/50 group-hover:from-nature-100 group-hover:to-emerald-100/50 transition-colors duration-500">
+                <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-40 group-hover:scale-110 transition-all duration-700">
+                    <Sprout className="w-24 h-24 text-nature-300" strokeWidth={1} />
                 </div>
-
-                {/* Badges */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
-                    <span className={`px-3 py-1 text-[10px] font-black tracking-widest uppercase rounded-full shadow-sm border ${crop.qualityGrade === 'A' ? 'bg-green-100 text-green-700 border-green-200' :
-                        crop.qualityGrade === 'B' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                            'bg-red-100 text-red-700 border-red-200'
-                        }`}>
-                        Grade {crop.qualityGrade}
-                    </span>
-                    {isTopRated && (
-                        <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center">
-                            <Award className="w-3 h-3 mr-1" /> Top Rated
-                        </div>
-                    )}
-                </div>
-
-                <div className="absolute top-3 left-3">
-                    <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-sm border border-white/50">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                
+                {/* Price Tag */}
+                <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-white/50 z-10">
+                    <span className="text-xs font-bold text-nature-400 uppercase tracking-wider block mb-0.5">Price</span>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-lg font-black text-nature-800">₹{crop.price || crop.expectedPrice}</span>
+                        <span className="text-xs font-medium text-nature-400">/ {crop.quantityUnit || 'kg'}</span>
                     </div>
+                </div>
+
+                {/* Grade Badge */}
+                <div className="absolute top-4 right-4">
+                    <span className={`px-3 py-1.5 text-xs font-bold rounded-xl border shadow-sm ring-2 ring-inset ${getQualityColor(crop.quality || 'B')} flex items-center gap-1.5`}>
+                        <Gem className="w-3 h-3" />
+                        Grade {crop.quality || 'B'}
+                    </span>
                 </div>
             </div>
 
-            <div className="p-5 flex flex-col flex-1">
-                {/* Header */}
+            {/* Content Body */}
+            <div className="p-6 flex flex-col flex-1">
                 <div className="mb-4">
-                    <h3 className="text-lg font-black text-text-dark line-clamp-1 group-hover:text-primary transition-colors">{crop.name}</h3>
-                    <p className="text-xs text-accent font-bold uppercase tracking-wider mt-0.5">{crop.variety || 'Standard Variety'}</p>
+                    <div className="flex justify-between items-start mb-1">
+                        <h3 className="text-xl font-black text-nature-900 group-hover:text-nature-600 transition-colors line-clamp-1">{crop.cropName}</h3>
+                        {/* Variety Tag */}
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-nature-400 bg-nature-50 px-2 py-1 rounded-lg border border-nature-100">
+                            {crop.variety || 'Organic'}
+                        </span>
+                    </div>
+                   
+                    <div className="flex items-center text-sm font-medium text-nature-500 mt-2">
+                        <MapPin className="w-4 h-4 mr-1.5 text-nature-400" />
+                        <span className="truncate">{crop.location?.district || 'Unknown'}, {crop.location?.state || 'Location'}</span>
+                    </div>
                 </div>
 
-                {/* Main Stats */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="space-y-1">
-                        <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Quantity</p>
-                        <div className="flex items-center text-sm font-black text-text-dark">
-                            <Scale className="w-3.5 h-3.5 mr-1.5 text-primary" />
-                            {crop.quantity} <span className="text-xs text-accent font-medium ml-1 uppercase">{crop.unit}</span>
+                <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-white/40 rounded-2xl border border-white/40">
+                    <div>
+                        <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">Quantity</span>
+                        <div className="flex items-center gap-1.5 text-nature-800 font-bold">
+                            <Scale className="w-4 h-4 text-nature-400" />
+                            {crop.quantity} {crop.quantityUnit || 'kg'}
                         </div>
                     </div>
-                    <div className="space-y-1">
-                        <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Price / {crop.unit}</p>
-                        <div className="flex flex-col">
-                            <div className="flex items-center text-sm font-black text-primary">
-                                <BadgeIndianRupee className="w-3.5 h-3.5 mr-1" />
-                                <span>₹{crop.finalPrice || crop.basePrice}</span>
-                            </div>
-                            {crop.finalPrice !== crop.basePrice && (
-                                <span className="text-[9px] text-accent font-medium line-through decoration-red-400/50">₹{crop.basePrice} base</span>
-                            )}
+                     <div>
+                        <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">Harvest Date</span>
+                        <div className="text-sm font-bold text-nature-700">
+                             {new Date(crop.harvestDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </div>
                     </div>
                 </div>
 
-                {/* Location */}
-                <div className="mb-6 pt-4 border-t border-neutral-light/50">
-                    <div className="flex items-center text-xs text-accent font-medium">
-                        <MapPin className="w-3.5 h-3.5 mr-2 text-red-400" />
-                        <span className="truncate">{crop.location.district}, {crop.location.state}</span>
-                    </div>
-                </div>
-
-                {/* Action Area */}
-                <div className="mt-auto flex gap-2">
+                {/* Actions Footer */}
+                <div className="mt-auto pt-4 border-t border-nature-100 flex gap-2">
                     {isOwner ? (
                         <>
                             <button
                                 onClick={handleEdit}
-                                className="p-2.5 bg-neutral-light/50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-                                title="Edit Listing"
+                                className="p-2.5 rounded-xl bg-nature-50 text-nature-600 hover:bg-nature-500 hover:text-white transition-all"
                             >
                                 <Edit className="w-4 h-4" />
                             </button>
                             <button
                                 onClick={handleDelete}
-                                className="p-2.5 bg-neutral-light/50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                                title="Delete Listing"
+                                className="p-2.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </>
                     ) : null}
 
-                    <div
-                        className="flex-1 flex items-center justify-between px-4 py-2.5 bg-neutral-light/50 text-text-dark text-xs font-black uppercase tracking-widest rounded-xl group-hover:bg-primary group-hover:text-white transition-all group/btn"
-                    >
-                        {isOwner ? "View Details" : "Buy / Bid"}
-                        <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    <div className={`flex-1 flex items-center justify-between px-5 py-3 rounded-xl font-bold text-sm transition-all shadow-sm ${
+                        isOwner 
+                        ? 'bg-nature-100 text-nature-800 hover:bg-nature-200' 
+                        : 'bg-nature-600 text-white hover:bg-nature-700 shadow-nature-600/20'
+                    }`}>
+                        <span>{isOwner ? "View Details" : "View Listing"}</span>
+                        <ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
             </div>

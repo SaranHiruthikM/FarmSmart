@@ -1,10 +1,11 @@
-function InputField({ label, type = "text", name, value, onChange, placeholder, required }) {
+function InputField({ label, type = "text", name, value, onChange, placeholder, required, className = "" }) {
   return (
-    <div className="mb-4">
-
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
+    <div className={`mb-4 w-full ${className}`}>
+      {label && (
+        <label className="block text-sm font-bold text-nature-800 mb-1.5 ml-1">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+      )}
 
       <input
         type={type}
@@ -14,13 +15,17 @@ function InputField({ label, type = "text", name, value, onChange, placeholder, 
         placeholder={placeholder}
         required={required}
         className="
-          w-full px-3 py-2
-          border border-gray-300
-          rounded-lg
-          focus:ring-2 focus:ring-primary
-          focus:border-primary
+          w-full px-4 py-3
+          bg-white/60 backdrop-blur-sm
+          border border-nature-200
+          text-nature-900 placeholder:text-nature-400
+          rounded-xl
+          focus:ring-2 focus:ring-nature-400/50
+          focus:border-nature-400
+          focus:bg-white
           outline-none
-          transition
+          transition-all duration-200
+          shadow-sm
         "
       />
     </div>
