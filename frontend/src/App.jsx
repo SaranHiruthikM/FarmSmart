@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import i18n from "./i18n/i18n";
 import authService from "./services/auth.service";
-
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Otp from "./pages/Otp";
@@ -93,7 +92,7 @@ function App() {
           <Route path="pricing" element={<QualityPricing />} />
 
           {/* Negotiation & Bidding */}
-          <Route path="negotiation" element={<NegotiationHistory />} />
+          <Route path="negotiations" element={<NegotiationHistory />} />
           <Route path="negotiations/:id" element={<NegotiationDetail />} />
 
           {/* Farmer Crop Management */}

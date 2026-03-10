@@ -115,6 +115,27 @@ const Profile = () => {
         }
     };
 
+    // KYC Upload
+    const [kycFile, setKycFile] = useState(null);
+    const [kycUploading, setKycUploading] = useState(false);
+
+    const handleKycUpload = async () => {
+        if (!kycFile) return;
+        setKycUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('document', kycFile);
+            await authService.uploadKYC(formData);
+            setMessage({ type: "success", text: "KYC Document uploaded. Pending verification." });
+            setKycFile(null);
+            fetchProfile();
+        } catch (error) {
+            setMessage({ type: "error", text: "Failed to upload KYC." });
+        } finally {
+            setKycUploading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
@@ -196,22 +217,65 @@ const Profile = () => {
                     </div>
 
                     {/* Verification Status */}
-                    <div className="bg-gradient-to-br from-nature-600 to-nature-800 p-8 rounded-3xl shadow-xl shadow-nature-900/10 text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <Check className="w-32 h-32" />
-                        </div>
-                        <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-xs font-black uppercase tracking-widest text-nature-200">Verified Account</span>
-                                <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
-                                    <Check className="w-4 h-4" />
-                                </div>
+                    {user?.isVerified ? (
+                        <div className="bg-gradient-to-br from-nature-600 to-nature-800 p-8 rounded-3xl shadow-xl shadow-nature-900/10 text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Check className="w-32 h-32" />
                             </div>
-                            <p className="text-nature-50 font-medium leading-relaxed opacity-90">
-                                Your identity is verified. This helps build trust with buyers and farmers throughout the platform.
-                            </p>
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-xs font-black uppercase tracking-widest text-nature-200">Verified Account</span>
+                                    <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+                                        <Check className="w-4 h-4" />
+                                    </div>
+                                </div>
+                                <p className="text-nature-50 font-medium leading-relaxed opacity-90">
+                                    Your identity is verified. This helps build trust with buyers and farmers throughout the platform.
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="bg-gradient-to-br from-orange-400 to-orange-600 p-8 rounded-3xl shadow-xl shadow-orange-900/10 text-white relative overflow-hidden">
+                             <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Briefcase className="w-32 h-32" />
+                            </div>
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-xs font-black uppercase tracking-widest text-orange-100">
+                                        {user?.kycStatus === 'PENDING' ? "Verification Pending" : "Verification Required"}
+                                    </span>
+                                    <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+                                        <Briefcase className="w-4 h-4" />
+                                    </div>
+                                </div>
+                                <p className="text-orange-50 font-medium leading-relaxed opacity-90 mb-4">
+                                    {user?.kycStatus === 'PENDING' 
+                                        ? "Your documents are under review. Check back later." 
+                                        : "Please upload an ID proof to verify your account."}
+                                </p>
+
+                                {user?.kycStatus !== 'PENDING' && (
+                                    <div className="space-y-3">
+                                         <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => setKycFile(e.target.files[0])}
+                                            className="block w-full text-sm text-orange-100 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-white/20 file:text-white hover:file:bg-white/30 cursor-pointer"
+                                        />
+                                        <button
+                                            type="button" 
+                                            onClick={handleKycUpload}
+                                            disabled={!kycFile || kycUploading}
+                                            className="w-full bg-white text-orange-600 font-bold py-2.5 rounded-xl hover:bg-orange-50 transition-colors disabled:opacity-75 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                                        >
+                                           {kycUploading && <Loader2 className="w-4 h-4 animate-spin"/>}
+                                           Upload Document
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Column: Form Fields */}

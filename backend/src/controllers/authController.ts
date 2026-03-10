@@ -8,6 +8,41 @@ import { AuthRequest } from '../middleware/authMiddleware';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_key_change_me';
 
+import { uploadToCloudinary } from '../utils/cloudinary';
+
+export const uploadKYC = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      sendResponse(res, 401, "Unauthorized");
+      return;
+    }
+
+    if (!req.file) {
+      sendResponse(res, 400, "KYC document image is required");
+      return;
+    }
+
+    const result = await uploadToCloudinary(req.file.buffer, 'kyc_documents');
+    const kycDocumentUrl = result.secure_url;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        kycDocumentUrl,
+        kycStatus: "PENDING",
+        isVerified: false
+      },
+      { new: true }
+    ).select('-passwordHash');
+
+    sendResponse(res, 200, "KYC document uploaded successfully. Verification pending.", { user });
+  } catch (error) {
+    console.error("Upload KYC Error:", error);
+    sendResponse(res, 500, "Internal Server Error");
+  }
+};
+
 export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;

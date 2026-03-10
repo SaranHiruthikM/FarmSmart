@@ -46,6 +46,16 @@ const authService = {
     return response.data;
   },
 
+  // Upload KYC
+  uploadKYC: async (formData) => {
+    const response = await api.post("/auth/kyc", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   // Logout user
   logout: () => {
     localStorage.removeItem("token");
