@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Leaf, Phone, Lock, ArrowRight, Loader2 } from "lucide-react";
 import authService from "../services/auth.service";
 import LanguageSelector from "../components/common/LanguageSelector";
@@ -13,12 +13,12 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!phone || !password) {
-      setError("Please fill in all fields");
+      setError(t('common.fillRequired'));
       return;
     }
 
@@ -30,12 +30,12 @@ const Login = () => {
         phoneNumber: phone,
         password: password
       });
-      
+
       // Navigate to OTP page instead of Dashboard, passing phone number
       navigate("/otp", { state: { phoneNumber: phone } });
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Invalid credentials. Please check your details.");
+      setError(err.response?.data?.message || t('auth.invalidCredentials'));
     } finally {
       setIsLoading(false);
     }
@@ -79,8 +79,8 @@ const Login = () => {
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 md:px-12 lg:px-20 bg-white text-text-dark relative">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold tracking-tight text-text-dark">Welcome Back</h2>
-            <p className="mt-2 text-accent">Please sign in to your account</p>
+            <h2 className="text-3xl font-bold tracking-tight text-text-dark">{t('auth.welcomeBack')}</h2>
+            <p className="mt-2 text-accent">{t('auth.signInSubtitle')}</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
@@ -99,7 +99,7 @@ const Login = () => {
 
               {/* Phone Input */}
               <div>
-                <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Phone Number</label>
+                <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.phoneNumber')}</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Phone className="h-5 w-5 text-accent group-focus-within:text-primary transition-colors duration-200" />
@@ -109,7 +109,7 @@ const Login = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-accent rounded-xl bg-white placeholder-accent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm font-medium text-text-dark"
-                    placeholder="Enter your phone number"
+                    placeholder={t('auth.phoneNumberPlaceholder')}
                   />
                 </div>
               </div>
@@ -117,9 +117,9 @@ const Login = () => {
               {/* Password Input */}
               <div>
                 <div className="flex items-center justify-between mb-1.5 ml-1">
-                  <label className="block text-sm font-semibold text-text-dark">Password</label>
+                  <label className="block text-sm font-semibold text-text-dark">{t('auth.password')}</label>
                   <a href="#" className="text-xs font-semibold text-primary hover:text-primary-light transition-colors">
-                    Forgot password?
+                    {t('auth.forgotPassword')}
                   </a>
                 </div>
                 <div className="relative group">
@@ -138,7 +138,7 @@ const Login = () => {
 
               {/* Language Selector */}
               <div>
-                <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">Language</label>
+                <label className="block text-sm font-semibold text-text-dark mb-1.5 ml-1">{t('auth.preferredLanguage')}</label>
                 <LanguageSelector />
               </div>
             </div>
@@ -154,16 +154,16 @@ const Login = () => {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  Sign In <ArrowRight className="ml-2 w-4 h-4" />
+                  {t('auth.login')} <ArrowRight className="ml-2 w-4 h-4" />
                 </>
               )}
             </motion.button>
 
             <div className="text-center mt-6">
               <p className="text-sm text-accent">
-                Don't have an account?{" "}
+                {t('auth.dontHaveAccount')}{" "}
                 <Link to="/register" className="font-bold text-primary hover:text-primary-dark hover:underline transition-all">
-                  Create Account
+                  {t('auth.register')}
                 </Link>
               </p>
             </div>

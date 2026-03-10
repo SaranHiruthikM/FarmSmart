@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import i18n from "./i18n/i18n";
 import authService from "./services/auth.service";
 
 import Login from "./pages/Login";
@@ -41,6 +43,18 @@ const PublicRoute = ({ children }) => {
 function App() {
   const location = useLocation();
   const isPublicRoute = (location.pathname === '/' || location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/otp');
+
+  useEffect(() => {
+    const initLanguage = async () => {
+      const user = authService.getCurrentUser();
+      if (user && user.preferredLanguage) {
+        if (i18n.language !== user.preferredLanguage) {
+          i18n.changeLanguage(user.preferredLanguage);
+        }
+      }
+    };
+    initLanguage();
+  }, []);
 
   return (
     <>

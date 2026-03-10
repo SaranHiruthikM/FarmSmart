@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import negotiationService from "../services/negotiation.service";
 import { Loader2, ArrowRight, Clock, CheckCircle2, XCircle, MessageCircle } from "lucide-react";
 
 const NegotiationHistory = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [negotiations, setNegotiations] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -47,7 +49,7 @@ const NegotiationHistory = () => {
     if (loading) return (
         <div className="flex flex-col items-center justify-center h-96 space-y-4">
             <Loader2 className="animate-spin text-primary w-12 h-12" />
-            <p className="text-accent font-medium animate-pulse">Loading negotiations...</p>
+            <p className="text-accent font-medium animate-pulse">{t('negotiations.loading')}</p>
         </div>
     );
 
@@ -55,8 +57,8 @@ const NegotiationHistory = () => {
         <div className="p-8 max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-text-dark tracking-tight">Negotiations</h1>
-                    <p className="text-accent mt-1">Manage all your active bids and offers</p>
+                    <h1 className="text-3xl font-black text-text-dark tracking-tight">{t('negotiations.title')}</h1>
+                    <p className="text-accent mt-1">{t('negotiations.subtitle')}</p>
                 </div>
             </div>
 
@@ -67,13 +69,13 @@ const NegotiationHistory = () => {
                         <div className="bg-green-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                             <MessageCircle className="w-10 h-10 text-green-400" />
                         </div>
-                        <h3 className="text-xl font-bold text-text-dark">No Negotiations Yet</h3>
-                        <p className="text-accent mt-2 max-w-md mx-auto">Start a negotiation by visiting the marketplace and making an offer on a crop.</p>
+                        <h3 className="text-xl font-bold text-text-dark">{t('negotiations.noNegotiations')}</h3>
+                        <p className="text-accent mt-2 max-w-md mx-auto">{t('negotiations.noNegotiationsDesc')}</p>
                         <button
                             onClick={() => navigate('/dashboard/marketplace')}
                             className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-green-600 transition-all shadow-lg shadow-green-200"
                         >
-                            Browse Marketplace
+                            {t('negotiations.browseMarketplace')}
                         </button>
                     </div>
                 ) : (
@@ -89,11 +91,11 @@ const NegotiationHistory = () => {
                                         🌾
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-text-dark group-hover:text-primary transition-colors">{item.cropName || 'Unknown Crop'}</h3>
+                                        <h3 className="text-lg font-bold text-text-dark group-hover:text-primary transition-colors">{item.cropName || t('negotiations.unknownCrop')}</h3>
                                         <div className="flex items-center gap-3 mt-1 text-sm text-accent">
-                                            <span>Qty: {item.quantity} {item.unit || 'kg'}</span>
+                                            <span>{t('negotiations.qty')}: {item.quantity} {item.unit || 'kg'}</span>
                                             <span className="w-1 h-1 bg-neutral-light rounded-full"></span>
-                                            <span>Offered: ₹{item.price}/{item.unit || 'kg'}</span>
+                                            <span>{t('negotiations.offered')}: ₹{item.price}/{item.unit || 'kg'}</span>
                                         </div>
                                     </div>
                                 </div>

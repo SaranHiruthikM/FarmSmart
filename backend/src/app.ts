@@ -12,6 +12,7 @@ import schemeRoutes from './routes/schemeRoutes';
 import advisoryRoutes from './routes/advisoryRoutes';
 import disputeRoutes from './routes/disputeRoutes';
 import demandRoutes from './routes/demandRoutes';
+import poolingRoutes from './routes/pooling.routes';
 import { sendResponse } from './utils/response';
 
 const app = express();

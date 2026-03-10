@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
 import LanguageSelector from "../common/LanguageSelector";
@@ -9,6 +10,7 @@ const Header = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const user = authService.getCurrentUser();
 
     // Close on click outside
@@ -39,7 +41,7 @@ const Header = () => {
                 <div className="relative hidden md:block group">
                     <input
                         type="text"
-                        placeholder="Search..."
+                        placeholder={t('common.search')}
                         className="pl-10 pr-4 py-2.5 bg-white border border-[#E0E0E0] rounded-full text-sm w-64 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm group-hover:shadow-md"
                     />
                     <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -67,13 +69,13 @@ const Header = () => {
                                 className="absolute right-0 top-full mt-2 w-80 bg-[#FAF9F6] rounded-2xl shadow-xl border border-[#EAEAEA] overflow-hidden origin-top-right"
                             >
                                 <div className="p-4 space-y-3">
-                                    <NotificationItem icon={MessageSquare} title="New Message" isNew />
-                                    <NotificationItem icon={Gavel} title="Auction Update" isNew={false} />
-                                    <NotificationItem icon={Gavel} title="Auction Update" isNew={false} />
-                                    <NotificationItem icon={CircleAlert} title="Negotiation alert" isNew={false} />
+                                    <NotificationItem icon={MessageSquare} title={t('common.newMessage')} isNew />
+                                    <NotificationItem icon={Gavel} title={t('common.auctionUpdate')} isNew={false} />
+                                    <NotificationItem icon={Gavel} title={t('common.auctionUpdate')} isNew={false} />
+                                    <NotificationItem icon={AlertCircle} title={t('common.negotiationAlert')} isNew={false} />
                                 </div>
                                 <div className="px-4 py-3 bg-white/50 border-t border-[#EAEAEA] text-right">
-                                    <button onClick={() => navigate("/dashboard/notifications")} className="text-xs font-semibold text-primary hover:text-primary-dark">View all</button>
+                                    <button onClick={() => navigate("/dashboard/notifications")} className="text-xs font-semibold text-primary hover:text-primary-dark">{t('common.viewAll')}</button>
                                 </div>
                             </motion.div>
                         )}
@@ -117,7 +119,7 @@ const Header = () => {
                                             <div className="p-1.5 bg-green-100/50 rounded-lg group-hover:bg-primary/10 transition-colors">
                                                 <User className="w-4 h-4" />
                                             </div>
-                                            <span className="text-sm font-semibold">Profile</span>
+                                            <span className="text-sm font-semibold">{t('nav.profile')}</span>
                                         </div>
                                         <ChevronRight className="w-4 h-4 text-[#C0C0C0]" />
                                     </button>
@@ -130,7 +132,7 @@ const Header = () => {
                                             <div className="p-1.5 bg-green-100/50 rounded-lg group-hover:bg-red-50 transition-colors">
                                                 <LogOut className="w-4 h-4" />
                                             </div>
-                                            <span className="text-sm font-semibold">Logout</span>
+                                            <span className="text-sm font-semibold">{t('nav.logout')}</span>
                                         </div>
                                     </button>
                                 </div>
