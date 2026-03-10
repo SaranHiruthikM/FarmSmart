@@ -1,9 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home, Languages } from "lucide-react";
-import authService from "../services/auth.service";
-import AuthCard from "../components/common/AuthCard"; // Keeping for reference if needed elsewhere, but not using here.
+import authService from "../services/auth.service";// Keeping for reference if needed elsewhere, but not using here.
 import { useState } from "react";
 const Register = () => {
   const navigate = useNavigate()
@@ -16,16 +14,7 @@ const Register = () => {
   const [address, setAddress] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [preferredLanguage, setPreferredLanguage] = useState("en");
-
-  const languages = [
-    { code: "en", name: "English", native: "English" },
-    { code: "ta", name: "Tamil", native: "தமிழ்" },
-    { code: "hi", name: "Hindi", native: "हिन्दी" },
-    { code: "ml", name: "Malayalam", native: "മലയാളം" },
-    { code: "te", name: "Telugu", native: "తెలుగు" },
-    { code: "kn", name: "Kannada", native: "ಕನ್ನಡ" },
-  ];
+  const [preferredLanguage] = useState("en");
 
   const { t } = useTranslation();
 

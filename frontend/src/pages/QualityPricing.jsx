@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Award,
-    Upload,
     CheckCircle2,
     AlertCircle,
     ArrowRight,

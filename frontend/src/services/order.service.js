@@ -1,5 +1,4 @@
 import api from "./api";
-import authService from "./auth.service";
 
 const transformOrder = (order) => {
   if (!order) return null;

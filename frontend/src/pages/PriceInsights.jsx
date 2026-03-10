@@ -63,10 +63,12 @@ const PriceInsights = () => {
     const [timeFilter, setTimeFilter] = useState("30"); // Default 30 days
 
     // Dropdown UI
+    // eslint-disable-next-line no-unused-vars
     const [isDistrictDropdownOpen, setIsDistrictDropdownOpen] = useState(false);
     const districtInputRef = useRef(null);
 
     // Filter districts based on input for search
+    // eslint-disable-next-line no-unused-vars
     const filteredDistricts = useMemo(() => {
         if (!selectedDistrict) return districtsList;
         // Search logic
@@ -84,6 +86,7 @@ const PriceInsights = () => {
     const [loading, setLoading] = useState(false);
 
     // AI Forecast states
+    // eslint-disable-next-line no-unused-vars
     const [forecastResult, setForecastResult] = useState("");
     const [isForecastLoading, setIsForecastLoading] = useState(false);
     const [showForecast, setShowForecast] = useState(false);

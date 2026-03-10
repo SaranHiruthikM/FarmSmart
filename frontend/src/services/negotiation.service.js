@@ -1,5 +1,4 @@
 import api from "./api";
-import authService from "./auth.service";
 
 // Helper to transform Backend Negotiation format to Frontend Mock format
 const transformNegotiation = (serverData) => {
@@ -60,19 +59,15 @@ const transformNegotiation = (serverData) => {
 const NegotiationService = {
     // Start a new negotiation (Buyer side)
     async startNegotiation(cropId, price, quantity, message, farmerId) {
-        try {
-            const response = await api.post("/negotiations/start", {
-                cropId,
-                pricePerUnit: price,
-                quantity,
-                message,
-                farmerId
-            });
+        const response = await api.post("/negotiations/start", {
+            cropId,
+            pricePerUnit: price,
+            quantity,
+            message,
+            farmerId
+        });
 
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        return response.data;
     },
 
     // Get all negotiations for current user

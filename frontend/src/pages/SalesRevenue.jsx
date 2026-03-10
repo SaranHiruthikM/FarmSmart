@@ -26,14 +26,6 @@ const SalesRevenue = () => {
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [filteredSales, setFilteredSales] = useState([]);
 
-    useEffect(() => {
-        loadSalesData();
-    }, []);
-
-    useEffect(() => {
-        filterSales();
-    }, [sales, searchTerm, statusFilter]);
-
     const loadSalesData = async () => {
         try {
             setLoading(true);
@@ -47,7 +39,7 @@ const SalesRevenue = () => {
         }
     };
 
-    const filterSales = () => {
+    const filterSales = React.useCallback(() => {
         let result = [...sales];
 
         // Search by Crop Name or Buyer Name
@@ -65,7 +57,17 @@ const SalesRevenue = () => {
         }
 
         setFilteredSales(result);
-    };
+    }, [sales, searchTerm, statusFilter]);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        loadSalesData();
+    }, []);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        filterSales();
+    }, [filterSales]);
 
     const getStatusColor = (status) => {
         switch (status) {

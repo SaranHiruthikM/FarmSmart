@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import api from "../../services/api";
 import { ShieldAlert, CheckCircle, MessageSquare } from "lucide-react";
 
@@ -38,6 +38,7 @@ const DisputeTribunal = () => {
             setSelectedDispute(null);
             setAdminRemark("");
         } catch (error) {
+            console.log(error)
             alert("Failed to update dispute status.");
         }
     };

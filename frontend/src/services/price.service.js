@@ -74,8 +74,9 @@ const priceService = {
         try {
             const response = await api.get("/prices/compare", { params });
             return response.data;
-        } catch (error) {
+        } catch (err) {
             // If 404 (no data), return null or valid structure
+            console.log(err)
             return null;
         }
     },

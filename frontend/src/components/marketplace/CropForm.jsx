@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import InputField from "../common/InputField";
-import PrimaryButton from "../common/PrimaryButton";
 import { Loader2, Info, MapPin, Scale, BadgeIndianRupee, TrendingUp, HelpCircle } from "lucide-react";
 import qualityService from "../../services/quality.service";
 import ContextualSchemeAlert from "../schemes/ContextualSchemeAlert";
@@ -26,7 +25,15 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
 
     useEffect(() => {
         if (initialData) {
-            setFormData(initialData);
+            // Only update if data is truly different to avoid loops
+             // eslint-disable-next-line react-hooks/set-state-in-effect
+             setFormData(prev => {
+                if(JSON.stringify(prev) !== JSON.stringify(initialData)) {
+                    return initialData;
+                }
+                return prev;
+             });
+
             if (initialData.imageUrl) {
                 setPreviewUrl(initialData.imageUrl);
             }

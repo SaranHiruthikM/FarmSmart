@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
     LayoutDashboard,
@@ -23,10 +22,10 @@ const Sidebar = () => {
     const location = useLocation();
     const user = authService.getCurrentUser();
     const role = user?.role?.toLowerCase();
-    const isAdmin = role === "admin";
-    const isFarmer = role === "farmer";
-    const isBuyer = role === "buyer";
-    const isLogistics = role === "logistics";
+    // const isAdmin = role === "admin";
+    // const isFarmer = role === "farmer";
+    // const isBuyer = role === "buyer";
+    // const isLogistics = role === "logistics";
     const { t } = useTranslation();
 
     const menuItems = [

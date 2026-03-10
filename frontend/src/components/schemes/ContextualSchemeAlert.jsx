@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import api from "../../services/api";
 import authService from "../../services/auth.service";
-import { HandCoins, ChevronRight, X, Sparkles, AlertCircle } from "lucide-react";
+import {  ChevronRight, X, Sparkles} from "lucide-react";
 
 /**
  * Contextual scheme alert that matches schemes based on the crop currently being entered by the user

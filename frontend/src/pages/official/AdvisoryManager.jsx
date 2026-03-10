@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import api from "../../services/api";
 import { AlertTriangle, Plus, CloudRain, ShieldCheck, CalendarClock } from "lucide-react";
 
@@ -37,6 +37,7 @@ const AdvisoryManager = () => {
             fetchAdvisories();
             setShowModal(false);
         } catch (error) {
+            console.log(error)
             alert("Failed to broadcast advisory.");
         }
     };

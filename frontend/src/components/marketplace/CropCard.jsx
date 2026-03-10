@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import authService from "../../services/auth.service";
 import DynamicText from "../common/DynamicText";
-import { MapPin, Scale, ChevronRight, Edit, Trash2, Award, Gem, Sprout } from "lucide-react";
+import { MapPin, Scale, ChevronRight, Edit, Trash2,  Gem, Sprout } from "lucide-react";
 
 const CropCard = ({ crop, onDelete }) => {
     const { t } = useTranslation();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import {
     ShieldAlert,
     Clock,
@@ -24,7 +24,7 @@ const AdminDisputes = () => {
     const userRole = user?.role?.toUpperCase() || "BUYER";
     const isAdmin = userRole === "ADMIN";
     const isFarmer = userRole === "FARMER";
-    const isBuyer = userRole === "BUYER";
+    // const isBuyer = userRole === "BUYER";
 
     const [disputes, setDisputes] = useState([]);
     const [selectedDispute, setSelectedDispute] = useState(null);
@@ -362,6 +362,7 @@ const AdminDisputes = () => {
                                                         loadDisputes();
                                                         setSelectedDispute(null);
                                                     } catch (error) {
+                                                        console.log(error)
                                                         alert("Failed to re-open dispute");
                                                     }
                                                 }}

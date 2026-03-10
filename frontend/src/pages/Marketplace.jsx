@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import cropService from "../services/crop.service";
 import CropCard from "../components/marketplace/CropCard";
-import InputField from "../components/common/InputField";
-import poolingService from "../services/pooling.service";
 import { Loader2, Search, Filter, Plus, Globe, Layers, Users2, ChevronRight, Leaf } from "lucide-react";
 
 const Marketplace = () => {
@@ -17,8 +15,8 @@ const Marketplace = () => {
         state: "",
         district: "",
     });
-    const [viewType, setViewType] = useState("regular"); // "regular" or "institutional"
-    const [batches, setBatches] = useState([]);
+    const [viewType] = useState("regular"); // "regular" or "institutional"
+    const [batches] = useState([]);
 
     useEffect(() => {
         fetchCrops();

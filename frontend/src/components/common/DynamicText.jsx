@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDynamicTranslation } from '../../hooks/useDynamicTranslation';
 
@@ -9,7 +8,7 @@ import { useDynamicTranslation } from '../../hooks/useDynamicTranslation';
  * @param {string} as - Element type (p, span, div, h1, etc.)
  * @param {string} contextPrefix - Optional i18n key prefix to check first (e.g. "dynamic.crops")
  */
-const DynamicText = ({ text, className = "", as: Component = "span", contextPrefix }) => {
+const DynamicText = ({ text, className = "", as: Tag = "span", contextPrefix }) => {
   const { t, i18n } = useTranslation();
   
   // 1. Check static dictionary first if prefix provided
@@ -28,9 +27,9 @@ const DynamicText = ({ text, className = "", as: Component = "span", contextPref
   const displayText = staticTranslation || translated || text;
 
   return (
-    <Component className={className}>
+    <Tag className={className}>
       {displayText}
-    </Component>
+    </Tag>
   );
 };
 

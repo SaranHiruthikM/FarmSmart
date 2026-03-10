@@ -1,4 +1,3 @@
-import React from "react";
 import SchemesList from "../components/schemes/SchemesList";
 import EligibilityChecker from "../components/schemes/EligibilityChecker";
 import AdvisoryFeed from "../components/schemes/AdvisoryFeed";

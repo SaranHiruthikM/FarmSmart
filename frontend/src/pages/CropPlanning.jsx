@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { 
   Sprout, 
-  Calendar, 
-  MapPin, 
+  Calendar,  
   Loader2, 
   ArrowRight, 
-  Droplet, 
-  BarChart4, 
   TrendingUp 
 } from 'lucide-react';
 import { getSeasonPlan } from '../services/planning.service';

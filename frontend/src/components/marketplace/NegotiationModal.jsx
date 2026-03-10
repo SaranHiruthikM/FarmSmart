@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { X, HandCoins, AlertCircle, ShoppingBag, Sprout } from 'lucide-react';
 import PrimaryButton from '../common/PrimaryButton';
 import orderService from '../../services/order.service';

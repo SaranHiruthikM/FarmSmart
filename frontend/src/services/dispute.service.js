@@ -1,5 +1,4 @@
 import api from "./api";
-import authService from "./auth.service";
 
 const transformDispute = (data) => {
   if (!data) return null;
@@ -54,13 +53,13 @@ const getPersistentDisputes = () => {
   }
 };
 
-const savePersistentDisputes = (disputes) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(disputes));
-  } catch (err) {
-    console.error("Failed to save disputes:", err);
-  }
-};
+// const savePersistentDisputes = (disputes) => {
+//   try {
+//     localStorage.setItem(STORAGE_KEY, JSON.stringify(disputes));
+//   } catch (err) {
+//     console.error("Failed to save disputes:", err);
+//   }
+// };
 
 const disputeService = {
   // Raise a new dispute

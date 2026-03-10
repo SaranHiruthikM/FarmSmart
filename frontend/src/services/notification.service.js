@@ -82,7 +82,7 @@ class NotificationService {
                 cropService.getAllCrops()
             ]);
 
-            const currentRole = user.role ? user.role.toUpperCase() : (user.userType ? user.userType.toUpperCase() : "");
+            // const currentRole = user.role ? user.role.toUpperCase() : (user.userType ? user.userType.toUpperCase() : "");
 
             // --- PROCESS NEGOTIATIONS ---
             negotiations.forEach(neg => {
@@ -221,7 +221,7 @@ class NotificationService {
     }
 
     // Unused but kept for compatibility
-    createNotification(targetUserId, message, type = 'INFO', link = null) {
+    createNotification(targetUserId, message, _type = 'INFO', _link = null) {
         return Promise.resolve();
     }
 
