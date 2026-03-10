@@ -127,7 +127,7 @@ const Dashboard = () => {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-nature-600 animate-spin mx-auto mb-4" />
-          <p className="text-nature-500 font-medium">{t('dashboard.loading')</p>
+          <p className="text-nature-500 font-medium">{t('dashboard.loading')}</p>
         </div>
       </div>
     );
