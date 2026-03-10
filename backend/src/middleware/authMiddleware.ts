@@ -42,7 +42,7 @@ export const adminOnly = (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.user?.role !== "ADMIN") {
+  if (req.user?.role !== "ADMIN" && req.user?.role !== "COOPERATIVE") {
     return res.status(403).json({ message: "Admin access required" });
   }
   next();

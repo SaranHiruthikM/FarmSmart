@@ -18,6 +18,16 @@ const authService = {
     return response.data;
   },
 
+  // Admin login Bypass
+  adminLogin: async (credentials) => {
+    const response = await api.post("/admin/login", credentials);
+    if (response.data.data && response.data.data.token) {
+        localStorage.setItem("token", response.data.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.data.user));
+    }
+    return response.data;
+  },
+
   // Verify OTP (Check code and get token)
   verify: async (verifyData) => {
     // verifyData: { contact, code }

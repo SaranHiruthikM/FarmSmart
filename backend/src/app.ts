@@ -12,6 +12,7 @@ import schemeRoutes from './routes/schemeRoutes';
 import advisoryRoutes from './routes/advisoryRoutes';
 import disputeRoutes from './routes/disputeRoutes';
 import demandRoutes from './routes/demandRoutes';
+import adminRoutes from './routes/adminRoutes';
 import poolingRoutes from './routes/pooling.routes';
 import { sendResponse } from './utils/response';
 
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
 app.use('/crops', cropRoutes);
 app.use('/negotiations', negotiationRoutes);
 app.use('/orders', orderRoutes);

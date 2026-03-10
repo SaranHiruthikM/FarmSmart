@@ -16,6 +16,8 @@ export interface IUser extends Document {
   fullName?: string;
   preferredLanguage: string;
   isVerified: boolean;
+  kycDocumentUrl?: string;
+  kycStatus: "PENDING" | "APPROVED" | "REJECTED" | "NOT_SUBMITTED";
   isActive: boolean;
   // Reputation
   averageRating: number;
@@ -49,6 +51,12 @@ const UserSchema: Schema = new Schema(
 
     preferredLanguage: { type: String, default: 'en' },
     isVerified: { type: Boolean, default: false },
+    kycDocumentUrl: { type: String },
+    kycStatus: {
+      type: String,
+      enum: ["PENDING", "APPROVED", "REJECTED", "NOT_SUBMITTED"],
+      default: "NOT_SUBMITTED"
+    },
     isActive: { type: Boolean, default: true },
     
     // Reputation Fields

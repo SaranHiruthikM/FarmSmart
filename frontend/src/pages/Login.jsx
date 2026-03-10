@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
 import { motion, AnimatePresence } from "framer-motion";
-
 import { useTranslation } from "react-i18next";
-
-import { Leaf, Phone, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Leaf, Phone, Lock, ArrowRight, Loader2, ShieldAlert } from "lucide-react";
 import authService from "../services/auth.service";
 import LanguageSelector from "../components/common/LanguageSelector";
 import loginImage from "../assets/Images/loginPageImage.jpg";
@@ -101,6 +98,12 @@ const Login = () => {
                         <div className="w-6 h-0.5 bg-nature-300 rounded-full"></div>
                         <span className="text-nature-200 text-xs uppercase tracking-wider font-bold">George Washington</span>
                     </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/10 text-center">
+                    <Link to="/admin-login" className="text-sm font-semibold text-nature-300 hover:text-white transition-colors flex items-center justify-center gap-2">
+                        <ShieldAlert className="w-4 h-4" /> Cooperative Official Access
+                    </Link>
                 </div>
             </div>
         </div>
