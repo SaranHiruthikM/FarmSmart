@@ -10,7 +10,6 @@ router.get("/admin/all", authenticate, adminOnly, getAllAdvisories);
 
 // AI Crop Doctor
 import { diagnoseSymptoms } from "../controllers/aiAdvisoryController";
-import { authenticate } from "../middleware/authMiddleware";
 router.post("/diagnose", authenticate, diagnoseSymptoms);
 
 // AI Rotation Strategy
