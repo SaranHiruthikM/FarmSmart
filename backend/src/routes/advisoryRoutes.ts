@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { getAdvisories, createAdvisory, getAllAdvisories } from "../controllers/advisoryController";
+import { getAdvisories, createAdvisory, getAllAdvisories, updateAdvisory } from "../controllers/advisoryController";
 import { authenticate, adminOnly } from "../middleware/authMiddleware";
 
 const router = Router();
 
 router.get("/", getAdvisories);
 router.post("/", authenticate, adminOnly, createAdvisory);
+router.patch("/:id", authenticate, adminOnly, updateAdvisory);
 router.get("/admin/all", authenticate, adminOnly, getAllAdvisories);
 
 // AI Crop Doctor

@@ -5,8 +5,9 @@ export const getForecast = async (req: Request, res: Response): Promise<any> => 
     try {
         const crop = req.query.crop as string || 'Tomato';
         const location = req.query.location as string || 'Coimbatore';
+        const language = req.query.language as string || 'English';
 
-        const data = await getDemandAnalysis(crop, location);
+        const data = await getDemandAnalysis(crop, location, language);
 
         // Match frontend expected shape
         res.json({
@@ -32,9 +33,10 @@ export const getForecast = async (req: Request, res: Response): Promise<any> => 
 export const getRecommendations = async (req: Request, res: Response): Promise<any> => {
     try {
         const location = req.query.location as string || 'Coimbatore';
+        const language = req.query.language as string || 'English';
         // Pass the currently selected crop so AI can suggest complementary crops
         const currentCrop = req.query.crop as string | undefined;
-        const suggestions = await getCropRecommendations(location, currentCrop);
+        const suggestions = await getCropRecommendations(location, currentCrop, language);
 
         res.json({
             location,

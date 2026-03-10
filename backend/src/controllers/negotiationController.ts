@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { Negotiation } from "../models/Negotiation";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { getIO } from "../socket";
+import User from "../models/User";
+import { sendNegotiationAlert } from "../services/notificationService";
 
 import { Crop } from "../models/Crop";
 
@@ -60,6 +62,21 @@ export const startNegotiation = async (
                 },
             ],
         });
+
+        // NOTIFICATION: Send SMS to Farmer
+        try {
+            const farmer = await User.findById(farmerId);
+            const currentUser = await User.findById(req.user!.id);
+            if (farmer && farmer.phoneNumber) {
+                await sendNegotiationAlert(
+                    farmer.phoneNumber, 
+                    'NEW_OFFER', 
+                    { name: currentUser?.fullName || 'Buyer', crop: crop.name, price: pricePerUnit }
+                );
+            }
+        } catch (smsError) {
+            console.error("SMS Error:", smsError);
+        }
 
         try {
             const io = getIO();
@@ -144,6 +161,43 @@ export const respondToNegotiation = async (
             .populate("cropId", "name unit location")
             .populate("buyerId", "fullName phoneNumber")
             .populate("farmerId", "fullName phoneNumber");
+
+        // NOTIFICATION: Send SMS
+        try {
+            if (populatedNegotiation) {
+                // Determine Recipient (The other party)
+                const recipient = isFarmer ? populatedNegotiation.buyerId : populatedNegotiation.farmerId;
+                const senderName = isFarmer ? (populatedNegotiation.farmerId as any).fullName : (populatedNegotiation.buyerId as any).fullName;
+                const recipientPhone = (recipient as any).phoneNumber;
+                const cropName = (populatedNegotiation.cropId as any).name;
+
+                if (recipientPhone) {
+                    if (action === "COUNTER") {
+                        await sendNegotiationAlert(recipientPhone, 'COUNTER_OFFER', { 
+                            name: senderName, 
+                            crop: cropName, 
+                            price: pricePerUnit 
+                        });
+                    } else if (action === "ACCEPT") {
+                        // Notify the one who made the offer (recipent) that *I* accepted
+                        await sendNegotiationAlert(recipientPhone, 'ACCEPTED', { 
+                            name: senderName, 
+                            crop: cropName, 
+                            price: negotiation.agreedPrice 
+                        });
+                    } else if (action === "REJECT") {
+                        // Notify user their offer was rejected
+                        await sendNegotiationAlert(recipientPhone, 'REJECTED', { 
+                            name: senderName, 
+                            crop: cropName, 
+                            price: 0 
+                        });
+                    }
+                }
+            }
+        } catch (smsErr) {
+            console.error("SMS Error:", smsErr);
+        }
 
         try {
             const io = getIO();

@@ -56,6 +56,15 @@ function App() {
 
   useEffect(() => {
     const initLanguage = async () => {
+      // Prioritize local preference over user profile default to prevent resetting on refresh
+      const savedLang = localStorage.getItem('i18nextLng');
+      if (savedLang) {
+          if (i18n.language !== savedLang) {
+             i18n.changeLanguage(savedLang);
+          }
+          return;
+      }
+      
       const user = authService.getCurrentUser();
       if (user && user.preferredLanguage) {
         if (i18n.language !== user.preferredLanguage) {

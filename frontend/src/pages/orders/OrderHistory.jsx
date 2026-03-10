@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react"; // Added hooks
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import DynamicText from "../../components/common/DynamicText";
 import { Receipt, Search, Filter, ChevronRight, Package, Calendar, Tag } from "lucide-react";
 import authService from "../../services/auth.service";
 import orderService from "../../services/order.service"; // Changed to real service
 
 const OrderHistory = () => {
+    const { t } = useTranslation();
     const user = authService.getCurrentUser();
     const isFarmer = user?.role?.toLowerCase() === "farmer";
 
@@ -66,10 +69,10 @@ const OrderHistory = () => {
                         <div className="p-2 bg-primary/10 rounded-lg">
                             <Receipt className="w-6 h-6 text-primary" />
                         </div>
-                        <h1 className="text-4xl font-black text-text-dark tracking-tight">Order History</h1>
+                        <h1 className="text-4xl font-black text-text-dark tracking-tight">{t('nav.orders')}</h1>
                     </div>
                     <p className="text-[#5C715E] font-medium">
-                        {isFarmer ? "Manage and track sales of your crops." : "View and track your previous crop purchases."}
+                        {isFarmer ? t('common.orders.manageSales') : t('common.orders.viewPurchases')}
                     </p>
                 </div>
 
@@ -78,7 +81,7 @@ const OrderHistory = () => {
                         <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-accent" />
                         <input
                             type="text"
-                            placeholder="Search orders..."
+                            placeholder={t('common.orders.searchPlaceholder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-11 pr-4 py-3 bg-white border-2 border-neutral-light rounded-2xl focus:border-primary/30 outline-none w-full md:w-64 transition-all font-medium text-sm"
@@ -154,7 +157,12 @@ const OrderHistory = () => {
                                         🌾
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-black text-text-dark group-hover:text-primary transition-colors">{order.crop}</h3>
+                                        <DynamicText 
+                                            text={order.crop} 
+                                            as="h3" 
+                                            className="text-lg font-black text-text-dark group-hover:text-primary transition-colors"
+                                            contextPrefix="dynamic.crops"
+                                        />
                                         <div className="flex items-center gap-3 mt-1">
                                             <span className="text-xs font-bold text-secondary uppercase tracking-wider">{order.id.slice(0, 8)}</span>
                                             <span className="w-1 h-1 bg-accent/30 rounded-full" />
@@ -169,7 +177,7 @@ const OrderHistory = () => {
                                 {/* Details Grid */}
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:items-center gap-8 lg:gap-12 lg:px-6">
                                     <div>
-                                        <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1.5">Quantity</p>
+                                        <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1.5">{t('common.quantity')}</p>
                                         <div className="flex items-center gap-2 text-text-dark font-bold">
                                             <Package className="w-4 h-4 text-primary-light" />
                                             {order.quantity}
@@ -186,7 +194,7 @@ const OrderHistory = () => {
                                     <div className="col-span-2 md:col-span-1">
                                         <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1.5">Status</p>
                                         <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black border-2 ${getStatusColor(order.status)} uppercase tracking-wider`}>
-                                            {order.status}
+                                            {t(`dynamic.status.${order.status.toLowerCase()}`, order.status)}
                                         </span>
                                     </div>
                                 </div>

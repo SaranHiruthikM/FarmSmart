@@ -139,14 +139,9 @@ export async function getForecastAnalysis(req: Request, res: Response) {
     if (query) {
       forecast = await handleChatForecast(query, crop, district, currentPrice, language);
     } else {
-      // Logic for the original simple button if no specific query
-      const prediction = await getPricePrediction(crop, district, currentPrice);
-      const now = new Date();
-      const targetMonth = now.getMonth() + 2;
-      const targetYear = now.getFullYear();
-      const monthName = new Date(targetYear, targetMonth - 1).toLocaleString('default', { month: 'long' });
-
-      forecast = `Based on our Random Forest ML model, we predict the price for ${crop} in ${monthName} ${targetYear} in ${district} will be around ₹${prediction!.predicted_price}/kg.`;
+      // Use a default query to trigger the LLM translation capability
+      const defaultQuery = `What is the price prediction for ${crop} in ${district}?`;
+      forecast = await handleChatForecast(defaultQuery, crop, district, currentPrice, language);
     }
 
     return res.status(200).json({ forecast });

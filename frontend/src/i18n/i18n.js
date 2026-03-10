@@ -1,7 +1,15 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
+// Get language from localStorage or default to English
+const savedLanguage = localStorage.getItem('i18nextLng') || "en";
+
 i18n.use(initReactI18next).init({
+  lng: savedLanguage,
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false
+  },
   resources: {
     en: {
       translation: {
@@ -21,7 +29,47 @@ i18n.use(initReactI18next).init({
           viewAll: "View all",
           newMessage: "New Message",
           auctionUpdate: "Auction Update",
-          negotiationAlert: "Negotiation Alert"
+          negotiationAlert: "Negotiation Alert",
+          orders: {
+            manageSales: "Manage and track sales of your crops.",
+            viewPurchases: "View and track your previous crop purchases.",
+            searchPlaceholder: "Search orders..."
+          },
+          price: "Price",
+          quantity: "Quantity",
+          listedOn: "Listed On",
+          grade: "Grade",
+          location: "Location"
+        },
+        dynamic: {
+          crops: {
+            tomato: "Tomato",
+            potato: "Potato",
+            onion: "Onion",
+            wheat: "Wheat",
+            rice: "Rice",
+            "basmati rice": "Basmati Rice",
+            "sona masuri rice": "Sona Masuri Rice",
+            chilli: "Chilli",
+            okra: "Okra",
+            "bitter gourd": "Bitter Gourd",
+            "unknown crop": "Unknown Crop",
+            unknown: "Unknown"
+          },
+          status: {
+            created: "Created",
+            confirmed: "Confirmed",
+            delivered: "Delivered",
+            resolved: "Resolved",
+            rejected: "Rejected",
+            cancelled: "Cancelled",
+            pending: "Pending"
+          },
+          roles: {
+            farmer: "Farmer",
+            buyer: "Buyer",
+            logistics: "Logistics"
+          }
         },
         nav: {
           dashboard: "Dashboard",
@@ -80,7 +128,8 @@ i18n.use(initReactI18next).init({
         },
         dashboard: {
           loading: "Loading your dashboard...",
-          welcome: "Welcome back, {{name}}! Here's what's happening today.",
+          welcome: "Welcome back, {{name}}!",
+          welcomeSub: "Here's a summary of your agricultural activities and market insights.",
           totalCrops: "Total Crops",
           totalRevenue: "Total Revenue",
           activeBids: "Active Bids",
@@ -103,6 +152,12 @@ i18n.use(initReactI18next).init({
           noMatching: "No matching",
           revenueComingSoon: "Revenue Analytics (Coming Soon)",
           activityComingSoon: "Recent Activity (Coming Soon)",
+          revenueAnalytics: "Revenue Analytics",
+          recentActivity: "Recent Activity",
+          analyticsLoading: "Analytics Module Loading...",
+          detailedCharts: "Detailed charts coming soon to this view.",
+          noRecentActivity: "No Recent Activity",
+          latestActions: "Your latest actions will appear here.",
           enterQuantity: "Enter quantity (kg) to contribute:",
           joinedPool: "Successfully joined the institutional batch!",
           failedToJoin: "Failed to join pool"
@@ -348,7 +403,47 @@ i18n.use(initReactI18next).init({
           viewAll: "அனைத்தையும் காண்க",
           newMessage: "புதிய செய்தி",
           auctionUpdate: "ஏல அறிவிப்பு",
-          negotiationAlert: "பேச்சுவார்த்தை எச்சரிக்கை"
+          negotiationAlert: "பேச்சுவார்த்தை எச்சரிக்கை",
+          orders: {
+            manageSales: "உங்கள் பயிர் விற்பனையை நிர்வகிக்கவும் கண்காணிக்கவும்.",
+            viewPurchases: "உங்கள் முந்தைய பயிர் கொள்முதல்களைப் பார்க்கவும் கண்காணிக்கவும்.",
+            searchPlaceholder: "ஆர்டர்களை தேடு..."
+          },
+          price: "விலை",
+          quantity: "அளவு",
+          listedOn: "பட்டியலிடப்பட்ட தேதி",
+          grade: "தரம்",
+          location: "இடம்"
+        },
+        dynamic: {
+          crops: {
+            tomato: "தக்காளி",
+            potato: "உருளைக்கிழங்கு",
+            onion: "வெங்காயம்",
+            wheat: "கோதுமை",
+            rice: "அரிசி",
+            "basmati rice": "பாசுமதி அரிசி",
+            "sona masuri rice": "சோனா மசூரி அரிசி",
+            chilli: "மிளகாய்",
+            okra: "வெண்டைக்காய்",
+            "bitter gourd": "பாகற்காய்",
+            unknown: "தெரியாத",
+            "unknown crop": "தெரியாத பயிர்"
+          },
+          status: {
+            created: "உருவாக்கப்பட்டது",
+            confirmed: "உறுதிப்படுத்தப்பட்டது",
+            delivered: "வழங்கப்பட்டது",
+            resolved: "தீர்க்கப்பட்டது",
+            rejected: "நிராகரிக்கப்பட்டது",
+            cancelled: "ரத்து செய்யப்பட்டது",
+            pending: "நிலுவையில் உள்ளது"
+          },
+          roles: {
+            farmer: "விவசாயி",
+            buyer: "வாங்குபவர்",
+            logistics: "தளவாடங்கள்"
+          }
         },
         nav: {
           dashboard: "முகப்பு",
@@ -403,7 +498,8 @@ i18n.use(initReactI18next).init({
         },
         dashboard: {
           loading: "உங்கள் டாஷ்போர்டு ஏற்றப்படுகிறது...",
-          welcome: "மீண்டும் வருக, {{name}}! இன்று என்ன நடக்கிறது.",
+          welcome: "மீண்டும் வருக, {{name}}!",
+          welcomeSub: "உங்கள் விவசாய நடவடிக்கைகள் மற்றும் சந்தை நுண்ணறிவுகளின் சுருக்கம் இங்கே.",
           totalCrops: "மொத்த பயிர்கள்",
           totalRevenue: "மொத்த வருவாய்",
           activeBids: "செயல் ஏலங்கள்",
@@ -426,6 +522,12 @@ i18n.use(initReactI18next).init({
           noMatching: "பொருந்தும் இல்லை",
           revenueComingSoon: "வருவாய் பகுப்பாய்வு (விரைவில்)",
           activityComingSoon: "சமீபத்திய செயல்பாடு (விரைவில்)",
+          revenueAnalytics: "வருவாய் பகுப்பாய்வு",
+          recentActivity: "சமீபத்திய செயல்பாடு",
+          analyticsLoading: "பகுப்பாய்வு தொகுதி ஏற்றப்படுகிறது...",
+          detailedCharts: "விரிவான வரைபடங்கள் விரைவில் பயன்பாட்டிற்கு வரும்.",
+          noRecentActivity: "சமீபத்திய செயல்பாடு இல்லை",
+          latestActions: "உங்கள் சமீபத்திய நடவடிக்கைகள் இங்கே தோன்றும்.",
           enterQuantity: "பங்களிக்க அளவை (கிலோ) உள்ளிடவும்:",
           joinedPool: "நிறுவன தொகுப்பில் வெற்றிகரமாக இணைந்தது!",
           failedToJoin: "குளத்தில் சேர முடியவில்லை"
@@ -1528,7 +1630,7 @@ i18n.use(initReactI18next).init({
       }
     },
   },
-  lng: "en",
+  lng: savedLanguage,
   fallbackLng: "en",
 
   interpolation: {

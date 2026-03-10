@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home, Languages } from "lucide-react";
 import authService from "../services/auth.service";
 import AuthCard from "../components/common/AuthCard"; // Keeping for reference if needed elsewhere, but not using here.
+import { useState } from "react";
 const Register = () => {
+  const navigate = useNavigate()
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -49,8 +51,8 @@ const Register = () => {
         preferredLanguage
       });
 
-      // Navigate to OTP page
-      navigate("/otp", { state: { phoneNumber: phone } });
+      // Navigate to Dashboard
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || t('common.error'));

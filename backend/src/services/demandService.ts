@@ -11,7 +11,7 @@ const getGroq = () => {
 
 const MODEL_NAME = "llama-3.3-70b-versatile";
 
-export const getDemandAnalysis = async (cropName: string, location: string) => {
+export const getDemandAnalysis = async (cropName: string, location: string, language: string = 'English') => {
     // 1. Search for crops with this name in the DB
     const cropsFilter: any = { name: new RegExp(cropName, "i") };
     const crops = await Crop.find(cropsFilter);
@@ -99,54 +99,50 @@ export const getDemandAnalysis = async (cropName: string, location: string) => {
                - If price is rising and predicted to go higher -> Wait.
                - If price is likely to fall or demand is high now -> Sell.
                - If no active buyers -> Wait (unless price is crashing).
+            3. Ensure the explanation and reason are in "${language}" language.
             
-            Return strictly valid JSON:
+            Return ONLY strictly valid JSON (no markdown, no extra text):
             {
                 "explanation": "...",
                 "sellRecommendation": {
-                    "action": "...",
-                    "reason": "...",
-                    "trend": "..." 
+                    "action": "Sell Now" | "Wait",
+                    "reason": "..."
                 }
             }
             `;
 
-            const completion = await groq.chat.completions.create({
+            const chatCompletion = await groq.chat.completions.create({
                 messages: [{ role: 'user', content: prompt }],
                 model: MODEL_NAME,
-                response_format: { type: "json_object" }
-            }, { timeout: 15000 }); // 15 second timeout
+                temperature: 0.1,
+            });
 
-            console.log(`[DemandService] AI Demand response received for ${cropName}`);
-            const aiData = JSON.parse(completion.choices[0].message.content || '{}');
+            const content = chatCompletion.choices[0]?.message?.content || '{}';
+            const cleanContent = content.replace(/```json/g, '').replace(/```/g, '').trim();
+            const jsonResponse = JSON.parse(cleanContent);
+            
+            if (jsonResponse.explanation) explanation = jsonResponse.explanation;
+            if (jsonResponse.sellRecommendation) sellRecommendation = jsonResponse.sellRecommendation;
 
-            if (aiData.explanation) explanation = aiData.explanation;
-            if (aiData.sellRecommendation) sellRecommendation = aiData.sellRecommendation;
         } catch (error) {
-            console.error('[DemandService] Groq API Error (Forecast):', error);
+            console.error('Error fetching Groq demand analysis:', error);
+            // Fallback to heuristic values defined above
         }
     }
 
     return {
         demandLevel,
-        activeBuyers: activeNegotiations,
-        totalSupply,
         explanation,
         sellRecommendation,
+        activeBuyers: activeNegotiations,
+        totalSupply,
         currentPrice,
         priceTrend: priceTrendLabel,
         predictedPrice: prediction ? prediction.predicted_price : null
     };
 };
 
-// Smart fallback recommendations — crop-aware so they don't always say Tomato/Onion/Potato
-const CROP_ROTATION_FALLBACK: Record<string, Array<{ name: string; reason: string; suitability: string }>> = {
-    tomato: [{ name: 'Onion', reason: 'Tomato and onion share compatible soil conditions and rotation cycle', suitability: '82%' }, { name: 'Beans', reason: 'Legumes fix nitrogen after tomato harvest, improving soil', suitability: '78%' }, { name: 'Cabbage', reason: 'Cole crops grow well in post-tomato soil with proper pH', suitability: '71%' }],
-    onion: [{ name: 'Tomato', reason: 'Tomatoes thrive after onions and repel pests naturally', suitability: '85%' }, { name: 'Carrot', reason: 'Carrots and onions are great companion crops', suitability: '79%' }, { name: 'Maize', reason: 'Maize provides good windbreak for next season onion fields', suitability: '70%' }],
-    potato: [{ name: 'Wheat', reason: 'Wheat is an ideal crop rotation partner after potato harvest', suitability: '83%' }, { name: 'Beans', reason: 'Beans fix nitrogen depleted by potatoes', suitability: '80%' }, { name: 'Cauliflower', reason: 'Cauliflower benefits from the loose soil left after potato digging', suitability: '74%' }],
-    rice: [{ name: 'Wheat', reason: 'Classic rice-wheat rotation maximizes yield per season in India', suitability: '90%' }, { name: 'Mustard', reason: 'Mustard thrives in post-rice fields with residual moisture', suitability: '82%' }, { name: 'Gram', reason: 'Chickpea/gram is ideal nitrogen-fixer after rice in Rabi season', suitability: '77%' }],
-    wheat: [{ name: 'Rice', reason: 'Rice-wheat rotation is the backbone of Indian agriculture', suitability: '88%' }, { name: 'Sugarcane', reason: 'Sugarcane benefits from wheat-prepared soils', suitability: '74%' }, { name: 'Soybean', reason: 'Soybean fixes nitrogen and prepares soil for next wheat crop', suitability: '80%' }],
-    maize: [{ name: 'Soybean', reason: 'Soybean restores nitrogen after maize drain', suitability: '85%' }, { name: 'Wheat', reason: 'Wheat follows maize well in Rabi season', suitability: '80%' }, { name: 'Sunflower', reason: 'Sunflower is a good break crop after maize', suitability: '73%' }],
+const CROP_ROTATION_FALLBACK: Record<string, any[]> = {
     sugarcane: [{ name: 'Onion', reason: 'Onion intercropping in sugarcane ratoon is highly profitable', suitability: '80%' }, { name: 'Potato', reason: 'Potato grows well in inter-rows during early sugarcane growth', suitability: '75%' }, { name: 'Garlic', reason: 'Garlic is an excellent intercrop with sugarcane in Tamil Nadu', suitability: '72%' }],
     cotton: [{ name: 'Wheat', reason: 'Wheat is ideal after cotton harvest in north and central India', suitability: '84%' }, { name: 'Gram', reason: 'Gram fixes nitrogen depleted heavily by cotton', suitability: '81%' }, { name: 'Sunflower', reason: 'Sunflower rotation breaks cotton bollworm cycle', suitability: '75%' }],
     groundnut: [{ name: 'Maize', reason: 'Maize works well after groundnut as a cereal break crop', suitability: '83%' }, { name: 'Sorghum', reason: 'Sorghum is highly suitable following groundnut harvest', suitability: '79%' }, { name: 'Wheat', reason: 'Wheat thrives in nitrogen-enriched post-groundnut soil', suitability: '77%' }],
@@ -168,7 +164,7 @@ const DEFAULT_FALLBACK = [
     { name: 'Potato', reason: 'Consistent demand and pricing year-round', suitability: '75%' }
 ];
 
-export const getCropRecommendations = async (location: string, currentCrop?: string) => {
+export const getCropRecommendations = async (location: string, currentCrop?: string, language: string = 'English') => {
     const groq = getGroq();
 
     if (!groq) {
@@ -196,6 +192,7 @@ export const getCropRecommendations = async (location: string, currentCrop?: str
         
         Consider: local soil, climate, market demand in India, seasonal suitability, crop rotation benefits, and profitability.
         Give actionable, specific reasons. Suitability should be a realistic percentage (60%-95%).
+        Ensure the reasons and crop names (if appropriate) are in "${language}" language.
         
         Return ONLY strictly valid JSON (no markdown, no extra text):
         {
