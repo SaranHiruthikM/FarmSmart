@@ -6,6 +6,8 @@ import qualityService from "../../services/quality.service";
 import ContextualSchemeAlert from "../schemes/ContextualSchemeAlert";
 
 const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) => {
+    const [imageFile, setImageFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
     const [formData, setFormData] = useState({
         name: "",
         variety: "",
@@ -25,8 +27,20 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
     useEffect(() => {
         if (initialData) {
             setFormData(initialData);
+            if (initialData.imageUrl) {
+                setPreviewUrl(initialData.imageUrl);
+            }
         }
     }, [initialData]);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
 
     useEffect(() => {
         const calculateImpact = async () => {
@@ -115,11 +129,38 @@ const CropForm = ({ initialData, onSubmit, isLoading, buttonLabel = "Submit" }) 
             alert("Please fill in all required fields.");
             return;
         }
-        onSubmit(formData);
+        onSubmit({ ...formData, imageFile });
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-10">
+             {/* Image Upload Section */}
+             <div className="space-y-4 bg-nature-50 p-6 rounded-2xl border border-nature-200">
+                <label className="text-sm font-bold text-nature-700 uppercase tracking-wide">Crop Photo {(!initialData?.imageUrl) && "*"}</label>
+                <div className="flex items-center gap-6">
+                    <div className="w-32 h-32 bg-white rounded-xl border-2 border-dashed border-nature-300 flex items-center justify-center overflow-hidden shadow-inner transition-colors">
+                        {previewUrl ? (
+                            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                            <span className="text-nature-400 text-xs text-center px-2">No Image Selected</span>
+                        )}
+                    </div>
+                    <div>
+                         <label className="cursor-pointer inline-flex items-center gap-2 bg-white border border-nature-200 text-nature-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-nature-50 hover:border-nature-300 transition-all shadow-sm">
+                            Choose Image
+                            <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={handleImageChange} 
+                                className="hidden" 
+                                required={!initialData?.imageUrl} 
+                            />
+                        </label>
+                        <p className="mt-2 text-xs text-nature-500 font-medium">Supports: JPG, PNG (Max 5MB)</p>
+                    </div>
+                </div>
+            </div>
+
             {/* Basic Info */}
             <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-nature-200 pb-2">

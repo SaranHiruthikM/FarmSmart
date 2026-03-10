@@ -34,6 +34,7 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess, mode = 'negotiate'
 
         try {
             if (mode === 'buy') {
+                // Use instantBuy for direct purchase
                 const order = await orderService.instantBuy(crop._id, Number(quantity));
                 if (onSuccess) onSuccess(order);
             } else {

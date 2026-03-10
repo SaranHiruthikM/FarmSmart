@@ -9,11 +9,12 @@ import {
   myCrops,
 } from "../controllers/cropController";
 import { authenticate, farmerOnly } from "../middleware/authMiddleware";
+import { upload } from "../middleware/uploadMiddleware";
 
 const router = Router();
 
-router.post("/", authenticate, farmerOnly, createCrop);
-router.put("/:id", authenticate, farmerOnly, updateCrop);
+router.post("/", authenticate, farmerOnly, upload.single('image'), createCrop);
+router.put("/:id", authenticate, farmerOnly, upload.single('image'), updateCrop);
 router.delete("/:id", authenticate, farmerOnly, deleteCrop);
 router.patch("/:id/quantity", authenticate, farmerOnly, updateQuantity);
 

@@ -2,12 +2,20 @@ import { Request, Response } from "express";
 import { Crop } from "../models/Crop";
 import { QualityRule } from "../models/QualityRule";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { uploadToCloudinary } from "../utils/cloudinary";
 
 /**
  * POST /crops
  */
 export const createCrop = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ message: "Crop image is required" });
+    }
+
+    const imageUpload = await uploadToCloudinary(req.file.buffer, "crops");
+    const imageUrl = imageUpload.secure_url;
+
     let { finalPrice, basePrice, qualityGrade } = req.body;
 
     // Calculate finalPrice if missing
@@ -16,19 +24,19 @@ export const createCrop = async (req: AuthRequest, res: Response): Promise<any> 
       if (rule) {
         finalPrice = (Number(basePrice) * rule.multiplier).toFixed(2);
       } else {
-        // Fallback or error? defaulting to basePrice if rule not found is risky but maybe acceptable?
-        // Better to error if grade is invalid, but schema validation will catch invalid enum.
         finalPrice = basePrice; 
       }
     }
 
     const crop = await Crop.create({
       ...req.body,
+      imageUrl,
       finalPrice, // Add calculated or provided finalPrice
       farmerId: req.user!.id,
     });
     res.status(201).json(crop);
   } catch (error: any) {
+    console.error("Create Crop Error:", error);
     if (error.name === "ValidationError" || error.name === "CastError") {
       return res.status(400).json({ message: error.message });
     }
@@ -41,8 +49,14 @@ export const createCrop = async (req: AuthRequest, res: Response): Promise<any> 
  */
 export const updateCrop = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    let updateData = { ...req.body };
+    const { _id, farmerId, createdAt, updatedAt, ...updateData } = req.body;
     
+    // Handle image upload if present
+    if (req.file) {
+      const imageUpload = await uploadToCloudinary(req.file.buffer, "crops");
+      updateData.imageUrl = imageUpload.secure_url;
+    }
+
     // If updating price factors, recalculate finalPrice
     if (updateData.basePrice || updateData.qualityGrade) {
       // We might need existing data if only one is provided
@@ -62,13 +76,14 @@ export const updateCrop = async (req: AuthRequest, res: Response): Promise<any> 
 
     const crop = await Crop.findOneAndUpdate(
       { _id: req.params.id, farmerId: req.user!.id },
-      updateData,
+      { $set: updateData },
       { new: true, runValidators: true }
     );
     
     if (!crop) return res.status(404).json({ message: "Crop not found" });
     res.json(crop);
   } catch (error: any) {
+    console.error("Update Crop Error Detail:", error); // Improved logging
     if (error.name === "ValidationError" || error.name === "CastError") {
       return res.status(400).json({ message: error.message });
     }

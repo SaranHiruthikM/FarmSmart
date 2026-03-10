@@ -3,14 +3,12 @@ dotenv.config();
 
 import app from './app';
 import connectDB from './config/db';
-import { seedSchemesAndAdvisory } from './utils/seedSchemes';
 import { createServer } from 'http';
 import { initSocket } from './socket';
 
 // Connect to Database
 connectDB().then(() => {
-    // Seed data on startup (for demo purposes)
-    seedSchemesAndAdvisory();
+    console.log("Database connected.");
 });
 
 const PORT = process.env.PORT || 3000;

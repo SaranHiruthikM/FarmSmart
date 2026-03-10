@@ -90,20 +90,7 @@ export const getPriceImpact = async (req: Request, res: Response): Promise<void>
  */
 export const getQualityRules = async (req: Request, res: Response): Promise<void> => {
     try {
-        let rules = await QualityRule.find();
-        
-        // Auto-seed default rules if database is completely empty
-        if (rules.length === 0) {
-            const defaultRules = [
-                { grade: "A", multiplier: 1.5, description: "Export quality, premium size, minimal moisture.", minSize: 80, maxMoisture: 10 },
-                { grade: "B", multiplier: 1.0, description: "Standard market quality, average size, normal moisture.", minSize: 50, maxMoisture: 14 },
-                { grade: "C", multiplier: 0.7, description: "Lower grade, smaller size or higher moisture. Good for processing.", minSize: 0, maxMoisture: 20 },
-            ];
-            
-            await QualityRule.insertMany(defaultRules);
-            rules = await QualityRule.find();
-        }
-
+        const rules = await QualityRule.find();
         res.json(rules);
     } catch (error) {
         console.error("Get Quality Rules Error:", error);
