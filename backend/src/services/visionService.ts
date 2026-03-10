@@ -12,37 +12,78 @@ const getGroq = () => {
 };
 
 export const analyzeCropQuality = async (imageBuffer: Buffer, mimeType: string, language: string = "English") => {
+    console.log(`[VisionService] Starting analysis for mimeType: ${mimeType}, language: ${language}`);
     const base64Image = imageBuffer.toString("base64");
-    
-    // 1. Try Gemini First
+
+    // Priority 1: Groq (Llama 4 Scout - Primary)
+    try {
+        const groq = getGroq();
+        if (groq) {
+            console.log("[VisionService] Attempting Groq (Llama 4 Scout - Primary)...");
+            const completion = await groq.chat.completions.create({
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            {
+                                type: "text",
+                                text: `
+                                You are an expert agricultural quality inspector.
+                                Analyze this image of a crop strictly according to these rules:
+
+                                GRADING LOGIC:
+                                - Grade A: Perfect shape, color, no defects.
+                                - Grade B: Minor cosmetic issues (small marks, slightly irregular shape), good for local market.
+                                - Grade C: Visible damage, rot, spots, or serious deformation.
+
+                                Output Requirements:
+                                - Language: all descriptive values MUST be in "${language}" (keys remain in English).
+                                - Format: Return ONLY a raw JSON object.
+                                
+                                JSON Structure:
+                                {
+                                  "cropName": "Detected name in ${language}",
+                                  "grade": "A" | "B" | "C",
+                                  "confidence": number,
+                                  "defects": ["list of issues in ${language}"],
+                                  "analysis": "Single sentence summary of reasoning in ${language}."
+                                }
+                                `
+                            },
+                            {
+                                type: "image_url",
+                                image_url: {
+                                    url: `data:${mimeType};base64,${base64Image}`
+                                }
+                            }
+                        ]
+                    }
+                ],
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                temperature: 0.1,
+                max_tokens: 500,
+            });
+
+            const content = completion.choices[0]?.message?.content;
+            if (content) {
+                console.log("[VisionService] Received response from Groq.");
+                const jsonStr = content.replace(/```json/g, "").replace(/```/g, "").trim();
+                const result = JSON.parse(jsonStr);
+                if (result.grade) result.grade = result.grade.toUpperCase();
+                return result;
+            }
+        }
+    } catch (groqError: any) {
+        console.warn("[VisionService] Groq failed, trying fallback...", groqError?.message || groqError);
+    }
+
+    // Priority 2: Gemini (Fallback)
     try {
         const genAI = getGenerativeAI();
         if (genAI) {
-            // Using specific model version which is more stable
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const prompt = `
-            You are an expert agricultural quality inspector.
-            Analyze this image of a crop very strictly.
-            The response must be in "${language}" (only values, keep keys in English).
-            
-            1. Identify the crop (e.g., Tomato, Potato).
-            2. Detect any visual defects (spots, rot, unripe, shape issues, pests).
-            3. Assign a Quality Grade based on these rules:
-               - Grade A (Premium): Perfect shape, bright color, no defects.
-               - Grade B (Standard): Minor shape irregularities, very slight marks, readable but not perfect.
-               - Grade C (Low/Fair): Visible spots, cuts, rot, or serious deformation.
-            4. Estimate a "Confidence Score" (0-100%).
-            5. List the specific defects found (in ${language}).
-        
-            Return ONLY valid JSON (no markdown):
-            {
-              "cropName": "string",
-              "grade": "A" | "B" | "C",
-              "confidence": number,
-              "defects": ["string (in ${language})", "string (in ${language})"],
-              "analysis": "Single sentence summary of why this grade was given (in ${language})."
-            }
-            `;
+            console.log("[VisionService] Attempting Gemini fallback...");
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const prompt = `Analyze this crop strictly. Language: ${language}. Return ONLY raw JSON: {"cropName": "name", "grade": "A"|"B"|"C", "confidence": 0, "defects": [], "analysis": ""}`;
 
             const result = await model.generateContent([
                 prompt,
@@ -55,70 +96,24 @@ export const analyzeCropQuality = async (imageBuffer: Buffer, mimeType: string, 
             ]);
             const response = await result.response;
             const text = response.text();
+
+            console.log("[VisionService] Received response from Gemini.");
             const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
-            return JSON.parse(jsonStr);
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.grade) parsed.grade = parsed.grade.toUpperCase();
+            return parsed;
         }
-    } catch (geminiError) {
-        console.warn("Gemini Vision failed, trying Groq fallback...", geminiError);
+    } catch (geminiError: any) {
+        console.error("[VisionService] Gemini fallback failed:", geminiError?.message || geminiError);
     }
 
-    // 2. Fallback to Groq (Llama 3.2 Vision)
-    try {
-        const groq = getGroq();
-        if (!groq) throw new Error("No AI providers available (Missing GEMINI_API_KEY and GROQ_API_KEY)");
-
-        const completion = await groq.chat.completions.create({
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "text",
-                            text: `
-                            You are an expert agricultural quality inspector. Analyze this image of a crop strictly.
-                            Identify crop, defects, grade (A/B/C), confidence.
-                            Response MUST be in "${language}" language (values only).
-                            Return ONLY valid JSON (no markdown block):
-                            {
-                              "cropName": "string (in ${language})",
-                              "grade": "A" | "B" | "C",
-                              "confidence": number,
-                              "defects": ["string (in ${language})"],
-                              "analysis": "string (in ${language})"
-                            }
-                            `
-                        },
-                        {
-                            type: "image_url",
-                            image_url: {
-                                url: `data:${mimeType};base64,${base64Image}`
-                            }
-                        }
-                    ]
-                }
-            ],
-            model: "llama-3.2-90b-vision-preview",
-            temperature: 0.1,
-            max_tokens: 500,
-            // response_format: { type: "json_object" } // Removed as it can cause 400 with Vision models
-        });
-
-        const content = completion.choices[0]?.message?.content;
-        if (content) {
-            // Clean up potentially returned markdown
-            const jsonStr = content.replace(/```json/g, "").replace(/```/g, "").trim();
-            return JSON.parse(jsonStr);
-        }
-    } catch (groqError) {
-        console.error("Groq Vision failed too:", groqError);
-    }
-
-    // 3. Final Fallback (Failure)
+    // Final Fallback (Failure)
+    console.warn("[VisionService] All AI providers failed. Returning failure placeholder.");
     return {
-        cropName: "Detailed Analysis Failed",
+        cropName: "Analysis Unavailable",
         grade: "B",
         confidence: 0.0,
-        defects: ["AI Service Unavailable"],
-        analysis: "Could not process image. Please check server logs and API keys."
+        defects: ["AI Service Connection Issue"],
+        analysis: "Could not process image due to server or API limitations. Defaulting to Grade B."
     };
 };
