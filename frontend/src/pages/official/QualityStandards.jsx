@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import api from "../../services/api";
 import { CheckCircle2, Save, Percent } from "lucide-react";
 
@@ -42,6 +42,7 @@ const QualityStandards = () => {
             alert("Pricing rules updated successfully");
             fetchRules(); // refresh
         } catch (error) {
+            console.log(error)
             alert("Failed to update rule.");
         }
     };

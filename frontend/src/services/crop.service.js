@@ -1,5 +1,4 @@
 import api from "./api";
-import authService from "./auth.service";
 
 // Helper to transform Backend Data (Crop Model) -> to Frontend UI Model (Mock structure)
 // Backend: { _id, farmerId: { _id, fullName }, ... }
@@ -57,7 +56,7 @@ const cropService = {
     },
 
     // Delete crop
-    deleteCrop: async (id, cropName = "Unknown Crop") => {
+    deleteCrop: async (id, _cropName = "Unknown Crop") => {
         const response = await api.delete(`/crops/${id}`);
         return response.data;
     },

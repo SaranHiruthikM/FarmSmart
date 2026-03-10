@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import negotiationService from '../services/negotiation.service';
@@ -48,14 +48,14 @@ const NegotiationDetail = () => {
         const userData = JSON.parse(localStorage.getItem("user") || "{}");
         const userId = userData._id || userData.id;
 
-        const socket = socketService.connect(userId);
+        socketService.connect(userId);
         socketService.joinNegotiation(id);
 
         const handleUpdate = (data) => {
             console.log("Real-time update received:", data);
             const transformed = negotiationService.transformNegotiation(data);
             // Ensure we update state correctly
-            setNegotiation(prev => {
+            setNegotiation(_prev => {
                 // Optimization: only update if changed? For now, always update.
                 return transformed;
             });

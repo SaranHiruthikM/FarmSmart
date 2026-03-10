@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Leaf, Phone, Lock, ArrowRight, Loader2, ShieldAlert } from "lucide-react";
 import authService from "../services/auth.service";

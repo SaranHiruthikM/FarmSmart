@@ -8,8 +8,8 @@ import salesService from "../services/sales.service";
 import cropService from "../services/crop.service";
 import orderService from "../services/order.service";
 import poolingService from "../services/pooling.service";
-import { Globe, Users2, ChevronRight, LayoutDashboard, Search, HandCoins } from "lucide-react";
-import RotationAdvisoryCard from "../components/dashboard/RotationAdvisoryCard";
+// import { Globe, Users2, ChevronRight, LayoutDashboard, Search, HandCoins } from "lucide-react";
+// import RotationAdvisoryCard from "../components/dashboard/RotationAdvisoryCard";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -25,8 +25,8 @@ const Dashboard = () => {
     marketTrends: "+15%"
   });
   const [loading, setLoading] = useState(true);
-  const [activePools, setActivePools] = useState([]);
-  const [myCrops, setMyCrops] = useState([]);
+  // const [activePools, setActivePools] = useState([]);
+  // const [myCrops, setMyCrops] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -83,14 +83,13 @@ const Dashboard = () => {
         revenue = salesStats.totalRevenue;
 
         const crops = results[2] || [];
-        setMyCrops(crops);
+        // setMyCrops(crops);
         cropsCount = crops.length;
 
         if (crops.length > 0) {
           const district = crops[0].location?.district;
           if (district) {
-            const pools = await poolingService.getActivePools(district);
-            setActivePools(pools);
+            await poolingService.getActivePools(district);
           }
         }
       }
@@ -109,6 +108,7 @@ const Dashboard = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleJoinPool = async (poolId, cropId, quantity) => {
     try {
       const amount = prompt(t('dashboard.enterQuantity'), quantity);

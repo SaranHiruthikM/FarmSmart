@@ -129,7 +129,7 @@ const Profile = () => {
             setMessage({ type: "success", text: "KYC Document uploaded. Pending verification." });
             setKycFile(null);
             fetchProfile();
-        } catch (error) {
+        } catch {
             setMessage({ type: "error", text: "Failed to upload KYC." });
         } finally {
             setKycUploading(false);

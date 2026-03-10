@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
     ShieldAlert,
@@ -11,7 +11,6 @@ import {
     ArrowRight
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import authService from "../../services/auth.service";
 import disputeService from "../../services/dispute.service";
 
 const MyDisputes = () => {

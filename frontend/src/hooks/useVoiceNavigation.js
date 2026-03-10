@@ -369,7 +369,7 @@ const useVoiceNavigation = () => {
                         setError(`Could not find crop "${cropName}" in your listings.`);
                         return;
                     }
-                } catch (e) {
+                } catch {
                     setError("Failed to access your crops.");
                     // Fallthrough to generic handler maybe? No, return.
                     return;
@@ -384,7 +384,7 @@ const useVoiceNavigation = () => {
                 const rawField = setFieldMatch[1];
                 const value = setFieldMatch[2];
                 let targetField = rawField;
-                let scope = 'generic';
+                // let scope = 'generic';
 
                 // Map spoken fields to actual form fields
                 const fieldMappings = {

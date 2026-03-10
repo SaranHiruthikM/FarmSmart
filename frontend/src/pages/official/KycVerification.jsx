@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import api from "../../services/api";
 import { CheckCircle2, XCircle, FileText } from "lucide-react";
 
@@ -26,6 +26,7 @@ const KycVerification = () => {
             await api.put(`/admin/kyc/${userId}`, { status });
             setUsers(users.filter((u) => u._id !== userId));
         } catch (error) {
+            console.log(error)
             alert("Action failed");
         }
     };

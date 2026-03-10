@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, AlertCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import {  AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
@@ -152,10 +152,10 @@ const Header = () => {
     );
 };
 
-const NotificationItem = ({ icon: Icon, title, isNew, warning }) => (
+const NotificationItem = ({ icon: IconComponent, title, isNew, warning }) => (
     <div className={`flex items-center gap-3 p-3 rounded-xl hover:bg-white/60 transition-colors cursor-pointer group border border-transparent hover:border-white/50 ${isNew ? "bg-nature-50/50" : ""}`}>
         <div className={`p-2 rounded-full ${warning ? "bg-red-100 text-red-500" : (isNew ? "bg-nature-100 text-nature-600" : "bg-slate-100 text-slate-400")}`}>
-            <Icon className="w-4 h-4" />
+            <IconComponent className="w-4 h-4" />
         </div>
         <div className="flex-1">
             <span className={`text-sm font-medium display-block ${isNew ? "text-nature-900 font-bold" : "text-nature-700"}`}>{title}</span>

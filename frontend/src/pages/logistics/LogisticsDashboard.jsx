@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
     Truck,
     Package,
@@ -17,7 +17,7 @@ import {
     Loader2,
     CalendarClock
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import {  AnimatePresence } from "framer-motion";
 import orderService from "../../services/order.service";
 
 const LogisticsDashboard = () => {
@@ -62,6 +62,7 @@ const LogisticsDashboard = () => {
             setAvailableOrders(availableOrders.filter(o => o.id !== orderId));
             alert("Order accepted successfully!");
         } catch (error) {
+            console.log(error)
             alert("Failed to accept order");
         } finally {
             setActionLoading(null);
@@ -79,6 +80,7 @@ const LogisticsDashboard = () => {
             setShowEditModal(null);
             fetchData();
         } catch (error) {
+            console.log(error)
             alert("Failed to update details");
         } finally {
             setActionLoading(null);
@@ -91,6 +93,7 @@ const LogisticsDashboard = () => {
             await orderService.updateOrderStatus(orderId, status);
             fetchData();
         } catch (error) {
+            console.log(error)
             alert("Failed to update status");
         } finally {
             setActionLoading(null);

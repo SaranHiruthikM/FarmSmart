@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import rotationService from "../../services/rotation.service";
 import authService from "../../services/auth.service";
-import { LineChart, HandCoins, ArrowRight, RefreshCcw, Droplet, Sprout, BarChart3, Star, Sparkles } from "lucide-react";
+import { LineChart, HandCoins, ArrowRight, RefreshCcw,  Sprout,  Star, Sparkles } from "lucide-react";
 
 const RotationAdvisoryCard = () => {
     const [suggestion, setSuggestion] = useState(null);

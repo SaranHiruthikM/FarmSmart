@@ -18,7 +18,7 @@ export const useDynamicTranslation = (text, sourceLang = 'en') => {
   };
 
   const [translatedText, setTranslatedText] = useState(getInitialState);
-  const [currentLang, setCurrentLang] = useState(i18n.language);
+  // const [currentLang, setCurrentLang] = useState(i18n.language);
 
   // Update effect to handle language changes or text changes
   useEffect(() => {
@@ -42,7 +42,7 @@ export const useDynamicTranslation = (text, sourceLang = 'en') => {
       try {
         const result = await TranslationService.translate(text, i18n.language, sourceLang);
         if (isMounted) setTranslatedText(result);
-      } catch (err) {
+      } catch (err) { // eslint-disable-line no-unused-vars
         if (isMounted) setTranslatedText(text);
       }
     };

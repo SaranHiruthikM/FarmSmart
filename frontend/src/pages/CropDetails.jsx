@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -11,13 +11,11 @@ import {
   ShoppingCart,
   Gavel,
   Loader2,
-  Share2,
   Tractor,
   Sprout,
   CheckCircle2,
   LayoutGrid,
   Bell,
-  Info
 } from "lucide-react";
 import cropService from "../services/crop.service";
 import notificationService from "../services/notification.service";

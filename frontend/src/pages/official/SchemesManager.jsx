@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import api from "../../services/api";
 import { Landmark, Plus, Edit, Trash2 } from "lucide-react";
 
@@ -62,6 +62,7 @@ const SchemesManager = () => {
             fetchSchemes();
             setShowModal(false);
         } catch (error) {
+            console.log(error)
             alert("Failed to save scheme.");
         }
     };
@@ -72,6 +73,7 @@ const SchemesManager = () => {
             await api.delete(`/schemes/${id}`);
             fetchSchemes();
         } catch (error) {
+            console.log(error)
             alert("Failed to delete scheme.");
         }
     };

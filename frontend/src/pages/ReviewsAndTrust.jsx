@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { Star, ShieldCheck, Award, MessageSquare, TrendingUp, User, Calendar, CheckCircle } from "lucide-react";
 import authService from "../services/auth.service";
 import reviewService from "../services/review.service";

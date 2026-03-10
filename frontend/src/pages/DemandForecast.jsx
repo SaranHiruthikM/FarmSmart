@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import priceService from "../services/price.service";
 import recommendationService from "../services/recommendation.service";
 import {
-    TrendingUp,
     ArrowDown,
     ArrowUp,
     MapPin,
@@ -65,6 +64,7 @@ const DemandForecast = () => {
     const [recommendations, setRecommendations] = useState([]);
     const [availableCrops, setAvailableCrops] = useState(FALLBACK_CROPS);
     const [loading, setLoading] = useState(true);
+    // eslint-disable-next-line no-unused-vars
     const [recsLoading, setRecsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -163,15 +163,15 @@ const DemandForecast = () => {
     // Recommendations-only refresh when crop changes
     // (so we don't block the whole page)
     // -------------------------------------------------------
-    const refreshRecommendations = useCallback(async () => {
-        setRecsLoading(true);
-        try {
-            const recs = await recommendationService.getCropRecommendations(committedLocation, selectedCrop);
-            setRecommendations(Array.isArray(recs) ? recs.slice(0, 3) : []);
-        } finally {
-            setRecsLoading(false);
-        }
-    }, [committedLocation, selectedCrop]);
+    // const refreshRecommendations = useCallback(async () => {
+    //     setRecsLoading(true);
+    //     try {
+    //         const recs = await recommendationService.getCropRecommendations(committedLocation, selectedCrop);
+    //         setRecommendations(Array.isArray(recs) ? recs.slice(0, 3) : []);
+    //     } finally {
+    //         setRecsLoading(false);
+    //     }
+    // }, [committedLocation, selectedCrop]);
 
     // -------------------------------------------------------
     // Render helpers
