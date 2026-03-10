@@ -129,10 +129,6 @@ function App() {
           <Route path="*" element={<div className="p-10 text-center text-gray-500">Page under construction</div>} />
         </Route>
 
-        {/* Global Fallback */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-
       {/* Official Admin Routes */}
       <Route path="/official" element={<OfficialLayout />}>
         <Route index element={<Navigate to="/official/dashboard" replace />} />

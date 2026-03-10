@@ -34,7 +34,7 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess, mode = 'negotiate'
 
         try {
             if (mode === 'buy') {
-                const order = await orderService.createOrder(crop._id, Number(quantity));
+                const order = await orderService.instantBuy(crop._id, Number(quantity));
                 if (onSuccess) onSuccess(order);
             } else {
                 let farmerId = null;
@@ -51,12 +51,13 @@ const NegotiationModal = ({ isOpen, onClose, crop, onSuccess, mode = 'negotiate'
                    throw new Error("Farmer ID missing from crop object.");
                 }
 
-                const newNegotiation = await negotiationService.createNegotiation({
-                    cropId: crop._id,
-                    proposedPrice: Number(price),
-                    proposedQuantity: Number(quantity),
-                    initialMessage: message
-                });
+                const newNegotiation = await negotiationService.startNegotiation(
+                    crop._id,
+                    Number(price),
+                    Number(quantity),
+                    message,
+                    farmerId
+                );
                 
                 if (onSuccess) onSuccess(newNegotiation);
             }
