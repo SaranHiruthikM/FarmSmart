@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Use environment variable or default to localhost:3000
-const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+// Use environment variable or default to localhost:3001
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
 const api = axios.create({
     baseURL: API_URL,
@@ -30,8 +30,8 @@ api.interceptors.response.use(
     (error) => {
         if (error.response && error.response.status === 401) {
             // Auto logout if 401 Unauthorized
-            // localStorage.removeItem("token");
-            // window.location.href = "/login";
+            localStorage.removeItem("token");
+            window.location.href = "/login";
         }
         return Promise.reject(error);
     }

@@ -17,7 +17,10 @@ export const getForecast = async (req: Request, res: Response): Promise<any> => 
             sellRecommendation: data.sellRecommendation,
             metadata: {
                 activeBuyers: data.activeBuyers,
-                totalSupply: data.totalSupply
+                totalSupply: data.totalSupply,
+                currentPrice: data.currentPrice,
+                priceTrend: data.priceTrend,
+                predictedPrice: data.predictedPrice
             }
         });
     } catch (error) {
@@ -29,7 +32,9 @@ export const getForecast = async (req: Request, res: Response): Promise<any> => 
 export const getRecommendations = async (req: Request, res: Response): Promise<any> => {
     try {
         const location = req.query.location as string || 'Coimbatore';
-        const suggestions = await getCropRecommendations(location);
+        // Pass the currently selected crop so AI can suggest complementary crops
+        const currentCrop = req.query.crop as string | undefined;
+        const suggestions = await getCropRecommendations(location, currentCrop);
 
         res.json({
             location,

@@ -8,6 +8,7 @@ import cropService from "../services/crop.service";
 import orderService from "../services/order.service";
 import poolingService from "../services/pooling.service";
 import { Globe, Users2, ChevronRight, LayoutDashboard, Search, HandCoins } from "lucide-react";
+import RotationAdvisoryCard from "../components/dashboard/RotationAdvisoryCard";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -272,18 +273,29 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Placeholder for Charts/Recent Activity */}
+      {/* AI Strategies & Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-96 flex items-center justify-center text-gray-400">
-          <div className="text-center">
-            <TrendingUp className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-            <p>{t('dashboard.revenueComingSoon')}</p>
-          </div>
+        <div className="lg:col-span-2">
+          {isFarmer ? (
+            <RotationAdvisoryCard />
+          ) : (
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-96 flex items-center justify-center text-gray-400">
+              <div className="text-center">
+                <TrendingUp className="w-12 h-12 text-gray-200 mx-auto mb-2" />
+                <p>{t('dashboard.revenueComingSoon')}</p>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-96 flex items-center justify-center text-gray-400">
-          <div className="text-center">
+
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-96 flex items-center justify-center text-gray-400 overflow-hidden relative group">
+          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+            <Users className="w-32 h-32 text-accent" />
+          </div>
+          {/* Future: Recent Activity List */}
+          <div className="text-center relative z-10">
             <Users className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-            <p>{t('dashboard.activityComingSoon')}</p>
+            <p className="text-sm font-bold text-accent italic">{t('dashboard.activityComingSoon')}</p>
           </div>
         </div>
       </div>

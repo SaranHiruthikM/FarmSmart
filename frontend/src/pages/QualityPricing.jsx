@@ -1,23 +1,34 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Award,
-    BadgeIndianRupee,
-    TrendingUp,
+    Upload,
     CheckCircle2,
-    CircleAlert,
+    AlertCircle,
     ArrowRight,
-    Search,
-    Info,
-    ShieldCheck
+    Loader2,
+    X,
+    Camera,
+    Sparkles,
+    ScanLine,
+    Info
 } from "lucide-react";
 import PrimaryButton from "../components/common/PrimaryButton";
 import { useNavigate } from "react-router-dom";
+import qualityService from "../services/quality.service";
 
 const QualityPricing = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const fileInputRef = useRef(null);
+
+    // State
     const [basePrice, setBasePrice] = useState(100);
+    const [image, setImage] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState(null);
+    const [error, setError] = useState(null);
 
     const grades = [
         {
@@ -49,6 +60,43 @@ const QualityPricing = () => {
         }
     ];
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImage(file);
+            setPreviewUrl(URL.createObjectURL(file));
+            setAnalysisResult(null);
+            setError(null);
+        }
+    };
+
+    const handleAnalyze = async () => {
+        if (!image) return;
+
+        setIsAnalyzing(true);
+        setError(null);
+
+        try {
+            const result = await qualityService.analyzeImage(image);
+            setAnalysisResult(result);
+        } catch (err) {
+            setError("Failed to analyze image. Please try again.");
+            console.error(err);
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const resetAnalysis = () => {
+        setImage(null);
+        setPreviewUrl(null);
+        setAnalysisResult(null);
+        setError(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
     return (
         <div className="space-y-8 pb-12">
             {/* Header Section */}
@@ -58,7 +106,9 @@ const QualityPricing = () => {
                 </div>
                 <div className="relative z-10">
                     <h1 className="text-4xl font-black text-text-dark tracking-tight">{t('qualityPricing.title')}</h1>
-                    <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">{t('qualityPricing.subtitle')}</p>
+                    <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">
+                        {t('qualityPricing.subtitle')}
+                    </p>
                 </div>
                 <PrimaryButton
                     className="relative z-10 px-8 py-4 text-xs font-black uppercase tracking-widest rounded-2xl"
@@ -68,50 +118,162 @@ const QualityPricing = () => {
                 </PrimaryButton>
             </div>
 
-            {/* Interactive Calculator */}
-            <div className="bg-linear-to-br from-text-dark to-neutral-900 p-8 rounded-4xl text-white shadow-xl shadow-black/10">
-                <div className="max-w-4xl mx-auto space-y-10">
-                    <div className="text-center space-y-2">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">{t('qualityPricing.calcTitle')}</h2>
-                        <p className="text-xs opacity-60 font-medium uppercase tracking-[0.2em]">{t('qualityPricing.calcSub')}</p>
-                    </div>
+            {/* AI Analysis Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left: Upload & Preview */}
+                <div className="bg-white p-8 rounded-4xl border border-neutral-light shadow-sm h-full flex flex-col">
+                    {!previewUrl ? (
+                        <div
+                            className="flex-1 border-3 border-dashed border-neutral-light rounded-3xl flex flex-col items-center justify-center p-12 text-center cursor-pointer hover:bg-neutral-50 transition-colors"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6 text-primary">
+                                <Camera className="w-10 h-10" />
+                            </div>
+                            <h3 className="text-xl font-black text-text-dark mb-2">{t('qualityPricing.uploadPhoto')}</h3>
+                            <p className="text-secondary font-medium">{t('qualityPricing.clickOrDrag')}</p>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                            />
+                        </div>
+                    ) : (
+                        <div className="relative flex-1 rounded-3xl overflow-hidden bg-black/5 flex items-center justify-center group">
+                            <img
+                                src={previewUrl}
+                                alt="Crop Preview"
+                                className="max-h-[400px] w-full object-contain"
+                            />
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-black opacity-60 uppercase tracking-widest">{t('qualityPricing.enterBase')}</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-black text-xl">₹</span>
-                                <input
-                                    type="number"
-                                    value={basePrice}
-                                    onChange={(e) => setBasePrice(e.target.value)}
-                                    className="w-full bg-white/5 border-2 border-white/10 focus:border-primary px-10 py-4 rounded-2xl outline-none text-2xl font-black transition-all"
-                                />
+                            {/* Overlay Controls */}
+                            <div className="absolute top-4 right-4 flex gap-2">
+                                <button
+                                    onClick={resetAnalysis}
+                                    className="bg-white/90 backdrop-blur p-2 rounded-full hover:bg-red-50 text-red-500 transition-colors shadow-lg"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {!analysisResult && !isAnalyzing && (
+                                <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+                                    <PrimaryButton
+                                        onClick={handleAnalyze}
+                                        className="px-8 py-3 rounded-full shadow-xl"
+                                    >
+                                        <Sparkles className="w-5 h-5 mr-2" />
+                                        {t('qualityPricing.analyzeQuality')}
+                                    </PrimaryButton>
+                                </div>
+                            )}
+
+                            {isAnalyzing && (
+                                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-white">
+                                    <Loader2 className="w-12 h-12 animate-spin mb-4 text-primary" />
+                                    <p className="font-bold text-lg animate-pulse">{t('qualityPricing.analyzing')}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Right: Results or Instructions */}
+                <div className="flex flex-col h-full">
+                    {analysisResult ? (
+                        <div className="bg-gradient-to-br from-text-dark to-neutral-900 text-white p-8 rounded-4xl shadow-xl h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {/* Result Header */}
+                            <div className="flex items-start justify-between mb-8">
+                                <div>
+                                    <p className="text-neutral-400 text-xs font-bold uppercase tracking-widest mb-1">{t('qualityPricing.detectedCrop')}</p>
+                                    <h2 className="text-3xl font-black">{analysisResult.cropName}</h2>
+                                </div>
+                                <div className={`px-4 py-2 rounded-xl text-center backdrop-blur-md bg-white/10 border border-white/10`}>
+                                    <p className="text-[10px] uppercase font-bold text-white/60">{t('qualityPricing.confidence')}</p>
+                                    <p className="text-xl font-black text-primary">{(analysisResult.confidence * 100).toFixed(0)}%</p>
+                                </div>
+                            </div>
+
+                            {/* Grade Badge */}
+                            <div className="flex items-center gap-6 mb-8 p-6 bg-white/5 rounded-3xl border border-white/10">
+                                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-4xl font-black shrink-0 ${analysisResult.grade === 'A' ? 'bg-green-500 text-white' :
+                                    analysisResult.grade === 'B' ? 'bg-yellow-500 text-black' :
+                                        'bg-red-500 text-white'
+                                    }`}>
+                                    {analysisResult.grade}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold mb-1">
+                                        {analysisResult.grade === 'A' ? t('qualityPricing.grades.A.name', { defaultValue: 'Premium Quality' }) :
+                                            analysisResult.grade === 'B' ? t('qualityPricing.grades.B.name', { defaultValue: 'Standard Quality' }) :
+                                                t('qualityPricing.grades.C.name', { defaultValue: 'Fair Quality' })}
+                                    </h3>
+                                    <p className="text-neutral-400 text-sm leading-relaxed">{analysisResult.analysis}</p>
+                                </div>
+                            </div>
+
+                            {/* Defects List */}
+                            {analysisResult.defects && analysisResult.defects.length > 0 && (
+                                <div className="mb-8">
+                                    <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-3 flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" /> {t('qualityPricing.detectedIssues')}
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {analysisResult.defects.map((defect, idx) => (
+                                            <span key={idx} className="bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1 rounded-full text-xs font-bold">
+                                                {defect}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="mt-auto pt-8 border-t border-white/10">
+                                <div className="flex justify-between items-center mb-4">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">{t('qualityPricing.marketPrice')} (₹/kg)</label>
+                                    <input
+                                        type="number"
+                                        value={basePrice}
+                                        onChange={(e) => setBasePrice(e.target.value)}
+                                        className="bg-transparent border-b border-white/20 w-24 text-right text-xl font-black focus:outline-none focus:border-primary text-white"
+                                    />
+                                </div>
+                                <div className="flex justify-between items-center p-4 bg-primary/20 rounded-2xl border border-primary/30">
+                                    <span className="font-bold text-primary">{t('qualityPricing.estSellingPrice')}</span>
+                                    <span className="text-2xl font-black text-white">
+                                        ₹{analysisResult.impact
+                                            ? (basePrice * analysisResult.impact.multiplier).toFixed(2)
+                                            : basePrice}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                    ) : (
+                        <div className="bg-neutral-50 p-8 rounded-4xl border border-neutral-light h-full flex flex-col justify-center items-center text-center space-y-6">
+                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm">
+                                <ScanLine className="w-10 h-10 text-secondary" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-text-dark mb-2">{t('qualityPricing.aiGrading')}</h3>
+                                <p className="text-secondary max-w-xs mx-auto text-sm leading-relaxed">
+                                    {t('qualityPricing.aiGradingDesc')}
+                                </p>
+                            </div>
 
-                        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {grades.map((grade) => (
-                                <div key={grade.id} className="bg-white/5 border border-white/10 p-6 rounded-2xl hover:bg-white/10 transition-all group">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className={`text-3xl font-black ${grade.color === 'green' ? 'text-green-400' : grade.color === 'yellow' ? 'text-yellow-400' : 'text-red-400'}`}>
-                                            {grade.id}
-                                        </span>
-                                        <div className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${grade.color === 'green' ? 'bg-green-400/20 text-green-400' : grade.color === 'yellow' ? 'bg-yellow-400/20 text-yellow-400' : 'bg-red-400/20 text-red-400'}`}>
-                                            {grade.impact}
-                                        </div>
-                                    </div>
-                                    <h4 className="font-bold text-sm mb-1">{t(`qualityPricing.grades.${grade.id}.name`, { defaultValue: grade.name })}</h4>
-                                    <p className="text-2xl font-black text-white">₹{(basePrice * grade.multiplier).toFixed(0)}</p>
+                            {error && (
+                                <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2">
+                                    <AlertCircle className="w-4 h-4" /> {error}
                                 </div>
-                            ))}
+                            )}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
             {/* Quality Standards Guide */}
-            <div className="space-y-6">
+            <div className="space-y-6 mt-12">
                 <div>
                     <h2 className="text-2xl font-black text-text-dark tracking-tight uppercase">{t('qualityPricing.guideTitle')}</h2>
                     <p className="text-accent font-bold uppercase tracking-widest text-[10px] mt-1">{t('qualityPricing.guideSub')}</p>
@@ -153,7 +315,7 @@ const QualityPricing = () => {
             {/* Verification Tip */}
             <div className="bg-green-50 border border-green-100 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
                 <div className="bg-white p-5 rounded-3xl shadow-sm border border-green-100 shrink-0 transform -rotate-3 hover:rotate-0 transition-transform">
-                    <ShieldCheck className="w-12 h-12 text-primary" />
+                    <CheckCircle2 className="w-12 h-12 text-primary" />
                 </div>
                 <div className="space-y-2">
                     <h4 className="font-black text-green-900 uppercase tracking-[0.2em] text-sm">{t('qualityPricing.whyGrade')}</h4>

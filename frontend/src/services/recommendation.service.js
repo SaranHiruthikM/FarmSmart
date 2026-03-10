@@ -9,11 +9,11 @@ const recommendationService = {
         return response.data;
     },
 
-    // Get crop recommendations based on location
-    getCropRecommendations: async (location) => {
-        const response = await api.get('/demand/recommendations', {
-            params: { location }
-        });
+    // Get crop recommendations based on location and currently selected crop
+    getCropRecommendations: async (location, currentCrop) => {
+        const params = { location };
+        if (currentCrop) params.crop = currentCrop;
+        const response = await api.get('/demand/recommendations', { params });
         return response.data.suggestions || response.data;
     }
 };
