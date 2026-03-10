@@ -5,6 +5,7 @@ import User from '../models/User';
 import VerificationCode, { VerificationType } from '../models/VerificationCode';
 import { sendResponse } from '../utils/response';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { sendWelcomeMessage, sendLoginAlert } from '../services/notificationService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_key_change_me';
 
@@ -160,8 +161,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // 4. Create User (Unverified initially)
-    await User.create({
+    // 4. Create User (Verified initially)
+    const newUser = await User.create({
       phoneNumber: phoneStr,
       passwordHash,
       role: userRole,
@@ -171,16 +172,26 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       district,
       address,
       preferredLanguage: preferredLanguage || 'en',
-      isVerified: false // Explicitly unverified
+      isVerified: true // Verify by default
     });
 
-    // 5. Generate and Save OTP
-    const otp = await saveOTP(phoneStr, VerificationType.PHONE);
+    // 5. Generate Token
+    const token = jwt.sign(
+      { userId: newUser._id, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    sendResponse(res, 201, "User registered successfully. Please verify OTP.", {
-      requiresOtp: true,
-      phoneNumber: phoneStr,
-      debugOtp: otp
+    // Send Welcome SMS
+    await sendWelcomeMessage(phoneStr, fullName);
+
+    const userObject = newUser.toObject();
+    const { passwordHash: _, ...userWithoutPassword } = userObject;
+
+    sendResponse(res, 201, "User registered successfully", {
+      user: userWithoutPassword,
+      token,
+      requiresOtp: false
     });
 
   } catch (error) {
@@ -217,13 +228,23 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // 4. Generate and Save OTP
-    const otp = await saveOTP(phoneStr, VerificationType.PHONE);
+    // 4. Generate Token
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    sendResponse(res, 200, "Credentials valid. Please verify OTP.", {
-      requiresOtp: true,
-      phoneNumber: phoneStr,
-      debugOtp: otp
+    // Send Login Alert SMS
+    await sendLoginAlert(phoneStr, user.fullName || 'User');
+
+    const userObject = user.toObject();
+    const { passwordHash: _, ...userWithoutPassword } = userObject;
+
+    sendResponse(res, 200, "Login successful", {
+      user: userWithoutPassword,
+      token,
+      requiresOtp: false
     });
 
   } catch (error) {

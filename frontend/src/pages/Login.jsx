@@ -33,8 +33,8 @@ const Login = () => {
         password: password
       });
 
-      // Navigate to OTP page instead of Dashboard, passing phone number
-      navigate("/otp", { state: { phoneNumber: phone } });
+      // Navigate to Dashboard
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || t('auth.invalidCredentials'));

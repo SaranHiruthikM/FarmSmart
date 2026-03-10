@@ -37,7 +37,7 @@ const AiCropDoctor = () => {
     };
 
     return (
-        <div className="bg-white rounded-3xl border border-neutral-light shadow-sm overflow-hidden flex flex-col h-full relative group">
+        <div className="bg-white rounded-3xl border border-neutral-light shadow-sm overflow-hidden flex flex-col h-fit relative group">
             <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
                 <Stethoscope className="w-32 h-32 text-primary" />
             </div>

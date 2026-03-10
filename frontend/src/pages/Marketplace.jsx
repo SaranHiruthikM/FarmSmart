@@ -74,11 +74,10 @@ const Marketplace = () => {
                 <div>
                    <h1 className="text-3xl md:text-4xl font-black text-nature-900 tracking-tight flex items-center gap-3">
                         <Leaf className="w-8 h-8 md:w-10 md:h-10 text-nature-600 fill-nature-100" />
-                        Marketplace
+                        {t('nav.marketplace')}
                    </h1>
                    <p className="text-nature-600 font-medium text-base md:text-lg mt-2 max-w-2xl">
-                        Discover fresh, locally sourced crops directly from verified farmers. 
-                        Fair prices, transparent quality.
+                        {t('marketplace.subtitle')}
                    </p>
                 </div>
                 
@@ -109,7 +108,7 @@ const Marketplace = () => {
                 <div className="glass-panel p-6 rounded-3xl mb-2">
                     <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-nature-700 ml-1">Crop Name</label>
+                            <label className="text-sm font-bold text-nature-700 ml-1">{t('priceInsights.crop')}</label>
                             <div className="relative">
                                 <Search className="absolute left-4 top-3.5 w-5 h-5 text-nature-400" />
                                 <input
@@ -117,32 +116,32 @@ const Marketplace = () => {
                                     name="name"
                                     value={filters.name}
                                     onChange={handleFilterChange}
-                                    placeholder="Search e.g. Rice"
+                                    placeholder={t('marketplace.searchCrop')}
                                     className="w-full pl-12 pr-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
                                 />
                             </div>
                         </div>
                         
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-nature-700 ml-1">State</label>
+                            <label className="text-sm font-bold text-nature-700 ml-1">{t('priceInsights.state')}</label>
                             <input
                                 type="text"
                                 name="state"
                                 value={filters.state}
                                 onChange={handleFilterChange}
-                                placeholder="Filter by State"
+                                placeholder={t('marketplace.filterByState')}
                                 className="w-full px-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
                             />
                         </div>
                         
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-nature-700 ml-1">District</label>
+                            <label className="text-sm font-bold text-nature-700 ml-1">{t('priceInsights.district')}</label>
                             <input
                                 type="text"
                                 name="district"
                                 value={filters.district}
                                 onChange={handleFilterChange}
-                                placeholder="Filter by District"
+                                placeholder={t('marketplace.filterByDistrict')}
                                 className="w-full px-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
                             />
                         </div>

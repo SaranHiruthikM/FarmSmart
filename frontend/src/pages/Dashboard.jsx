@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { TrendingUp, Users, DollarSign, ShoppingBag, Loader2, Truck, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import DynamicText from "../components/common/DynamicText"; // Import DynamicText
 import authService from "../services/auth.service";
 import negotiationService from "../services/negotiation.service";
 import salesService from "../services/sales.service";
@@ -140,8 +141,8 @@ const Dashboard = () => {
         <div className="relative z-10">
             <h1 className="text-4xl font-black tracking-tight mb-2">{t('nav.dashboard')}</h1>
             <p className="text-nature-100/90 text-lg font-medium max-w-2xl">
-               {t('dashboard.welcome', { name: firstName })}! 
-                <span className="block text-sm opacity-80 font-normal mt-1">Here's a summary of your agricultural activities and market insights.</span>
+               {t('dashboard.welcome', { name: firstName })}
+               <span className="block text-sm opacity-80 font-normal mt-1">{t('dashboard.welcomeSub')}</span>
             </p>
         </div>
         
@@ -218,7 +219,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 glass-panel p-8 rounded-3xl min-h-[400px] flex flex-col relative overflow-hidden group">
             <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-xl text-nature-800">Revenue Analytics</h3>
+                <h3 className="font-bold text-xl text-nature-800">{t('dashboard.revenueAnalytics')}</h3>
                 <div className="flex gap-2">
                     <span className="w-3 h-3 rounded-full bg-nature-500"></span>
                     <span className="w-3 h-3 rounded-full bg-secondary-light"></span>
@@ -230,8 +231,16 @@ const Dashboard = () => {
                 <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
                     <TrendingUp className="w-12 h-12 text-nature-300" />
                 </div>
-                <p className="text-nature-800 font-bold">Analytics Module Loading...</p>
-                <p className="text-nature-500 text-sm mt-1">Detailed charts coming soon to this view.</p>
+                <DynamicText 
+                    text={t('dashboard.analyticsLoading')} 
+                    as="p" 
+                    className="text-nature-800 font-bold"
+                />
+                <DynamicText 
+                    text={t('dashboard.detailedCharts')} 
+                    as="p" 
+                    className="text-nature-500 text-sm mt-1"
+                />
             </div>
             
             {/* Fake chart lines for visual fill */}
@@ -243,14 +252,22 @@ const Dashboard = () => {
         </div>
 
         <div className="glass-panel p-8 rounded-3xl min-h-[400px] relative overflow-hidden">
-            <h3 className="font-bold text-xl text-nature-800 mb-6">Recent Activity</h3>
+            <h3 className="font-bold text-xl text-nature-800 mb-6">{t('dashboard.recentActivity')}</h3>
             
             <div className="flex-1 flex flex-col items-center justify-center text-center h-64">
                 <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
                     <Users className="w-12 h-12 text-nature-300" />
                 </div>
-                <p className="text-nature-800 font-bold">No Recent Activity</p>
-                <p className="text-nature-500 text-sm mt-1">Your latest actions will appear here.</p>
+                <DynamicText 
+                    text={t('dashboard.noRecentActivity')} 
+                    as="p" 
+                    className="text-nature-800 font-bold"
+                />
+                <DynamicText 
+                    text={t('dashboard.latestActions')} 
+                    as="p" 
+                    className="text-nature-500 text-sm mt-1"
+                />
             </div>
         </div>
       </div>

@@ -1,0 +1,94 @@
+name: FarmSmart CI/CD Pipeline
+
+# Trigger the workflow on pushes and pull requests to the main branch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Define environment variables if needed
+env:
+  NODE_VERSION: '18.x'
+
+jobs:
+  # ------------------------------------------------------------------
+  # JOB 1: BACKEND CI (Test & Build)
+  # ------------------------------------------------------------------
+  backend-ci:
+    name: Backend CI (Test & Build)
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests (Jest)
+        run: npm test -- --passWithNoTests
+
+      - name: Build / Type Check (TypeScript)
+        run: npm run build
+
+  # ------------------------------------------------------------------
+  # JOB 2: FRONTEND CI (Lint & Build)
+  # ------------------------------------------------------------------
+  frontend-ci:
+    name: Frontend CI (Lint & Build)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint Code (ESLint)
+        # Only run lint if the script exists
+        run: npm run lint --if-present
+
+      - name: Build Project (Vite)
+        run: npm run build
+
+  # ------------------------------------------------------------------
+  # JOB 3: DEPLOY TO RENDER (CD)
+  # ------------------------------------------------------------------
+  deploy:
+    name: Deploy to Render
+    needs: [backend-ci, frontend-ci] # Only deploy if CI passes
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Deploy (Backend)
+        if: env.RENDER_DEPLOY_HOOK_BACKEND != ''
+        run: curl "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
+      
+      - name: Trigger Render Deploy (Frontend)
+        if: env.RENDER_DEPLOY_HOOK_FRONTEND != ''
+        run: curl "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}"

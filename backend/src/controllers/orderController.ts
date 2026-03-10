@@ -3,7 +3,9 @@ import { Types } from "mongoose";
 import { Order } from "../models/Order";
 import { Negotiation } from "../models/Negotiation";
 import { Crop } from "../models/Crop";
+import User from "../models/User";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { sendNewOrderAlert, sendOrderStatusAlert } from "../services/notificationService";
 
 const ORDER_STATUSES = ["CREATED", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED"] as const;
 type OrderStatus = (typeof ORDER_STATUSES)[number];
@@ -37,7 +39,7 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<any>
     // Prevent Duplicate Orders for the same negotiation
     const existingOrder = await Order.findOne({ negotiationId: negotiation._id });
     if (existingOrder) {
-        // ... existing code ...
+        console.log(`[OrderController] Duplicate order found for negotiation ${negotiation._id}. Returning existing order without sending SMS.`);
         const populatedExisting = await Order.findById(existingOrder._id)
           .populate("cropId", "name")
           .populate("buyerId", "fullName role")
@@ -77,6 +79,31 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<any>
       .populate("cropId", "name")
       .populate("buyerId", "fullName role phoneNumber")
       .populate("farmerId", "fullName role phoneNumber");
+
+    // NOTIFICATION: Send SMS to Farmer (New Order)
+    try {
+        console.log(`[OrderController] Begin SMS logic for Order: ${order._id}`);
+        // Fetch fresh User documents to ensure we have phone numbers
+        const farmer = await User.findById(order.farmerId);
+        const buyer = await User.findById(order.buyerId);
+        
+        // Debug Logs
+        if (!farmer) console.warn(`[OrderController] Farmer not found for ID: ${order.farmerId}`);
+        if (!farmer?.phoneNumber) console.warn(`[OrderController] Farmer has no phone number: ${order.farmerId}`);
+        
+        if (farmer && farmer.phoneNumber) {
+            console.log(`[OrderController] Sending New Order SMS to Farmer: ${farmer.phoneNumber}`);
+            await sendNewOrderAlert(farmer.phoneNumber, {
+                buyerName: buyer?.fullName || 'Buyer',
+                crop: crop.name || 'Crop',
+                quantity: order.quantity,
+                unit: 'kg' // Assuming default kg, or can be fetched from Crop
+            });
+            console.log(`[OrderController] SMS sent successfully.`);
+        }
+    } catch (smsErr) {
+        console.error("[OrderController] SMS Error:", smsErr);
+    }
 
     return res.status(201).json(populatedOrder);
   } catch (error: any) {
@@ -198,6 +225,33 @@ export const acceptOrder = async (req: AuthRequest, res: Response): Promise<any>
        .populate("farmerId", "fullName role phoneNumber")
        .populate("logisticsProviderId", "fullName role phoneNumber");
 
+    // NOTIFICATION: Send SMS to Farmer and Buyer (Order Accepted)
+    try {
+        const farmer = await User.findById(order.farmerId);
+        const buyer = await User.findById(order.buyerId);
+        const crop = await Crop.findById(order.cropId);
+        
+        const cropName = crop?.name || 'Crop';
+        
+        if (farmer && farmer.phoneNumber) {
+            await sendOrderStatusAlert(farmer.phoneNumber, {
+                orderId: order._id.toString(),
+                status: "CONFIRMED",
+                crop: cropName
+            });
+        }
+        
+        if (buyer && buyer.phoneNumber) {
+            await sendOrderStatusAlert(buyer.phoneNumber, {
+                orderId: order._id.toString(),
+                status: "CONFIRMED",
+                crop: cropName
+            });
+        }
+    } catch (smsErr) {
+        console.error("SMS Error:", smsErr);
+    }
+
     return res.json(populated);
   } catch (err) {
     return res.status(500).json({ message: "Server error" });
@@ -275,6 +329,37 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response): Promis
     order.status.push({ status: nextStatus, timestamp: new Date() });
 
     await order.save();
+
+    // NOTIFICATION: Send SMS to Buyer and Farmer
+    try {
+        const buyer = await User.findById(order.buyerId);
+        const farmer = await User.findById(order.farmerId);
+        const crop = await Crop.findById(order.cropId);
+        
+        const cropName = crop?.name || 'Crop';
+        const status = nextStatus;
+
+        // Notify Buyer
+        if (buyer && buyer.phoneNumber) {
+            await sendOrderStatusAlert(buyer.phoneNumber, {
+                orderId: order._id.toString(),
+                status: status,
+                crop: cropName
+            });
+        }
+
+        // Notify Farmer
+        if (farmer && farmer.phoneNumber) {
+            await sendOrderStatusAlert(farmer.phoneNumber, {
+                orderId: order._id.toString(),
+                status: status,
+                crop: cropName
+            });
+        }
+
+    } catch (smsErr) {
+        console.error("SMS Error:", smsErr);
+    }
 
     return res.json(order);
   } catch {

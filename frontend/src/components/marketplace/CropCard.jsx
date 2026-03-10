@@ -1,9 +1,14 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import authService from "../../services/auth.service";
+import DynamicText from "../common/DynamicText";
 import { MapPin, Scale, ChevronRight, Edit, Trash2, Award, Gem, Sprout } from "lucide-react";
 
 const CropCard = ({ crop, onDelete }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
+
+    // Removed getTranslatedCropName helper as we use DynamicText now
 
     // Check ownership
     const currentUser = authService.getCurrentUser();
@@ -54,7 +59,7 @@ const CropCard = ({ crop, onDelete }) => {
                 
                 {/* Price Tag */}
                 <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-white/50 z-10">
-                    <span className="text-xs font-bold text-nature-400 uppercase tracking-wider block mb-0.5">Price</span>
+                    <span className="text-xs font-bold text-nature-400 uppercase tracking-wider block mb-0.5">{t('common.price')}</span>
                     <div className="flex items-baseline gap-1">
                         <span className="text-lg font-black text-nature-800">₹{crop.price || crop.finalPrice || crop.basePrice}</span>
                         <span className="text-xs font-medium text-nature-400">/ {crop.quantityUnit || crop.unit || 'kg'}</span>
@@ -65,7 +70,7 @@ const CropCard = ({ crop, onDelete }) => {
                 <div className="absolute top-4 right-4">
                     <span className={`px-3 py-1.5 text-xs font-bold rounded-xl border shadow-sm ring-2 ring-inset ${getQualityColor(crop.qualityGrade || crop.quality || 'B')} flex items-center gap-1.5`}>
                         <Gem className="w-3 h-3" />
-                        Grade {crop.qualityGrade || crop.quality || 'B'}
+                         {t('common.grade')} {crop.qualityGrade || crop.quality || 'B'}
                     </span>
                 </div>
             </div>
@@ -74,7 +79,12 @@ const CropCard = ({ crop, onDelete }) => {
             <div className="p-6 flex flex-col flex-1">
                 <div className="mb-4">
                     <div className="flex justify-between items-start mb-1">
-                        <h3 className="text-xl font-black text-nature-900 group-hover:text-nature-600 transition-colors line-clamp-1">{crop.name || crop.cropName}</h3>
+                        <DynamicText 
+                            text={crop.name || crop.cropName || 'Unknown Crop'} 
+                            as="h3" 
+                            className="text-xl font-black text-nature-900 group-hover:text-nature-600 transition-colors line-clamp-1"
+                            contextPrefix="dynamic.crops"
+                        />
                         {/* Variety Tag */}
                         <span className="text-[10px] font-bold uppercase tracking-wider text-nature-400 bg-nature-50 px-2 py-1 rounded-lg border border-nature-100">
                             {crop.variety || 'Organic'}
@@ -83,20 +93,20 @@ const CropCard = ({ crop, onDelete }) => {
                    
                     <div className="flex items-center text-sm font-medium text-nature-500 mt-2">
                         <MapPin className="w-4 h-4 mr-1.5 text-nature-400" />
-                        <span className="truncate">{crop.location?.district || 'Unknown'}, {crop.location?.state || 'Location'}</span>
+                        <span className="truncate">{crop.location?.district || t('dynamic.unknown')} , {crop.location?.state || t('common.location')}</span>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-white/40 rounded-2xl border border-white/40">
                     <div>
-                        <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">Quantity</span>
+                        <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">{t('common.quantity')}</span>
                         <div className="flex items-center gap-1.5 text-nature-800 font-bold">
                             <Scale className="w-4 h-4 text-nature-400" />
                             {crop.quantity} {crop.quantityUnit || crop.unit || 'kg'}
                         </div>
                     </div>
                      <div>
-                        <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">Listed On</span>
+                        <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">{t('common.listedOn')}</span>
                         <div className="text-sm font-bold text-nature-700">
                              {new Date(crop.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </div>

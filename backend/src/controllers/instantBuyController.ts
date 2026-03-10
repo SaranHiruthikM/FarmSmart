@@ -2,7 +2,9 @@ import { Response } from "express";
 import { Order } from "../models/Order";
 import { Negotiation } from "../models/Negotiation";
 import { Crop } from "../models/Crop";
+import User from "../models/User";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { sendNewOrderAlert } from "../services/notificationService";
 
 /**
  * POST /orders/instant-buy
@@ -101,6 +103,28 @@ export const instantBuy = async (req: AuthRequest, res: Response): Promise<any> 
       .populate("cropId", "name")
       .populate("buyerId", "fullName role")
       .populate("farmerId", "fullName role");
+
+    // NOTIFICATION: Send SMS to Farmer (New Order via Instant Buy)
+    try {
+        const farmer = await User.findById(crop.farmerId);
+        const buyer = await User.findById(req.user.id);
+        
+        console.log(`[InstantBuy] Attempting SMS to Farmer: ${farmer?.phoneNumber}`);
+
+        if (farmer && farmer.phoneNumber) {
+            await sendNewOrderAlert(farmer.phoneNumber, {
+                buyerName: buyer?.fullName || 'Buyer (Instant)',
+                crop: crop.name || 'Crop',
+                quantity: quantity,
+                unit: crop.unit || 'kg'
+            });
+            console.log(`[InstantBuy] SMS Sent Successfully`);
+        } else {
+            console.warn(`[InstantBuy] Farmer phone missing. Cannot send SMS.`);
+        }
+    } catch (smsErr) {
+        console.error("SMS Error in InstantBuy:", smsErr);
+    }
 
     res.status(201).json(populatedOrder);
 
