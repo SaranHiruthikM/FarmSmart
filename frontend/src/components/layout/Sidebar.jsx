@@ -34,7 +34,7 @@ const Sidebar = () => {
         { label: t('nav.insights'), icon: TrendingUp, path: "/dashboard/insights", roles: ["farmer", "buyer"] },
         { label: t('nav.forecast'), icon: LineChart, path: "/dashboard/forecast", roles: ["farmer", "admin"] },
         { label: t('nav.pricing'), icon: Award, path: "/dashboard/pricing", roles: ["farmer", "buyer"] },
-        { label: t('nav.negotiations'), icon: Handshake, path: "/dashboard/negotiation", roles: ["farmer", "buyer"] },
+        { label: t('nav.negotiations'), icon: Handshake, path: "/dashboard/negotiations", roles: ["farmer", "buyer"] },
         { label: t('nav.orders'), icon: Receipt, path: "/dashboard/orders", roles: ["farmer", "buyer", "logistics"] },
         { label: t('nav.logistics'), icon: Truck, path: "/dashboard/logistics", roles: ["logistics"] },
         { label: t('nav.reviews'), icon: Star, path: "/dashboard/reviews", roles: ["farmer", "buyer", "logistics"] },

@@ -39,25 +39,33 @@ const CropCard = ({ crop, onDelete }) => {
             className="group relative glass-card rounded-3xl overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-nature-900/5 transition-all duration-300 cursor-pointer flex flex-col h-full border border-white/60"
         >
             {/* Image Placeholder with Gradient */}
-            <div className="h-48 relative overflow-hidden bg-gradient-to-br from-nature-50 to-emerald-50/50 group-hover:from-nature-100 group-hover:to-emerald-100/50 transition-colors duration-500">
-                <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-40 group-hover:scale-110 transition-all duration-700">
-                    <Sprout className="w-24 h-24 text-nature-300" strokeWidth={1} />
-                </div>
+            <div className="h-48 relative overflow-hidden bg-nature-50 group-hover:bg-nature-100 transition-colors duration-500">
+                {crop.imageUrl ? (
+                    <img 
+                        src={crop.imageUrl} 
+                        alt={crop.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-40 group-hover:scale-110 transition-all duration-700">
+                        <Sprout className="w-24 h-24 text-nature-300" strokeWidth={1} />
+                    </div>
+                )}
                 
                 {/* Price Tag */}
                 <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-white/50 z-10">
                     <span className="text-xs font-bold text-nature-400 uppercase tracking-wider block mb-0.5">Price</span>
                     <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-black text-nature-800">₹{crop.price || crop.expectedPrice}</span>
-                        <span className="text-xs font-medium text-nature-400">/ {crop.quantityUnit || 'kg'}</span>
+                        <span className="text-lg font-black text-nature-800">₹{crop.price || crop.finalPrice || crop.basePrice}</span>
+                        <span className="text-xs font-medium text-nature-400">/ {crop.quantityUnit || crop.unit || 'kg'}</span>
                     </div>
                 </div>
 
                 {/* Grade Badge */}
                 <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1.5 text-xs font-bold rounded-xl border shadow-sm ring-2 ring-inset ${getQualityColor(crop.quality || 'B')} flex items-center gap-1.5`}>
+                    <span className={`px-3 py-1.5 text-xs font-bold rounded-xl border shadow-sm ring-2 ring-inset ${getQualityColor(crop.qualityGrade || crop.quality || 'B')} flex items-center gap-1.5`}>
                         <Gem className="w-3 h-3" />
-                        Grade {crop.quality || 'B'}
+                        Grade {crop.qualityGrade || crop.quality || 'B'}
                     </span>
                 </div>
             </div>
@@ -66,7 +74,7 @@ const CropCard = ({ crop, onDelete }) => {
             <div className="p-6 flex flex-col flex-1">
                 <div className="mb-4">
                     <div className="flex justify-between items-start mb-1">
-                        <h3 className="text-xl font-black text-nature-900 group-hover:text-nature-600 transition-colors line-clamp-1">{crop.cropName}</h3>
+                        <h3 className="text-xl font-black text-nature-900 group-hover:text-nature-600 transition-colors line-clamp-1">{crop.name || crop.cropName}</h3>
                         {/* Variety Tag */}
                         <span className="text-[10px] font-bold uppercase tracking-wider text-nature-400 bg-nature-50 px-2 py-1 rounded-lg border border-nature-100">
                             {crop.variety || 'Organic'}
@@ -84,13 +92,13 @@ const CropCard = ({ crop, onDelete }) => {
                         <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">Quantity</span>
                         <div className="flex items-center gap-1.5 text-nature-800 font-bold">
                             <Scale className="w-4 h-4 text-nature-400" />
-                            {crop.quantity} {crop.quantityUnit || 'kg'}
+                            {crop.quantity} {crop.quantityUnit || crop.unit || 'kg'}
                         </div>
                     </div>
                      <div>
-                        <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">Harvest Date</span>
+                        <span className="text-[10px] font-bold text-nature-400 uppercase tracking-wider block mb-1">Listed On</span>
                         <div className="text-sm font-bold text-nature-700">
-                             {new Date(crop.harvestDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                             {new Date(crop.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </div>
                     </div>
                 </div>
