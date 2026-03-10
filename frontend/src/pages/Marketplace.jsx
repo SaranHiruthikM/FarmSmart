@@ -12,7 +12,6 @@ const Marketplace = () => {
     const [crops, setCrops] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showFilters, setShowFilters] = useState(false);
-    const location = useLocation();
     const [filters, setFilters] = useState({
         name: "",
         state: "",
@@ -22,28 +21,18 @@ const Marketplace = () => {
     const [batches, setBatches] = useState([]);
 
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const nameParam = params.get('name');
-        if (nameParam) {
-            setFilters(prev => ({ ...prev, name: nameParam }));
-            fetchCrops({ name: nameParam });
-        } else {
-            fetchCrops();
-        }
-    }, [location.search]);
+        fetchCrops();
+    }, []);
 
-    const fetchCrops = async (appliedFilters = {}) => {
+    const fetchCrops = async () => {
         setLoading(true);
         try {
-            if (viewType === "regular") {
-                const query = { ...filters, ...appliedFilters };
-                Object.keys(query).forEach(key => !query[key] && delete query[key]);
-                const data = await cropService.getAllCrops(query);
-                setCrops(data);
-            } else {
-                const data = await poolingService.getInstitutionalBatches(filters.name, filters.district);
-                setBatches(data);
-            }
+            const query = { ...filters };
+            // Remove empty keys
+            Object.keys(query).forEach(key => !query[key] && delete query[key]);
+            
+            const data = await cropService.getAllCrops(query);
+            setCrops(data);
         } catch (error) {
             console.error("Failed to fetch data", error);
         } finally {
@@ -69,7 +58,8 @@ const Marketplace = () => {
         if (window.confirm(t('marketplace.confirmDelete'))) {
             try {
                 await cropService.deleteCrop(id);
-                setCrops(crops.filter(crop => crop._id !== id));
+                // Optimistically remove from UI
+                setCrops(currentCrops => currentCrops.filter(crop => crop.id !== id));
             } catch (error) {
                 console.error("Failed to delete crop", error);
                 alert(t('marketplace.deleteFailed'));
@@ -78,104 +68,130 @@ const Marketplace = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-8 pb-8">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-text-dark tracking-tight">{t('nav.marketplace')}</h1>
-                    <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">{t('marketplace.subtitle')}</p>
+                   <h1 className="text-3xl md:text-4xl font-black text-nature-900 tracking-tight flex items-center gap-3">
+                        <Leaf className="w-8 h-8 md:w-10 md:h-10 text-nature-600 fill-nature-100" />
+                        Marketplace
+                   </h1>
+                   <p className="text-nature-600 font-medium text-base md:text-lg mt-2 max-w-2xl">
+                        Discover fresh, locally sourced crops directly from verified farmers. 
+                        Fair prices, transparent quality.
+                   </p>
                 </div>
-                <div className="flex bg-neutral-light/30 p-1.5 rounded-2xl gap-1">
-                    <button
-                        onClick={() => setViewType("regular")}
-                        className={`px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${viewType === "regular" ? 'bg-white text-primary shadow-sm' : 'text-accent hover:bg-white/50'}`}
-                    >
-                        {t('marketplace.individual')}
-                    </button>
-                    <button
-                        onClick={() => setViewType("institutional")}
-                        className={`px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${viewType === "institutional" ? 'bg-white text-primary shadow-sm' : 'text-accent hover:bg-white/50'}`}
-                    >
-                        {t('marketplace.institutional')}
-                    </button>
-                </div>
-                <div className="flex gap-3">
+                
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`flex items-center gap-2 px-6 py-3.5 border-2 font-black rounded-2xl transition-all text-sm tracking-wider ${showFilters ? 'bg-neutral-light border-neutral-light text-text-dark' : 'bg-white border-neutral-light text-secondary hover:border-primary/50 hover:text-primary'}`}
+                        className={`flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold transition-all duration-300 border ${
+                            showFilters 
+                            ? 'bg-nature-100 text-nature-800 border-nature-200 shadow-inner' 
+                            : 'glass-card text-nature-700 hover:bg-white hover:text-nature-900 border-white/60'
+                        }`}
                     >
                         <Filter className="w-5 h-5" />
                         {showFilters ? t('marketplace.hideFilters') : t('marketplace.showFilters')}
                     </button>
+                    
                     <Link
                         to="/dashboard/add-crop"
-                        className="flex items-center gap-2 px-8 py-3.5 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:bg-green-600 hover:-translate-y-1 transition-all text-sm tracking-wider"
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-nature-600 hover:bg-nature-700 text-white font-bold rounded-2xl shadow-lg shadow-nature-600/30 hover:-translate-y-1 transition-all duration-300"
                     >
                         <Plus className="w-5 h-5 stroke-[3px]" /> {t('marketplace.addCrop')}
                     </Link>
                 </div>
             </div>
 
-            {/* Filters */}
-            {showFilters && (
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-neutral-light animate-in slide-in-from-top-2 duration-200">
-                    <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                        <InputField
-                            label={t('marketplace.searchCrop')}
-                            name="name"
-                            value={filters.name}
-                            onChange={handleFilterChange}
-                            placeholder="e.g. Rice"
-                        />
-                        <InputField
-                            label={t('auth.state')}
-                            name="state"
-                            value={filters.state}
-                            onChange={handleFilterChange}
-                            placeholder={t('marketplace.filterByState')}
-                        />
-                        <InputField
-                            label={t('auth.district')}
-                            name="district"
-                            value={filters.district}
-                            onChange={handleFilterChange}
-                            placeholder={t('marketplace.filterByDistrict')}
-                        />
-                        <div className="mb-4">
+            {/* Glass Filter Panel */}
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showFilters ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="glass-panel p-6 rounded-3xl mb-2">
+                    <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-nature-700 ml-1">Crop Name</label>
+                            <div className="relative">
+                                <Search className="absolute left-4 top-3.5 w-5 h-5 text-nature-400" />
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={filters.name}
+                                    onChange={handleFilterChange}
+                                    placeholder="Search e.g. Rice"
+                                    className="w-full pl-12 pr-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-nature-700 ml-1">State</label>
+                            <input
+                                type="text"
+                                name="state"
+                                value={filters.state}
+                                onChange={handleFilterChange}
+                                placeholder="Filter by State"
+                                className="w-full px-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
+                            />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-nature-700 ml-1">District</label>
+                            <input
+                                type="text"
+                                name="district"
+                                value={filters.district}
+                                onChange={handleFilterChange}
+                                placeholder="Filter by District"
+                                className="w-full px-4 py-3 bg-white/50 border border-nature-200 rounded-xl focus:ring-2 focus:ring-nature-400 focus:border-nature-400 outline-none transition-all placeholder:text-nature-300 text-nature-800 font-medium"
+                            />
+                        </div>
+
+                        <div className="flex items-end">
                             <button
                                 type="submit"
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-white font-bold rounded-xl hover:bg-secondary-dark transition shadow-lg shadow-secondary/20"
+                                className="w-full py-3 bg-nature-800 text-white font-bold rounded-xl hover:bg-nature-900 transition-colors shadow-lg shadow-nature-800/20"
                             >
+                                Apply Filters
                                 <Search className="w-4 h-4" /> {t('common.search')}
                             </button>
                         </div>
                     </form>
                 </div>
-            )}
+            </div>
 
-            {/* Content */}
+            {/* Content Grid */}
             {loading ? (
-                <div className="flex justify-center py-20">
-                    <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]">
+                    <Loader2 className="w-12 h-12 text-nature-600 animate-spin mb-4" />
+                    <p className="text-nature-600 font-medium animate-pulse">Fetching fresh listings...</p>
                 </div>
-            ) : viewType === "regular" && crops.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-accent/30">
-                    <Filter className="w-12 h-12 text-accent mx-auto mb-3 opacity-50" />
-                    <h3 className="text-lg font-bold text-text-dark">{t('marketplace.noCropsFound')}</h3>
-                    <p className="text-accent">{t('marketplace.adjustFilters')}</p>
+            ) : crops.length === 0 ? (
+                <div className="glass-panel text-center py-24 rounded-3xl border border-dashed border-nature-300/50">
+                    <div className="bg-nature-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Leaf className="w-10 h-10 text-nature-400" />
+                    </div>
+                    <h3 className="text-2xl font-black text-nature-800 mb-2">No crops found</h3>
+                    <p className="text-nature-500 max-w-md mx-auto">
+                        We couldn't find any listings matching your specific criteria. Try adjusting your filters or search for something else.
+                    </p>
+                    <button 
+                        onClick={() => {
+                            setFilters({ name: "", state: "", district: "" });
+                            fetchCrops();
+                        }}
+                        className="mt-6 text-nature-700 font-bold hover:text-nature-900 hover:underline underline-offset-4"
+                    >
+                        Clear all filters
+                    </button>
                 </div>
-            ) : viewType === "institutional" && batches.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-accent/30">
-                    <Layers className="w-12 h-12 text-accent mx-auto mb-3 opacity-50" />
-                    <h3 className="text-lg font-bold text-text-dark">{t('marketplace.noBatches')}</h3>
-                    <p className="text-accent">{t('marketplace.checkBackLater')}</p>
-                </div>
-            ) : viewType === "regular" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {crops.map((crop) => (
                         <CropCard
-                            key={crop._id}
+                            key={crop._id || crop.id}
                             crop={crop}
-                            onDelete={() => handleDelete(crop._id)}
+                            onDelete={() => handleDelete(crop._id || crop.id)}
                         />
                     ))}
                 </div>

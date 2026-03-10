@@ -124,21 +124,30 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-100">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <Loader2 className="w-10 h-10 text-green-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">{t('dashboard.loading')}</p>
+          <Loader2 className="w-12 h-12 text-nature-600 animate-spin mx-auto mb-4" />
+          <p className="text-nature-500 font-medium">{t('dashboard.loading')</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
       {/* Welcome Section */}
-      <div>
-        <h1 className="text-3xl font-bold text-[#1a1f1b]">{t('nav.dashboard')}</h1>
-        <p className="text-[#5C715E] mt-1">{t('dashboard.welcome', { name: firstName })}</p>
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-nature-800 to-nature-600 p-8 shadow-xl shadow-nature-900/20 text-white">
+        <div className="relative z-10">
+            <h1 className="text-4xl font-black tracking-tight mb-2">{t('nav.dashboard')}</h1>
+            <p className="text-nature-100/90 text-lg font-medium max-w-2xl">
+               {t('dashboard.welcome', { name: firstName })}! 
+                <span className="block text-sm opacity-80 font-normal mt-1">Here's a summary of your agricultural activities and market insights.</span>
+            </p>
+        </div>
+        
+        {/* Decorative Circles */}
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-20 w-40 h-40 bg-nature-400/20 rounded-full blur-2xl"></div>
       </div>
 
       {/* Stats Grid */}
@@ -150,14 +159,14 @@ const Dashboard = () => {
               value={stats.totalCrops}
               change={t('dashboard.posted')}
               icon={ShoppingBag}
-              color="bg-blue-50 text-blue-600"
+              variant="nature"
             />
             <StatCard
               title={t('dashboard.totalRevenue')}
               value={`₹${stats.totalRevenue.toLocaleString()}`}
               change={t('dashboard.earned')}
               icon={DollarSign}
-              color="bg-green-50 text-green-600"
+              variant="secondary"
             />
           </>
         )}
@@ -168,21 +177,21 @@ const Dashboard = () => {
               value={stats.activeDeliveries}
               change={t('dashboard.inTransit')}
               icon={Truck}
-              color="bg-blue-50 text-blue-600"
+              variant="blue"
             />
             <StatCard
               title={t('dashboard.completed')}
-              value={stats.completedDeliveries}
+              value={stats.completedDeliveries || 0}
               change={t('dashboard.success')}
               icon={CheckCircle2}
-              color="bg-green-50 text-green-600"
+              variant="nature"
             />
             <StatCard
               title={t('dashboard.newRequests')}
-              value={stats.newRequests}
+              value={stats.newRequests || 0}
               change={t('nav.marketplace')}
               icon={ShoppingBag}
-              color="bg-purple-50 text-purple-600"
+              variant="subtle"
             />
           </>
         )}
@@ -192,7 +201,7 @@ const Dashboard = () => {
             value={stats.activeBids}
             change={t('dashboard.ongoing')}
             icon={Users}
-            color="bg-purple-50 text-purple-600"
+            variant="subtle"
           />
         )}
         <StatCard
@@ -200,120 +209,87 @@ const Dashboard = () => {
           value={stats.marketTrends}
           change={t('dashboard.highDemand')}
           icon={TrendingUp}
-          color="bg-orange-50 text-orange-600"
+          variant="accent"
         />
       </div>
 
 
-      {/* Cooperative Pooling Hub (Institutional Batches) */}
-      {isFarmer && activePools.length > 0 && (
-        <div className="bg-white p-8 rounded-2xl border border-primary/20 shadow-sm relative overflow-hidden group">
-          {/* Decorative Background */}
-          <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:scale-110 transition-transform duration-1000">
-            <Globe className="w-64 h-64 rotate-12 text-primary" />
-          </div>
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-primary rounded-full"></div>
-                <h2 className="text-xl font-bold text-[#1a1f1b]">{t('dashboard.cooperativeHub')}</h2>
-              </div>
-              <p className="text-xs text-[#5C715E] font-bold uppercase tracking-widest">{t('dashboard.activeBatches')} {activePools[0].district}</p>
-            </div>
-            <button className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-primary/20">
-              {t('dashboard.viewAllPools')} <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {activePools.map(pool => {
-              const compatibleCrop = myCrops.find(c => c.name.toLowerCase() === pool.cropName.toLowerCase());
-              return (
-                <div key={pool._id} className="bg-neutral-light/10 border border-neutral-light/50 p-6 rounded-2xl flex flex-col justify-between space-y-4 hover:border-primary/30 transition-all group/card">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-bold text-[#1a1f1b] text-lg">{pool.cropName}</h4>
-                      <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{t('dashboard.target')}: {pool.targetQuantity} {pool.unit}</p>
-                    </div>
-                    <div className="px-2.5 py-1 bg-white border border-neutral-light rounded-lg shadow-sm">
-                      <span className="text-xs font-bold text-primary italic">₹{pool.basePrice}/kg</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-accent/60">
-                      <span>{t('dashboard.batchProgress')}</span>
-                      <span>{pool.progress}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-neutral-light/30 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary transition-all duration-1000"
-                        style={{ width: `${pool.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {compatibleCrop ? (
-                    <button
-                      onClick={() => handleJoinPool(pool._id, compatibleCrop._id, compatibleCrop.quantity)}
-                      className="w-full py-3 bg-white border-2 border-primary/20 text-primary font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all group-hover/card:border-primary"
-                    >
-                      {t('dashboard.addYour')} {compatibleCrop.name}
-                    </button>
-                  ) : (
-                    <button disabled className="w-full py-3 bg-neutral-light/30 text-accent/50 font-bold text-xs uppercase tracking-widest rounded-xl cursor-not-allowed italic">
-                      {t('dashboard.noMatching')} {pool.cropName}
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* AI Strategies & Activity */}
+      {/* Charts/Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          {isFarmer ? (
-            <RotationAdvisoryCard />
-          ) : (
-            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-96 flex items-center justify-center text-gray-400">
-              <div className="text-center">
-                <TrendingUp className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-                <p>{t('dashboard.revenueComingSoon')}</p>
-              </div>
+        <div className="lg:col-span-2 glass-panel p-8 rounded-3xl min-h-[400px] flex flex-col relative overflow-hidden group">
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-xl text-nature-800">Revenue Analytics</h3>
+                <div className="flex gap-2">
+                    <span className="w-3 h-3 rounded-full bg-nature-500"></span>
+                    <span className="w-3 h-3 rounded-full bg-secondary-light"></span>
+                </div>
             </div>
-          )}
+          
+            {/* Future: Chart Placeholder with improved look */}
+            <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60 group-hover:opacity-100 transition-opacity">
+                <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
+                    <TrendingUp className="w-12 h-12 text-nature-300" />
+                </div>
+                <p className="text-nature-800 font-bold">Analytics Module Loading...</p>
+                <p className="text-nature-500 text-sm mt-1">Detailed charts coming soon to this view.</p>
+            </div>
+            
+            {/* Fake chart lines for visual fill */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 opacity-10 pointer-events-none flex items-end justify-around px-8">
+                {[40, 70, 45, 90, 60, 80, 50, 75, 60].map((h, i) => (
+                    <div key={i} style={{ height: `${h}%` }} className="w-8 bg-nature-600 rounded-t-lg mx-1"></div>
+                ))}
+            </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-96 flex items-center justify-center text-gray-400 overflow-hidden relative group">
-          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
-            <Users className="w-32 h-32 text-accent" />
-          </div>
-          {/* Future: Recent Activity List */}
-          <div className="text-center relative z-10">
-            <Users className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-            <p className="text-sm font-bold text-accent italic">{t('dashboard.activityComingSoon')}</p>
-          </div>
+        <div className="glass-panel p-8 rounded-3xl min-h-[400px] relative overflow-hidden">
+            <h3 className="font-bold text-xl text-nature-800 mb-6">Recent Activity</h3>
+            
+            <div className="flex-1 flex flex-col items-center justify-center text-center h-64">
+                <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
+                    <Users className="w-12 h-12 text-nature-300" />
+                </div>
+                <p className="text-nature-800 font-bold">No Recent Activity</p>
+                <p className="text-nature-500 text-sm mt-1">Your latest actions will appear here.</p>
+            </div>
         </div>
       </div>
     </div>
   );
 };
 
-const StatCard = ({ title, value, change, icon: Icon, color }) => (
-  <div className="bg-white p-6 rounded-2xl border border-green-50 shadow-sm hover:shadow-md transition-shadow">
-    <div className="flex items-center justify-between mb-4">
-      <div className={`p-3 rounded-xl ${color || 'bg-gray-50 text-gray-600'}`}>
-        <Icon className="w-6 h-6" />
-      </div>
-      <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-1 rounded-full">{change}</span>
-    </div>
-    <h3 className="text-3xl font-bold text-[#1a1f1b]">{value}</h3>
-    <p className="text-sm text-[#5C715E] font-medium mt-1">{title}</p>
-  </div>
-);
+const StatCard = ({ title, value, change, icon: Icon, variant = 'nature' }) => {
+    
+    const variants = {
+        nature: "bg-nature-50 text-nature-600 ring-nature-100",
+        secondary: "bg-amber-50 text-amber-600 ring-amber-100",
+        blue: "bg-sky-50 text-sky-600 ring-sky-100",
+        subtle: "bg-slate-50 text-slate-600 ring-slate-100",
+        accent: "bg-rose-50 text-rose-600 ring-rose-100",
+    };
+
+    const iconBg = variants[variant] || variants.nature;
+
+    return (
+        <div className="glass-card p-6 rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="flex items-start justify-between mb-4 relative z-10">
+                <div className={`p-3.5 rounded-2xl ring-1 ring-inset ${iconBg} shadow-sm transition-colors duration-300`}>
+                    <Icon className="w-6 h-6" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-wider bg-white/50 backdrop-blur-sm px-2.5 py-1 rounded-full text-nature-800 border border-white/60">
+                    {change}
+                </span>
+            </div>
+            
+            <div className="relative z-10">
+                <h3 className="text-3xl font-black text-nature-900 tracking-tight">{value}</h3>
+                <p className="text-sm font-bold text-nature-500 mt-1 uppercase tracking-wide">{title}</p>
+            </div>
+            
+            {/* Hover Gradient Effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        </div>
+    );
+};
 
 export default Dashboard;

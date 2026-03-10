@@ -47,40 +47,46 @@ const Sidebar = () => {
 
 
     return (
-        <div className="w-72 h-screen bg-[#F1F8F1] border-r border-green-100 flex flex-col font-sans shrink-0">
+        <div className="w-full h-full flex flex-col font-sans shrink-0 bg-transparent">
             {/* Branding */}
-            <div className="p-6 flex items-center gap-3 border-b border-green-100/50">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                    <Leaf className="w-6 h-6 text-primary" />
+            <div className="p-8 flex items-center gap-4">
+                <div className="bg-gradient-to-br from-nature-400 to-nature-600 p-2.5 rounded-xl shadow-lg shadow-nature-500/30">
+                    <Leaf className="w-6 h-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold tracking-tight text-primary-dark">FARMSMART</h1>
+                <h1 className="text-2xl font-black tracking-tight text-nature-900">FarmSmart</h1>
             </div>
 
             {/* Menu */}
-            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-green-200">
+            <nav className="flex-1 overflow-y-auto py-2 px-4 space-y-1.5 scrollbar-thin scrollbar-thumb-nature-200">
                 {menuItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
                         <Link
                             key={item.path}
                             to={item.path}
-                            className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 font-medium text-sm group ${isActive
-                                ? "bg-primary text-white shadow-md shadow-green-200"
-                                : "text-[#5C715E] hover:bg-green-100/50 hover:text-primary-dark"
+                            className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 font-medium text-sm group relative overflow-hidden ${isActive
+                                ? "bg-nature-600 text-white shadow-lg shadow-nature-600/30"
+                                : "text-nature-900 hover:bg-white/50 hover:text-nature-700 hover:shadow-sm"
                                 }`}
                         >
-                            <item.icon className={`w-5 h-5 ${isActive ? "text-white" : "text-[#8CA38D] group-hover:text-primary"}`} />
-                            <span className="truncate">{item.label}</span>
+                            {isActive && (
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-30" />
+                            )}
+                            <item.icon className={`w-5 h-5 relative z-10 ${isActive ? "text-white" : "text-nature-400 group-hover:text-nature-600"}`} />
+                            <span className="truncate relative z-10">{item.label}</span>
                         </Link>
                     )
                 })}
             </nav>
 
-            {/* Bottom Settings Link (optional but standard) */}
-            <div className="p-4 border-t border-green-100/50">
-                <Link to="/dashboard/settings" className="flex items-center gap-3 px-3 py-3 rounded-xl text-[#5C715E] hover:bg-green-100/50 hover:text-primary-dark transition-all text-sm font-medium">
-                    <div className="w-5 h-5" /> {/* Placeholder/Icon if needed */}
+            {/* Bottom Settings Link */}
+            <div className="p-4 mx-4 mb-4 mt-2 border-t border-nature-200/50">
+                <Link to="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl text-nature-700 hover:bg-white/50 hover:text-nature-900 transition-all text-sm font-medium">
+                    <div className="w-5 h-5 flex items-center justify-center">
+                        <span className="w-1.5 h-1.5 rounded-full bg-nature-400"></span>
+                    </div>
                     <span>{t('nav.settings')}</span>
+
                 </Link>
             </div>
         </div>

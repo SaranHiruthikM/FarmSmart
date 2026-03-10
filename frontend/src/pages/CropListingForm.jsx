@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import cropService from "../services/crop.service";
 import CropForm from "../components/marketplace/CropForm";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2, Sprout } from "lucide-react";
 
 const CropListingForm = () => {
-    const { id } = useParams(); // If ID exists, we are editing
+    const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState(null);
@@ -23,7 +23,6 @@ const CropListingForm = () => {
             setInitialData(data);
         } catch (error) {
             console.error("Failed to load crop", error);
-            alert("Failed to load crop details");
             navigate("/dashboard/marketplace");
         } finally {
             setFetching(false);
@@ -35,44 +34,60 @@ const CropListingForm = () => {
         try {
             if (id) {
                 await cropService.updateCrop(id, formData);
-                alert("Crop updated successfully!");
             } else {
                 await cropService.createCrop(formData);
-                alert("Crop listed successfully!");
             }
             navigate("/dashboard/marketplace");
         } catch (error) {
             console.error("Failed to save crop", error);
-            alert("Failed to save crop. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
     if (fetching) {
-        return <div className="p-10 text-center">Loading...</div>;
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                <Loader2 className="w-12 h-12 text-nature-600 animate-spin mb-4" />
+                <p className="text-nature-600 font-medium">Loading details...</p>
+            </div>
+        );
     }
 
     return (
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto pb-10">
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center text-accent hover:text-primary transition font-medium"
+                className="group flex items-center text-nature-600 hover:text-nature-800 transition-colors font-bold mb-6"
             >
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                <div className="bg-white/50 p-2 rounded-full mr-2 group-hover:bg-nature-100 transition-colors">
+                    <ArrowLeft className="w-5 h-5" />
+                </div>
+                Back to Marketplace
             </button>
 
-            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-neutral-light">
-                <h1 className="text-2xl font-bold text-text-dark mb-6">
-                    {id ? "Edit Crop Listing" : "List New Crop"}
-                </h1>
+            <div className="glass-panel p-6 md:p-10 rounded-3xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
+                    <Sprout className="w-64 h-64 text-nature-600" />
+                </div>
 
-                <CropForm
-                    initialData={initialData}
-                    onSubmit={handleSubmit}
-                    isLoading={loading}
-                    buttonLabel={id ? "Update Listing" : "Publish Listing"}
-                />
+                <div className="relative z-10">
+                    <div className="mb-6 md:mb-8">
+                        <h1 className="text-2xl md:text-3xl font-black text-nature-900 tracking-tight mb-2">
+                            {id ? "Edit Crop Listing" : "List New Crop"}
+                        </h1>
+                        <p className="text-nature-600 text-base md:text-lg">
+                            {id ? "Update your crop details below." : "Share your harvest with buyers directly."}
+                        </p>
+                    </div>
+
+                    <CropForm
+                        initialData={initialData}
+                        onSubmit={handleSubmit}
+                        isLoading={loading}
+                        buttonLabel={id ? "Update Listing" : "Publish Listing"}
+                    />
+                </div>
             </div>
         </div>
     );

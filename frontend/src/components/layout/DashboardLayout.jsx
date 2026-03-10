@@ -25,45 +25,46 @@ const DashboardLayout = () => {
     const pageTitle = getPageTitle(location.pathname);
 
     return (
-        <div className="flex h-screen bg-[#FAFAFA] font-sans text-gray-900">
-            {/* Sidebar */}
+        <div className="flex h-screen overflow-hidden bg-transparent font-sans text-slate-800">
+            {/* Sidebar - Floating Glass Panel */}
             <div
-                className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+                className={`fixed inset-y-0 left-0 z-50 w-72 lg:m-4 m-0 lg:rounded-3xl rounded-r-3xl glass-panel transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 bg-white/95 lg:bg-transparent backdrop-blur-xl lg:backdrop-filter-none shadow-2xl lg:shadow-none ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:ml-4 lg:mr-0"
                     }`}
             >
                 <Sidebar closeSidebar={() => setIsSidebarOpen(false)} />
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden relative">
                 {/* Navbar */}
-                <header className="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-40 relative">
-                    <div className="flex items-center gap-4">
+                <header className="h-16 md:h-24 flex items-center justify-between px-4 md:px-8 z-40 relative mt-2 shrink-0">
+                    <div className="flex items-center gap-3 md:gap-4">
                         <button
-                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            className="lg:hidden p-2 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white/80 transition-colors shadow-sm text-nature-800 active:scale-95"
                             onClick={() => setIsSidebarOpen(true)}
                         >
-                            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
-                        <h2 className="text-2xl font-black text-gray-800 tracking-tight">{pageTitle}</h2>
+                        <h2 className="text-xl md:text-3xl font-black text-nature-900 tracking-tight drop-shadow-sm truncate max-w-[200px] md:max-w-none">{pageTitle}</h2>
                     </div>
                     <Header />
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
-                    <div className="max-w-[1920px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <main className="flex-1 overflow-y-auto px-4 pb-20 md:px-8 md:pb-8 scroll-smooth scrollbar-hide pt-2">
+                    <div className="max-w-[1920px] mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
                         <Outlet />
                     </div>
                 </main>
             </div>
 
+
             {/* Overlay for mobile sidebar */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+                    className="fixed inset-0 bg-nature-950/20 backdrop-blur-sm z-40 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 ></div>
             )}
