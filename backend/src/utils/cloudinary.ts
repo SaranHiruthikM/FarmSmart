@@ -1,3 +1,4 @@
+/// <reference path="../../node_modules/cloudinary/types/index.d.ts" />
 import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'stream';
 
@@ -13,7 +14,7 @@ export const uploadToCloudinary = (buffer: Buffer, folder: string): Promise<any>
       {
         folder: folder,
       },
-      (error, result) => {
+      (error: any, result: any) => {
         if (error) return reject(error);
         resolve(result);
       }
