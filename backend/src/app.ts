@@ -38,6 +38,7 @@ app.use('/schemes', schemeRoutes);
 app.use('/advisory', advisoryRoutes);
 app.use('/disputes', disputeRoutes);
 app.use('/demand', demandRoutes);
+app.use('/pooling', poolingRoutes);
 
 /**
  * Price Comparison & Market Insights

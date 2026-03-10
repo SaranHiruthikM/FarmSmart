@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +12,7 @@ import loginImage from "../assets/Images/loginPageImage.jpg";
 
 
 const Login = () => {
+  const navigate = useNavigate();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

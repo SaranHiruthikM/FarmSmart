@@ -1,40 +1,25 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/pooling';
-
-// Helper to get token
-const getAuthHeader = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user && user.token) {
-        return { Authorization: `Bearer ${user.token}` };
-    }
-    return {};
-};
+import api from './api';
 
 const poolingService = {
     getActivePools: async (district, cropName) => {
-        const response = await axios.get(`${API_URL}/active`, {
-            params: { district, cropName },
-            headers: getAuthHeader()
+        const response = await api.get('/pooling/active', {
+            params: { district, cropName }
         });
         return response.data;
     },
 
     joinPool: async (poolId, cropId, contributedQuantity) => {
-        const response = await axios.post(`${API_URL}/join`, {
+        const response = await api.post('/pooling/join', {
             poolId,
             cropId,
             contributedQuantity
-        }, {
-            headers: getAuthHeader()
         });
         return response.data;
     },
-
+    
     getInstitutionalBatches: async (cropName, district) => {
-        const response = await axios.get(`${API_URL}/institutional-batches`, {
-            params: { cropName, district },
-            headers: getAuthHeader()
+        const response = await api.get('/pooling/institutional-batches', {
+            params: { cropName, district }
         });
         return response.data;
     }

@@ -5,7 +5,7 @@ import cropService from "../services/crop.service";
 import CropCard from "../components/marketplace/CropCard";
 import InputField from "../components/common/InputField";
 import poolingService from "../services/pooling.service";
-import { Loader2, Search, Filter, Plus, Globe, Layers, Users2, ChevronRight } from "lucide-react";
+import { Loader2, Search, Filter, Plus, Globe, Layers, Users2, ChevronRight, Leaf } from "lucide-react";
 
 const Marketplace = () => {
     const { t } = useTranslation();
@@ -166,35 +166,37 @@ const Marketplace = () => {
                     <Loader2 className="w-12 h-12 text-nature-600 animate-spin mb-4" />
                     <p className="text-nature-600 font-medium animate-pulse">Fetching fresh listings...</p>
                 </div>
-            ) : crops.length === 0 ? (
-                <div className="glass-panel text-center py-24 rounded-3xl border border-dashed border-nature-300/50">
-                    <div className="bg-nature-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Leaf className="w-10 h-10 text-nature-400" />
+            ) : viewType === 'regular' ? (
+                crops.length === 0 ? (
+                    <div className="glass-panel text-center py-24 rounded-3xl border border-dashed border-nature-300/50">
+                        <div className="bg-nature-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Leaf className="w-10 h-10 text-nature-400" />
+                        </div>
+                        <h3 className="text-2xl font-black text-nature-800 mb-2">No crops found</h3>
+                        <p className="text-nature-500 max-w-md mx-auto">
+                            We couldn't find any listings matching your specific criteria. Try adjusting your filters or search for something else.
+                        </p>
+                        <button 
+                            onClick={() => {
+                                setFilters({ name: "", state: "", district: "" });
+                                fetchCrops();
+                            }}
+                            className="mt-6 text-nature-700 font-bold hover:text-nature-900 hover:underline underline-offset-4"
+                        >
+                            Clear all filters
+                        </button>
                     </div>
-                    <h3 className="text-2xl font-black text-nature-800 mb-2">No crops found</h3>
-                    <p className="text-nature-500 max-w-md mx-auto">
-                        We couldn't find any listings matching your specific criteria. Try adjusting your filters or search for something else.
-                    </p>
-                    <button 
-                        onClick={() => {
-                            setFilters({ name: "", state: "", district: "" });
-                            fetchCrops();
-                        }}
-                        className="mt-6 text-nature-700 font-bold hover:text-nature-900 hover:underline underline-offset-4"
-                    >
-                        Clear all filters
-                    </button>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {crops.map((crop) => (
-                        <CropCard
-                            key={crop._id || crop.id}
-                            crop={crop}
-                            onDelete={() => handleDelete(crop._id || crop.id)}
-                        />
-                    ))}
-                </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        {crops.map((crop) => (
+                            <CropCard
+                                key={crop._id || crop.id}
+                                crop={crop}
+                                onDelete={() => handleDelete(crop._id || crop.id)}
+                            />
+                        ))}
+                    </div>
+                )
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {batches.map((batch) => (
