@@ -27,10 +27,10 @@ const routesMap = {
     pricing: '/dashboard/pricing',
 
     // Negotiation
-    negotiation: '/dashboard/negotiation',
-    negotiations: '/dashboard/negotiation',
-    bidding: '/dashboard/negotiation',
-    bid: '/dashboard/negotiation',
+    negotiation: '/dashboard/negotiations',
+    negotiations: '/dashboard/negotiations',
+    bidding: '/dashboard/negotiations',
+    bid: '/dashboard/negotiations',
 
     // Orders & Transactions
     orders: '/dashboard/orders',
@@ -91,8 +91,8 @@ const routesMap = {
     'தரம்': '/dashboard/pricing',
 
     // Negotiation
-    'பேச்சுவார்த்தை': '/dashboard/negotiation',
-    'ஏலம்': '/dashboard/negotiation',
+    'பேச்சுவார்த்தை': '/dashboard/negotiations',
+    'ஏலம்': '/dashboard/negotiations',
 
     // Orders
     'ஆர்டர்கள்': '/dashboard/orders',
@@ -129,8 +129,8 @@ const routesMap = {
     'पूर्वानुमान': '/dashboard/forecast',
     'मांग': '/dashboard/forecast',
     'गुणवत्ता': '/dashboard/pricing',
-    'बातचीत': '/dashboard/negotiation',
-    'बोली': '/dashboard/negotiation',
+    'बातचीत': '/dashboard/negotiations',
+    'बोली': '/dashboard/negotiations',
     'आदेश': '/dashboard/orders',
     'लेनदेन': '/dashboard/orders',
     'परिवहन': '/dashboard/orders',
@@ -157,8 +157,8 @@ const routesMap = {
     'అంచనా': '/dashboard/forecast',
     'డిమాండ్': '/dashboard/forecast',
     'నాణ్యత': '/dashboard/pricing',
-    'చర్చలు': '/dashboard/negotiation',
-    'వేలం': '/dashboard/negotiation',
+    'చర్చలు': '/dashboard/negotiations',
+    'వేలం': '/dashboard/negotiations',
     'ఆర్డర్లు': '/dashboard/orders',
     'లావాదేవీలు': '/dashboard/orders',
     'రవాణా': '/dashboard/orders',
@@ -185,8 +185,8 @@ const routesMap = {
     'ಮುನ್ಸೂಚನೆ': '/dashboard/forecast',
     'ಬೇಡಿಕೆ': '/dashboard/forecast',
     'ಗುಣಮಟ್ಟ': '/dashboard/pricing',
-    'ಮಾತುಕತೆ': '/dashboard/negotiation',
-    'ಹರಾಜು': '/dashboard/negotiation',
+    'ಮಾತುಕತೆ': '/dashboard/negotiations',
+    'ಹರಾಜು': '/dashboard/negotiations',
     'ಆದೇಶಗಳು': '/dashboard/orders',
     'ವಹಿವಾಟು': '/dashboard/orders',
     'ಸಾರಿಗೆ': '/dashboard/orders',
@@ -213,8 +213,8 @@ const routesMap = {
     'പ്രവചനം': '/dashboard/forecast',
     'ആവശ്യം': '/dashboard/forecast',
     'ഗുണനിലവാരം': '/dashboard/pricing',
-    'ചർച്ച': '/dashboard/negotiation',
-    'ലേലം': '/dashboard/negotiation',
+    'ചർച്ച': '/dashboard/negotiations',
+    'ലേലം': '/dashboard/negotiations',
     'ഓർഡറുകൾ': '/dashboard/orders',
     'ഇടപാട്': '/dashboard/orders',
     'ഗതാഗതം': '/dashboard/orders',

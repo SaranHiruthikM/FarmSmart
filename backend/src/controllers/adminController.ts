@@ -136,7 +136,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
             User.countDocuments({ kycStatus: 'PENDING' }),
             Dispute.countDocuments({ status: 'OPEN' }),
             Order.countDocuments(),
-            Crop.find({ status: 'AVAILABLE' }),
+            Crop.find({ isActive: true }),
             Negotiation.find({ status: 'PENDING' })
         ]);
 

@@ -29,9 +29,31 @@ const CropListingForm = () => {
         }
     };
 
-    const handleSubmit = async (formData) => {
+    const handleSubmit = async (data) => {
         setLoading(true);
         try {
+            const formData = new FormData();
+            
+            // Append fields
+            Object.keys(data).forEach(key => {
+                // Skip internal keys or populated objects that shouldn't be updated
+                if (['farmer', 'farmerId', 'farmerName', 'farmerPhone', 'farmerRating', 'reviewCount', '_id', '__v', 'createdAt', 'updatedAt'].includes(key)) {
+                    return;
+                }
+
+                if (key === 'location') {
+                    if (data.location?.state) formData.append('location.state', data.location.state);
+                    if (data.location?.district) formData.append('location.district', data.location.district);
+                    if (data.location?.village) formData.append('location.village', data.location.village);
+                } else if (key === 'imageFile') {
+                    if (data.imageFile) {
+                        formData.append('image', data.imageFile);
+                    }
+                } else if (data[key] !== undefined && data[key] !== null) {
+                     formData.append(key, data[key]);
+                }
+            });
+
             if (id) {
                 await cropService.updateCrop(id, formData);
             } else {
