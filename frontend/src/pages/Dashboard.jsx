@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { TrendingUp, Users, DollarSign, ShoppingBag, Loader2, Truck, CheckCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import authService from "../services/auth.service";
 import negotiationService from "../services/negotiation.service";
 import salesService from "../services/sales.service";
 import cropService from "../services/crop.service";
 import orderService from "../services/order.service";
+import poolingService from "../services/pooling.service";
+import { Globe, Users2, ChevronRight, LayoutDashboard, Search, HandCoins } from "lucide-react";
+import RotationAdvisoryCard from "../components/dashboard/RotationAdvisoryCard";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const user = authService.getCurrentUser();
   const firstName = user?.fullName?.split(' ')[0] || user?.role || "User";
   const isFarmer = user?.role?.toLowerCase() === "farmer";
@@ -16,9 +21,11 @@ const Dashboard = () => {
     totalCrops: 0,
     totalRevenue: 0,
     activeBids: 0,
-    marketTrends: "+15%" // Placeholder for now as per requirements only focused on Bids, Revenue, Crops
+    marketTrends: "+15%"
   });
   const [loading, setLoading] = useState(true);
+  const [activePools, setActivePools] = useState([]);
+  const [myCrops, setMyCrops] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -49,7 +56,6 @@ const Dashboard = () => {
         return;
       }
 
-      // Parallel data fetching for performance
       const promises = [
         negotiationService.getMyNegotiations(),
       ];
@@ -62,7 +68,6 @@ const Dashboard = () => {
       const results = await Promise.all(promises);
 
       const negotiations = results[0] || [];
-      // Active Bids: Negotiations that are PENDING or have active counter offers
       const activeBidsCount = negotiations.filter(n =>
         n.status === 'pending' || n.status === 'counter_offer' ||
         (n.status !== 'accepted' && n.status !== 'rejected')
@@ -77,7 +82,16 @@ const Dashboard = () => {
         revenue = salesStats.totalRevenue;
 
         const crops = results[2] || [];
+        setMyCrops(crops);
         cropsCount = crops.length;
+
+        if (crops.length > 0) {
+          const district = crops[0].location?.district;
+          if (district) {
+            const pools = await poolingService.getActivePools(district);
+            setActivePools(pools);
+          }
+        }
       }
 
       setStats(prev => ({
@@ -94,13 +108,26 @@ const Dashboard = () => {
     }
   };
 
+  const handleJoinPool = async (poolId, cropId, quantity) => {
+    try {
+      const amount = prompt(t('dashboard.enterQuantity'), quantity);
+      if (!amount || isNaN(amount)) return;
+
+      await poolingService.joinPool(poolId, cropId, parseFloat(amount));
+      alert(t('dashboard.joinedPool'));
+      fetchDashboardData();
+    } catch (err) {
+      alert(err.response?.data?.message || t('dashboard.failedToJoin'));
+    }
+  };
+
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-nature-600 animate-spin mx-auto mb-4" />
-          <p className="text-nature-500 font-medium">Cultivating your dashboard...</p>
+          <p className="text-nature-500 font-medium">{t('dashboard.loading')</p>
         </div>
       </div>
     );
@@ -111,9 +138,9 @@ const Dashboard = () => {
       {/* Welcome Section */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-nature-800 to-nature-600 p-8 shadow-xl shadow-nature-900/20 text-white">
         <div className="relative z-10">
-            <h1 className="text-4xl font-black tracking-tight mb-2">Dashboard</h1>
+            <h1 className="text-4xl font-black tracking-tight mb-2">{t('nav.dashboard')}</h1>
             <p className="text-nature-100/90 text-lg font-medium max-w-2xl">
-                Welcome back, {firstName}! 
+               {t('dashboard.welcome', { name: firstName })}! 
                 <span className="block text-sm opacity-80 font-normal mt-1">Here's a summary of your agricultural activities and market insights.</span>
             </p>
         </div>
@@ -128,16 +155,16 @@ const Dashboard = () => {
         {isFarmer && (
           <>
             <StatCard
-              title="Total Crops"
+              title={t('dashboard.totalCrops')}
               value={stats.totalCrops}
-              change="Posted"
+              change={t('dashboard.posted')}
               icon={ShoppingBag}
               variant="nature"
             />
             <StatCard
-              title="Total Revenue"
+              title={t('dashboard.totalRevenue')}
               value={`₹${stats.totalRevenue.toLocaleString()}`}
-              change="Earned"
+              change={t('dashboard.earned')}
               icon={DollarSign}
               variant="secondary"
             />
@@ -146,23 +173,23 @@ const Dashboard = () => {
         {isLogistics && (
           <>
             <StatCard
-              title="Active Deliveries"
-              value={stats.activeDeliveries || 0}
-              change="In Transit"
+              title={t('dashboard.activeDeliveries')}
+              value={stats.activeDeliveries}
+              change={t('dashboard.inTransit')}
               icon={Truck}
               variant="blue"
             />
             <StatCard
-              title="Completed"
+              title={t('dashboard.completed')}
               value={stats.completedDeliveries || 0}
-              change="Success"
+              change={t('dashboard.success')}
               icon={CheckCircle2}
               variant="nature"
             />
             <StatCard
-              title="New Requests"
+              title={t('dashboard.newRequests')}
               value={stats.newRequests || 0}
-              change="Marketplace"
+              change={t('nav.marketplace')}
               icon={ShoppingBag}
               variant="subtle"
             />
@@ -170,17 +197,17 @@ const Dashboard = () => {
         )}
         {!isLogistics && (
           <StatCard
-            title="Active Bids"
+            title={t('dashboard.activeBids')}
             value={stats.activeBids}
-            change="Ongoing"
+            change={t('dashboard.ongoing')}
             icon={Users}
             variant="subtle"
           />
         )}
         <StatCard
-          title="Market Trends"
+          title={t('dashboard.marketTrends')}
           value={stats.marketTrends}
-          change="High Demand"
+          change={t('dashboard.highDemand')}
           icon={TrendingUp}
           variant="accent"
         />

@@ -68,6 +68,7 @@ const CropDetails = () => {
                         console.error("Failed to fetch reviews", err);
                         setReviews([]);
                     }
+                    // Use the pre-calculated rating from crop data which comes from User model
                     setAvgRating(data.farmerRating || 0);
                 }
             } catch (err) {

@@ -46,11 +46,11 @@ const Profile = () => {
         if (!field || !value) return;
 
         const profileKeys = ['fullName', 'email', 'state', 'district', 'address', 'preferredLanguage', 'phoneNumber'];
-        
+
         if (profileKeys.includes(field)) {
             let processedValue = value;
             if (field === 'fullName') {
-                 processedValue = value.replace(/\b\w/g, l => l.toUpperCase());
+                processedValue = value.replace(/\b\w/g, l => l.toUpperCase());
             }
 
             setFormData(prev => ({ ...prev, [field]: processedValue }));
@@ -74,7 +74,8 @@ const Profile = () => {
                     }
                 } catch (e) {
                     console.error("Failed to parse pending voice action", e);
-                } finally { 
+                } finally {
+                    // Always clear it so it doesn't re-apply on refresh
                     sessionStorage.removeItem('pendingVoiceAction');
                 }
             }

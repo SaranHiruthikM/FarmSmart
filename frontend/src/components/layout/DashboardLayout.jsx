@@ -2,21 +2,24 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import { useTranslation } from "react-i18next";
 
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
 
+    const { t } = useTranslation();
+
     const getPageTitle = (pathname) => {
-        if (pathname.includes("/dashboard/marketplace")) return "Marketplace";
-        if (pathname.includes("/dashboard/my-crops")) return "My Crops";
-        if (pathname.includes("/dashboard/notifications")) return "Notifications";
-        if (pathname.includes("/dashboard/negotiations")) return "Negotiations";
-        if (pathname.includes("/dashboard/orders")) return "Orders";
-        if (pathname.includes("/dashboard/sales")) return "Sales & Revenue";
-        if (pathname.includes("/dashboard/profile")) return "Profile";
-        if (pathname.includes("/dashboard/settings")) return "Settings";
-        return "Dashboard";
+        if (pathname.includes("/dashboard/marketplace")) return t('nav.marketplace');
+        if (pathname.includes("/dashboard/my-crops")) return t('nav.myCrops');
+        if (pathname.includes("/dashboard/notifications")) return t('nav.notifications');
+        if (pathname.includes("/dashboard/negotiations")) return t('nav.negotiations');
+        if (pathname.includes("/dashboard/orders")) return t('nav.orders');
+        if (pathname.includes("/dashboard/sales")) return t('nav.sales');
+        if (pathname.includes("/dashboard/profile")) return t('nav.profile');
+        if (pathname.includes("/dashboard/settings")) return t('nav.settings');
+        return t('nav.dashboard');
     };
 
     const pageTitle = getPageTitle(location.pathname);

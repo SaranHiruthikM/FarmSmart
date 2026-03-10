@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home, Languages } from "lucide-react";
 import authService from "../services/auth.service";
 import AuthCard from "../components/common/AuthCard"; // Keeping for reference if needed elsewhere, but not using here.
 const Register = () => {
@@ -14,13 +14,23 @@ const Register = () => {
   const [address, setAddress] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [preferredLanguage, setPreferredLanguage] = useState("en");
 
-  const navigate = useNavigate();
+  const languages = [
+    { code: "en", name: "English", native: "English" },
+    { code: "ta", name: "Tamil", native: "தமிழ்" },
+    { code: "hi", name: "Hindi", native: "हिन्दी" },
+    { code: "ml", name: "Malayalam", native: "മലയാളം" },
+    { code: "te", name: "Telugu", native: "తెలుగు" },
+    { code: "kn", name: "Kannada", native: "ಕನ್ನಡ" },
+  ];
+
+  const { t } = useTranslation();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!name || !phone || !password || !state || !district) {
-      setError("Please fill in all required fields");
+      setError(t('common.fillRequired'));
       return;
     }
 
@@ -36,14 +46,14 @@ const Register = () => {
         district,
         address,
         role: role.toUpperCase(), // Backend expects uppercase Role enum
-        // preferredLanguage: 'en' // Defaulting to en, could expand if UI supports it
+        preferredLanguage
       });
 
       // Navigate to OTP page
       navigate("/otp", { state: { phoneNumber: phone } });
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      setError(err.response?.data?.message || t('common.error'));
     } finally {
       setIsLoading(false);
     }

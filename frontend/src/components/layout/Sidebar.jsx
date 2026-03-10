@@ -16,6 +16,7 @@ import {
     Leaf
 } from "lucide-react";
 import authService from "../../services/auth.service";
+import { useTranslation } from "react-i18next";
 
 const Sidebar = () => {
     const location = useLocation();
@@ -25,22 +26,23 @@ const Sidebar = () => {
     const isFarmer = role === "farmer";
     const isBuyer = role === "buyer";
     const isLogistics = role === "logistics";
+    const { t } = useTranslation();
 
     const menuItems = [
-        { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard", roles: ["farmer", "buyer", "logistics", "admin"] },
-        { label: "Crop Marketplace", icon: Store, path: "/dashboard/marketplace", roles: ["farmer", "buyer"] },
-        { label: "Price Insights", icon: TrendingUp, path: "/dashboard/insights", roles: ["farmer", "buyer"] },
-        { label: "Demand Forecasting", icon: LineChart, path: "/dashboard/forecast", roles: ["farmer", "admin"] },
-        { label: "Quality Pricing", icon: Award, path: "/dashboard/pricing", roles: ["farmer", "buyer"] },
-        { label: "Negotiations", icon: Handshake, path: "/dashboard/negotiation", roles: ["farmer", "buyer"] },
-        { label: "Orders & History", icon: Receipt, path: "/dashboard/orders", roles: ["farmer", "buyer", "logistics"] },
-        { label: "Logistics Hub", icon: Truck, path: "/dashboard/logistics", roles: ["logistics"] },
-        { label: "Reviews & Trust", icon: Star, path: "/dashboard/reviews", roles: ["farmer", "buyer", "logistics"] },
-        { label: "Dispute Support", icon: ShieldAlert, path: "/dashboard/disputes", roles: ["farmer", "buyer", "logistics"] },
-        { label: "Admin Disputes", icon: ShieldAlert, path: "/dashboard/admin/disputes", roles: ["admin"] },
-        { label: "Sales & Revenue", icon: TrendingUp, path: "/dashboard/sales", roles: ["farmer"] },
-        { label: "Notifications", icon: Bell, path: "/dashboard/notifications", roles: ["farmer", "buyer", "logistics", "admin"] },
-        { label: "Gov Schemes", icon: Landmark, path: "/dashboard/schemes", roles: ["farmer", "buyer"] },
+        { label: t('nav.dashboard'), icon: LayoutDashboard, path: "/dashboard", roles: ["farmer", "buyer", "logistics", "admin"] },
+        { label: t('nav.marketplace'), icon: Store, path: "/dashboard/marketplace", roles: ["farmer", "buyer"] },
+        { label: t('nav.insights'), icon: TrendingUp, path: "/dashboard/insights", roles: ["farmer", "buyer"] },
+        { label: t('nav.forecast'), icon: LineChart, path: "/dashboard/forecast", roles: ["farmer", "admin"] },
+        { label: t('nav.pricing'), icon: Award, path: "/dashboard/pricing", roles: ["farmer", "buyer"] },
+        { label: t('nav.negotiations'), icon: Handshake, path: "/dashboard/negotiation", roles: ["farmer", "buyer"] },
+        { label: t('nav.orders'), icon: Receipt, path: "/dashboard/orders", roles: ["farmer", "buyer", "logistics"] },
+        { label: t('nav.logistics'), icon: Truck, path: "/dashboard/logistics", roles: ["logistics"] },
+        { label: t('nav.reviews'), icon: Star, path: "/dashboard/reviews", roles: ["farmer", "buyer", "logistics"] },
+        { label: t('nav.disputes'), icon: ShieldAlert, path: "/dashboard/disputes", roles: ["farmer", "buyer", "logistics"] },
+        { label: t('nav.adminDisputes'), icon: ShieldAlert, path: "/dashboard/admin/disputes", roles: ["admin"] },
+        { label: t('nav.sales'), icon: TrendingUp, path: "/dashboard/sales", roles: ["farmer"] },
+        { label: t('nav.notifications'), icon: Bell, path: "/dashboard/notifications", roles: ["farmer", "buyer", "logistics", "admin"] },
+        { label: t('nav.schemes'), icon: Landmark, path: "/dashboard/schemes", roles: ["farmer", "buyer"] },
     ].filter(item => item.roles.includes(role));
 
 
@@ -83,7 +85,8 @@ const Sidebar = () => {
                     <div className="w-5 h-5 flex items-center justify-center">
                         <span className="w-1.5 h-1.5 rounded-full bg-nature-400"></span>
                     </div>
-                    <span>Settings</span>
+                    <span>{t('nav.settings')}</span>
+
                 </Link>
             </div>
         </div>

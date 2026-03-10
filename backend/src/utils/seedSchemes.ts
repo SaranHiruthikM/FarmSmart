@@ -16,7 +16,8 @@ const schemesData = [
         ],
         applyLink: "https://pmfby.gov.in/",
         eligibilityCriteria: "Farmers with crops in notified areas",
-        applicableStates: [] // All
+        applicableStates: [], // All
+        triggerCrops: ["Rice", "Wheat", "Maize", "Groundnut"]
     },
     {
         name: "Pradhan Mantri Krishi Sinchai Yojana (PMKSY)",
@@ -28,7 +29,8 @@ const schemesData = [
         ],
         applyLink: "https://pmksy.gov.in/",
         eligibilityCriteria: "Farmers with cultivable land",
-        applicableStates: [] // All
+        applicableStates: [], // All
+        triggerCrops: ["Sugarcane", "Cotton", "Banana"]
     },
     {
         name: "Soil Health Card Scheme",
@@ -40,7 +42,21 @@ const schemesData = [
         ],
         applyLink: "https://soilhealth.dac.gov.in/",
         eligibilityCriteria: "All farmers",
-        applicableStates: ["Punjab", "Haryana", "Tamil Nadu"] // Example specific states
+        applicableStates: ["Punjab", "Haryana", "Tamil Nadu"],
+        triggerCrops: ["Tomato", "Onion", "Potato"]
+    },
+    {
+        name: "PMFME Turmeric Processing Subsidy",
+        description: "Under the PM-Formalisation of Micro Food Processing Enterprises (PMFME), Turmeric processing gets a 35% credit-linked subsidy.",
+        benefits: [
+            "35% credit-linked capital subsidy",
+            "Max subsidy of ₹10 Lakh",
+            "Seed capital for SHGs"
+        ],
+        applyLink: "https://pmfme.mofpi.gov.in/",
+        eligibilityCriteria: "Micro-enterprises, SHGs, FPOs",
+        applicableStates: [],
+        triggerCrops: ["Turmeric", "Spices"]
     }
 ];
 
@@ -66,7 +82,7 @@ const advisoryData = [
 export const seedSchemesAndAdvisory = async () => {
     try {
         console.log("Seeding Schemes and Advisory...");
-        
+
         // Clear existing
         await Scheme.deleteMany({});
         await Advisory.deleteMany({});

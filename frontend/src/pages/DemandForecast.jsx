@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import priceService from "../services/price.service";
 import recommendationService from "../services/recommendation.service";
@@ -51,6 +52,7 @@ const FALLBACK_CROPS = [
 ];
 
 const DemandForecast = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     // --- Core data state ---
@@ -188,7 +190,9 @@ const DemandForecast = () => {
         return (
             <div className={`px-4 py-2 rounded-2xl flex items-center gap-2 border shadow-sm ${styles[level] || styles.Low}`}>
                 <div className={`w-2 h-2 rounded-full animate-pulse ${dotStyles[level] || dotStyles.Low}`} />
-                <span className="text-sm font-black uppercase tracking-widest">{level} Demand</span>
+                <span className="text-sm font-black uppercase tracking-widest">
+                    {t(`demandForecast.levels.${level}`, { defaultValue: level })} {t('demandForecast.demand')}
+                </span>
             </div>
         );
     };
@@ -213,9 +217,9 @@ const DemandForecast = () => {
             {/* ── Header + Controls ─────────────────────────── */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-3xl shadow-sm border border-neutral-light">
                 <div>
-                    <h1 className="text-3xl font-black text-text-dark tracking-tight">Demand &amp; Recommendations</h1>
+                    <h1 className="text-3xl font-black text-text-dark tracking-tight">{t('demandForecast.title')}</h1>
                     <p className="text-secondary font-bold uppercase tracking-widest text-xs mt-1">
-                        Smart insights for better farming decisions.
+                        {t('demandForecast.subtitle')}
                     </p>
                 </div>
 
@@ -223,7 +227,7 @@ const DemandForecast = () => {
                     {/* Crop Selector */}
                     <div className="space-y-1.5 min-w-[200px]">
                         <label htmlFor="crop-select" className="text-[10px] font-black text-accent uppercase tracking-[0.2em] ml-1">
-                            Select Crop
+                            {t('demandForecast.selectCrop')}
                         </label>
                         <select
                             id="crop-select"
@@ -247,7 +251,7 @@ const DemandForecast = () => {
                         disabled={loading}
                     >
                         <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-                        Refresh Data
+                        {t('demandForecast.refreshData')}
                     </PrimaryButton>
                 </div>
             </div>
@@ -266,7 +270,7 @@ const DemandForecast = () => {
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                         <p className="text-accent font-bold text-sm uppercase tracking-widest">
-                            Analysing Market Trends…
+                            {t('demandForecast.analyzing')}
                         </p>
                     </div>
                 </div>
@@ -279,7 +283,7 @@ const DemandForecast = () => {
                         <div className="flex items-center justify-between mb-8 relative z-10">
                             <div className="space-y-1">
                                 <h3 className="text-xl font-black text-text-dark uppercase tracking-tight">
-                                    Market Demand
+                                    {t('demandForecast.marketDemand')}
                                 </h3>
                                 <p className="text-xs text-accent font-bold uppercase tracking-widest">
                                     {availableCrops.find(c => c.id === selectedCrop)?.name || selectedCrop} · {committedLocation}
@@ -301,20 +305,20 @@ const DemandForecast = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-4 bg-white border border-neutral-light rounded-2xl space-y-2">
                                     <h4 className="text-[10px] font-black text-accent uppercase tracking-widest">
-                                        Active Buyers
+                                        {t('demandForecast.activeBuyers')}
                                     </h4>
                                     <p className="text-2xl font-black text-text-dark">
                                         {demandData.metadata?.activeBuyers || 0}
-                                        <span className="text-xs text-accent font-medium ml-1">Bidding</span>
+                                        <span className="text-xs text-accent font-medium ml-1">{t('demandForecast.bidding')}</span>
                                     </p>
                                 </div>
                                 <div className="p-4 bg-white border border-neutral-light rounded-2xl space-y-2">
                                     <h4 className="text-[10px] font-black text-accent uppercase tracking-widest">
-                                        Total Supply
+                                        {t('demandForecast.totalSupply')}
                                     </h4>
                                     <p className="text-2xl font-black text-text-dark">
                                         {demandData.metadata?.totalSupply || 0}
-                                        <span className="text-xs text-accent font-medium ml-1">kg</span>
+                                        <span className="text-xs text-accent font-medium ml-1">{t('demandForecast.kg')}</span>
                                     </p>
                                 </div>
                             </div>
@@ -329,9 +333,9 @@ const DemandForecast = () => {
 
                         <div className="flex items-center justify-between mb-8 relative z-10">
                             <div className="space-y-1">
-                                <h3 className="text-xl font-black uppercase tracking-tight">Strategy Advice</h3>
+                                <h3 className="text-xl font-black uppercase tracking-tight">{t('demandForecast.strategyAdvice')}</h3>
                                 <p className="text-xs opacity-60 font-bold uppercase tracking-widest">
-                                    AI Assisted Stock Guidance
+                                    {t('demandForecast.aiGuidance')}
                                 </p>
                             </div>
                             <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
@@ -342,13 +346,13 @@ const DemandForecast = () => {
                         <div className="flex-1 space-y-8 relative z-10">
                             <div className="space-y-2">
                                 <span className="text-[10px] font-black opacity-60 uppercase tracking-[0.2em]">
-                                    Our Recommendation
+                                    {t('demandForecast.ourRecommendation')}
                                 </span>
                                 <div className="flex items-center gap-4">
                                     <h2
                                         className={`text-5xl font-black tracking-tight ${demandData.sellRecommendation?.action === "Sell Now"
-                                                ? "text-green-400"
-                                                : "text-yellow-400"
+                                            ? "text-green-400"
+                                            : "text-yellow-400"
                                             }`}
                                     >
                                         {demandData.sellRecommendation?.action || "Wait"}
@@ -373,7 +377,7 @@ const DemandForecast = () => {
                                 onClick={() => navigate("/dashboard/marketplace")}
                                 className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-green-600 transition-all shadow-lg shadow-primary/20"
                             >
-                                List my inventory
+                                {t('demandForecast.listInventory')}
                                 <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
@@ -386,10 +390,10 @@ const DemandForecast = () => {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
                         <h2 className="text-2xl font-black text-text-dark tracking-tight uppercase">
-                            Suggested for Next Season
+                            {t('demandForecast.suggested')}
                         </h2>
                         <p className="text-accent font-bold uppercase tracking-widest text-[10px] mt-1">
-                            Based on{" "}
+                            {t('demandForecast.basedOn')}{" "}
                             <span className="text-primary">
                                 {availableCrops.find((c) => c.id === selectedCrop)?.name || selectedCrop}
                             </span>{" "}
@@ -401,7 +405,7 @@ const DemandForecast = () => {
                     <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-neutral-light shadow-sm">
                         <MapPin className="w-4 h-4 text-primary ml-2 shrink-0" />
                         <span className="text-[10px] font-black text-accent uppercase tracking-widest whitespace-nowrap">
-                            Location:
+                            {t('demandForecast.locationLabel')}
                         </span>
                         <input
                             id="location-input"
@@ -409,7 +413,7 @@ const DemandForecast = () => {
                             value={location}
                             onChange={handleLocationInput}
                             onKeyDown={(e) => e.key === "Enter" && handleRefresh()}
-                            placeholder="Enter district… (e.g. Mysuru)"
+                            placeholder={t('demandForecast.enterDistrict')}
                             className="bg-neutral-light/50 px-4 py-2 rounded-xl text-xs font-black text-text-dark border-none focus:ring-2 focus:ring-primary outline-none min-w-[160px]"
                         />
                     </div>
@@ -420,7 +424,7 @@ const DemandForecast = () => {
                         <div className="flex flex-col items-center gap-3">
                             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                             <p className="text-xs text-accent font-bold uppercase tracking-widest">
-                                Getting AI recommendations…
+                                {t('demandForecast.gettingRecommendations')}
                             </p>
                         </div>
                     </div>
@@ -428,7 +432,9 @@ const DemandForecast = () => {
                     <div className="bg-neutral-light/30 rounded-3xl p-10 text-center">
                         <Sprout className="w-10 h-10 text-primary mx-auto mb-3" />
                         <p className="text-accent font-bold text-sm">
-                            No recommendations yet. Click <strong>Refresh Data</strong> after entering your location.
+                            {t('demandForecast.noRecommendationsYet')}{" "}
+                            <strong>{t('demandForecast.refreshData')}</strong>{" "}
+                            {t('demandForecast.afterEnteringLocation')}
                         </p>
                     </div>
                 ) : (
@@ -444,21 +450,21 @@ const DemandForecast = () => {
                                     </div>
                                     <div className="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-black rounded-full border border-green-100 flex items-center gap-1.5 uppercase tracking-widest">
                                         <CheckCircle2 className="w-3 h-3" />
-                                        {rec.suitability} Fit
+                                        {t(`demandForecast.suitability.${rec.suitability}`, { defaultValue: rec.suitability })} {t('demandForecast.fit')}
                                     </div>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="space-y-1">
                                         <h4 className="text-xl font-black text-text-dark">{rec.name}</h4>
                                         <p className="text-xs text-accent font-bold uppercase tracking-widest">
-                                            AI Recommendation
+                                            {t('demandForecast.potentialProfit')} <span className="text-primary font-black">+18%</span>
                                         </p>
                                     </div>
                                     <p className="text-xs text-accent font-medium leading-relaxed italic border-l-4 border-primary/20 pl-3">
                                         "{rec.reason}"
                                     </p>
                                     <button className="w-full py-3 bg-neutral-light/50 text-text-dark text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all">
-                                        View Growth Plan
+                                        {t('demandForecast.viewGrowthPlan')}
                                     </button>
                                 </div>
                             </div>
@@ -473,15 +479,13 @@ const DemandForecast = () => {
                     <BadgeAlert className="w-10 h-10 text-blue-500" />
                 </div>
                 <div className="space-y-1 text-center md:text-left">
-                    <h4 className="font-black text-blue-900 uppercase tracking-widest text-sm">Need Help? 📢</h4>
+                    <h4 className="font-black text-blue-900 uppercase tracking-widest text-sm">{t('demandForecast.needHelp')}</h4>
                     <p className="text-xs text-blue-700 font-bold leading-relaxed">
-                        🟢 Green = HIGH demand — good time to sell! 🔴 Red = wait for better prices.
-                        Select a crop from the dropdown and type your district to get AI-powered suggestions
-                        for the next 3 crops to grow. Press <strong>Refresh Data</strong> after entering your location.
+                        {t('demandForecast.helpText')}
                     </p>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

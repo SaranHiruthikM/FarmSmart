@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import SettingsCard from "../components/common/SettingsCard";
 import ToggleSwitch from "../components/common/ToggleSwitch";
 import notificationService from "../services/notification.service";
-import { Loader2 } from "lucide-react";
+import { Loader2, Languages, Check } from "lucide-react";
+import authService from "../services/auth.service";
+import i18n from "../i18n/i18n";
 
 function Settings() {
     const [loading, setLoading] = useState(true);
@@ -13,6 +15,17 @@ function Settings() {
         auctionAlerts: false,
         deliveryAlerts: false
     });
+    const [preferredLanguage, setPreferredLanguage] = useState(i18n.language || "en");
+    const [updatingLang, setUpdatingLang] = useState(false);
+
+    const languages = [
+        { code: "en", name: "English", native: "English" },
+        { code: "ta", name: "Tamil", native: "தமிழ்" },
+        { code: "hi", name: "Hindi", native: "हिन्दी" },
+        { code: "ml", name: "Malayalam", native: "മലയാളം" },
+        { code: "te", name: "Telugu", native: "తెలుగు" },
+        { code: "kn", name: "Kannada", native: "ಕನ್ನಡ" },
+    ];
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -25,8 +38,37 @@ function Settings() {
                 setLoading(false);
             }
         };
+
+        const loadProfile = async () => {
+            try {
+                const user = await authService.getProfile();
+                if (user && user.preferredLanguage) {
+                    setPreferredLanguage(user.preferredLanguage);
+                    if (i18n.language !== user.preferredLanguage) {
+                        i18n.changeLanguage(user.preferredLanguage);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load profile", err);
+            }
+        };
+
         fetchSettings();
+        loadProfile();
     }, []);
+
+    const handleLanguageChange = async (langCode) => {
+        setUpdatingLang(true);
+        try {
+            await i18n.changeLanguage(langCode);
+            setPreferredLanguage(langCode);
+            await authService.updateProfile({ preferredLanguage: langCode });
+        } catch (err) {
+            console.error("Failed to update language", err);
+        } finally {
+            setUpdatingLang(false);
+        }
+    };
 
     const handleToggle = async (key, value) => {
         const newSettings = { ...settings, [key]: value };
@@ -64,10 +106,54 @@ function Settings() {
         >
             <div className="max-w-md mx-auto">
 
-                {/* Header */}
                 <h2 className="text-2xl font-semibold text-primary mb-6 text-center">
-                    Notification Settings
+                    Account Settings
                 </h2>
+
+                {/* Language Settings */}
+                <SettingsCard title="Language Preferences">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-primary mb-2">
+                            <Languages className="w-5 h-5" />
+                            <span className="text-sm font-semibold text-text-dark">Select UI Language</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            {languages.map((lang) => (
+                                <button
+                                    key={lang.code}
+                                    onClick={() => handleLanguageChange(lang.code)}
+                                    disabled={updatingLang}
+                                    className={`
+                                        flex items-center justify-between p-3 rounded-xl border transition-all duration-200
+                                        ${preferredLanguage === lang.code
+                                            ? "bg-primary/5 border-primary shadow-sm"
+                                            : "bg-white border-accent/20 hover:border-primary/50 hover:bg-neutral-light"
+                                        }
+                                    `}
+                                >
+                                    <div className="flex flex-col items-start">
+                                        <span className={`font-bold text-sm ${preferredLanguage === lang.code ? "text-primary" : "text-text-dark"}`}>
+                                            {lang.native}
+                                        </span>
+                                        <span className="text-[10px] text-accent font-medium">
+                                            {lang.name}
+                                        </span>
+                                    </div>
+                                    {preferredLanguage === lang.code && (
+                                        <div className="bg-primary p-1 rounded-full">
+                                            <Check className="w-3 h-3 text-white" />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </SettingsCard>
+
+                {/* Notification Settings Header */}
+                <h3 className="text-lg font-semibold text-primary mt-8 mb-4 text-center">
+                    Notification Settings
+                </h3>
 
                 {/* SMS */}
                 <SettingsCard title="SMS Alerts">

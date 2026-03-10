@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import cropService from "../services/crop.service";
 import CropCard from "../components/marketplace/CropCard";
-import { Loader2, Search, Filter, Plus, Leaf } from "lucide-react";
+import InputField from "../components/common/InputField";
+import poolingService from "../services/pooling.service";
+import { Loader2, Search, Filter, Plus, Globe, Layers, Users2, ChevronRight } from "lucide-react";
 
 const Marketplace = () => {
+    const { t } = useTranslation();
     const [crops, setCrops] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showFilters, setShowFilters] = useState(false);
@@ -13,6 +17,8 @@ const Marketplace = () => {
         state: "",
         district: "",
     });
+    const [viewType, setViewType] = useState("regular"); // "regular" or "institutional"
+    const [batches, setBatches] = useState([]);
 
     useEffect(() => {
         fetchCrops();
@@ -28,11 +34,15 @@ const Marketplace = () => {
             const data = await cropService.getAllCrops(query);
             setCrops(data);
         } catch (error) {
-            console.error("Failed to fetch crops", error);
+            console.error("Failed to fetch data", error);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchCrops();
+    }, [viewType]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -45,14 +55,14 @@ const Marketplace = () => {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this listing?")) {
+        if (window.confirm(t('marketplace.confirmDelete'))) {
             try {
                 await cropService.deleteCrop(id);
                 // Optimistically remove from UI
                 setCrops(currentCrops => currentCrops.filter(crop => crop.id !== id));
             } catch (error) {
                 console.error("Failed to delete crop", error);
-                alert("Failed to delete crop. Please try again.");
+                alert(t('marketplace.deleteFailed'));
             }
         }
     };
@@ -81,16 +91,15 @@ const Marketplace = () => {
                             : 'glass-card text-nature-700 hover:bg-white hover:text-nature-900 border-white/60'
                         }`}
                     >
-                        <Filter className="w-5 h-5" /> 
-                        {showFilters ? "Hide Filters" : "Filter Crops"}
+                        <Filter className="w-5 h-5" />
+                        {showFilters ? t('marketplace.hideFilters') : t('marketplace.showFilters')}
                     </button>
                     
                     <Link
                         to="/dashboard/add-crop"
                         className="flex items-center justify-center gap-2 px-6 py-3 bg-nature-600 hover:bg-nature-700 text-white font-bold rounded-2xl shadow-lg shadow-nature-600/30 hover:-translate-y-1 transition-all duration-300"
                     >
-                        <Plus className="w-5 h-5 stroke-[3px]" /> 
-                        List New Crop
+                        <Plus className="w-5 h-5 stroke-[3px]" /> {t('marketplace.addCrop')}
                     </Link>
                 </div>
             </div>
@@ -144,6 +153,7 @@ const Marketplace = () => {
                                 className="w-full py-3 bg-nature-800 text-white font-bold rounded-xl hover:bg-nature-900 transition-colors shadow-lg shadow-nature-800/20"
                             >
                                 Apply Filters
+                                <Search className="w-4 h-4" /> {t('common.search')}
                             </button>
                         </div>
                     </form>
@@ -183,6 +193,54 @@ const Marketplace = () => {
                             crop={crop}
                             onDelete={() => handleDelete(crop._id || crop.id)}
                         />
+                    ))}
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {batches.map((batch) => (
+                        <div key={batch._id} className="bg-white p-6 rounded-2xl border border-neutral-light shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-all group">
+                            <div className="flex justify-between items-start">
+                                <div className="space-y-1">
+                                    <h4 className="font-bold text-[#1a1f1b] text-lg">{batch.cropName}</h4>
+                                    <div className="flex items-center gap-2 text-[10px] font-bold text-accent uppercase tracking-widest">
+                                        <Globe className="w-3 h-3" /> {batch.district}, {batch.state}
+                                    </div>
+                                </div>
+                                <div className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${batch.status === 'LOCKED' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                                    {batch.status}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-accent/60">
+                                    <span>{t('marketplace.collected')}: {batch.currentQuantity} {batch.unit}</span>
+                                    <span>{t('dashboard.target')}: {batch.targetQuantity} {batch.unit}</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-neutral-light/30 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-primary transition-all duration-1000"
+                                        style={{ width: `${batch.progress}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+
+                            <div className="pt-2 border-t border-neutral-light flex items-center justify-between">
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-8 h-8 rounded-full bg-neutral-light/50 flex items-center justify-center">
+                                        <Users2 className="w-4 h-4 text-accent" />
+                                    </div>
+                                    <span className="text-xs font-bold text-text-dark">{batch.members?.length || 0} {t('marketplace.farmers')}</span>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] font-bold text-accent uppercase">{t('marketplace.basePrice')}</p>
+                                    <p className="font-bold text-primary italic">₹{batch.basePrice}/kg</p>
+                                </div>
+                            </div>
+
+                            <button className="w-full py-3 bg-secondary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-secondary-dark transition-all shadow-lg shadow-secondary/20 flex items-center justify-center gap-2">
+                                {t('marketplace.sourceBatch')} <ChevronRight className="w-4 h-4" />
+                            </button>
+                        </div>
                     ))}
                 </div>
             )}

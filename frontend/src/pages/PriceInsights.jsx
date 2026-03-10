@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import priceService from "../services/price.service";
 import {
     TrendingUp,
@@ -47,6 +48,7 @@ ChartJS.register(
 );
 
 const PriceInsights = () => {
+    const { t } = useTranslation();
     // Selection States
     const [selectedState, setSelectedState] = useState("");
     const [selectedDistrict, setSelectedDistrict] = useState("");
@@ -86,7 +88,7 @@ const PriceInsights = () => {
     const [isForecastLoading, setIsForecastLoading] = useState(false);
     const [showForecast, setShowForecast] = useState(false);
     const [chatMessages, setChatMessages] = useState([
-        { role: 'assistant', content: "Namaste! I'm your FarmSmart AI Advisor. I see you've already selected your crop and location. Please enter a month and year (e.g., 'December 2026') to predict the price!" }
+        { role: 'assistant', content: t('priceInsights.aiGreeting') }
     ]);
     const [userQuery, setUserQuery] = useState("");
 
@@ -232,7 +234,7 @@ const PriceInsights = () => {
         e.preventDefault();
         if (!userQuery.trim() || isForecastLoading) return;
         if (!selectedCrop || !selectedDistrict || !stats.avg) {
-            setChatMessages(prev => [...prev, { role: 'assistant', content: "Please select a crop and district to ask about prices." }]);
+            setChatMessages(prev => [...prev, { role: 'assistant', content: t('priceInsights.selectCropFirst') }]);
             return;
         }
 
@@ -248,10 +250,10 @@ const PriceInsights = () => {
                 stats.avg,
                 currentQuery
             );
-            setChatMessages(prev => [...prev, { role: 'assistant', content: result || "I'm having trouble analyzing that. Try again?" }]);
+            setChatMessages(prev => [...prev, { role: 'assistant', content: result || t('priceInsights.tryAgain') }]);
         } catch (err) {
             console.error("Inquiry failed", err);
-            setChatMessages(prev => [...prev, { role: 'assistant', content: "Error connecting to AI. Please check your connection." }]);
+            setChatMessages(prev => [...prev, { role: 'assistant', content: t('priceInsights.aiError') }]);
         } finally {
             setIsForecastLoading(false);
         }
@@ -364,11 +366,11 @@ const PriceInsights = () => {
                     <div className="space-y-2">
                         <div className="flex items-center gap-3">
                             <div className="w-1.5 h-10 bg-primary rounded-full"></div>
-                            <h1 className="text-3xl font-bold text-[#1a1f1b]">Market Insights</h1>
+                            <h1 className="text-3xl font-bold text-[#1a1f1b]">{t('priceInsights.title')}</h1>
                         </div>
                         <p className="text-secondary font-bold uppercase tracking-[0.3em] text-[10px] mt-2 opacity-60 flex items-center gap-2">
                             <Sparkles className="w-3 h-3 text-primary animate-pulse" />
-                            Live Price Analytics & Predictive Intelligence
+                            {t('priceInsights.subtitle')}
                         </p>
                     </div>
 
@@ -383,21 +385,21 @@ const PriceInsights = () => {
                         ) : (
                             <BrainCircuit className="w-6 h-6 transition-transform group-hover:rotate-12" />
                         )}
-                        PREDICT PRICE
+                        {t('priceInsights.predictPrice')}
                     </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
                     {/* State Dropdown */}
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] ml-1">State</label>
+                        <label className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] ml-1">{t('priceInsights.state')}</label>
                         <div className="relative">
                             <select
                                 value={selectedState}
                                 onChange={(e) => setSelectedState(e.target.value)}
                                 className="w-full pl-11 pr-10 py-3 bg-neutral-light/30 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl outline-none font-bold text-text-dark transition-all cursor-pointer text-sm appearance-none"
                             >
-                                <option value="" disabled>Select State</option>
+                                <option value="" disabled>{t('priceInsights.selectState')}</option>
                                 {statesList.map(s => (
                                     <option key={s} value={s}>{s}</option>
                                 ))}
@@ -409,7 +411,7 @@ const PriceInsights = () => {
 
                     {/* District Dropdown */}
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] ml-1">District</label>
+                        <label className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] ml-1">{t('priceInsights.district')}</label>
                         <div className="relative">
                             <select
                                 value={selectedDistrict}
@@ -417,7 +419,7 @@ const PriceInsights = () => {
                                 className={`w-full pl-11 pr-10 py-3 bg-neutral-light/30 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl outline-none font-bold text-text-dark transition-all cursor-pointer text-sm appearance-none ${!selectedState ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 disabled={!selectedState}
                             >
-                                <option value="" disabled>{selectedState ? "Select District" : "Select State First"}</option>
+                                <option value="" disabled>{selectedState ? t('priceInsights.selectDistrict') : t('priceInsights.selectStateFirst')}</option>
                                 {districtsList.map((d, idx) => (
                                     <option key={idx} value={d}>{d}</option>
                                 ))}
@@ -429,7 +431,7 @@ const PriceInsights = () => {
 
                     {/* Crop Dropdown */}
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] ml-1">Crop</label>
+                        <label className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] ml-1">{t('priceInsights.crop')}</label>
                         <div className="relative">
                             <select
                                 value={selectedCrop}
@@ -437,7 +439,7 @@ const PriceInsights = () => {
                                 className={`w-full pl-11 pr-10 py-3 bg-neutral-light/30 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl outline-none font-bold text-text-dark transition-all cursor-pointer text-sm appearance-none ${!selectedDistrict ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 disabled={!selectedDistrict || availableCrops.length === 0}
                             >
-                                {availableCrops.length === 0 ? <option>No crops found</option> : null}
+                                {availableCrops.length === 0 ? <option>{t('priceInsights.noCrops')}</option> : null}
                                 {availableCrops.map(c => (
                                     <option key={c.id || c} value={c.name || c}>{c.name || c}</option>
                                 ))}
@@ -449,7 +451,7 @@ const PriceInsights = () => {
 
                     {/* Range Selectors */}
                     <div className="space-y-1.5 pt-1">
-                        <label className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] ml-1">Range</label>
+                        <label className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] ml-1">{t('priceInsights.range')}</label>
                         <div className="bg-neutral-light/30 p-1.5 rounded-2xl flex items-center gap-1">
                             {["30", "180", "365"].map((range) => (
                                 <button
@@ -482,7 +484,7 @@ const PriceInsights = () => {
                                     <BrainCircuit className="w-9 h-9" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold uppercase tracking-tight">Price Predictor</h2>
+                                    <h2 className="text-xl font-bold uppercase tracking-tight">{t('priceInsights.pricePredictor')}</h2>
                                     <div className="flex items-center gap-2">
                                         <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                                         <p className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Random Forest ML + Llama 3.3</p>
@@ -551,7 +553,7 @@ const PriceInsights = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <PriceCard
-                    label="Today's Avg Price"
+                    label={t('priceInsights.todayAvg')}
                     value={`₹${stats.avg}`}
                     unit="/ kg"
                     icon={TrendingUp}
@@ -559,7 +561,7 @@ const PriceInsights = () => {
                     bg="bg-green-50"
                 />
                 <PriceCard
-                    label="Lowest Price"
+                    label={t('priceInsights.lowestPrice')}
                     value={`₹${stats.min}`}
                     unit="/ kg"
                     icon={ArrowDown}
@@ -567,7 +569,7 @@ const PriceInsights = () => {
                     bg="bg-red-50"
                 />
                 <PriceCard
-                    label="Highest Price"
+                    label={t('priceInsights.highestPrice')}
                     value={`₹${stats.max}`}
                     unit="/ kg"
                     icon={ArrowUp}
@@ -575,7 +577,7 @@ const PriceInsights = () => {
                     bg="bg-emerald-50"
                 />
                 <PriceCard
-                    label="Best Market"
+                    label={t('priceInsights.bestMarket')}
                     value={stats.bestMandi}
                     icon={MapPin}
                     color="text-blue-600"
@@ -590,12 +592,12 @@ const PriceInsights = () => {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <div className="flex items-center gap-3">
-                                <h3 className="text-lg font-bold text-[#1a1f1b]">Price Trend</h3>
+                                <h3 className="text-lg font-bold text-[#1a1f1b]">{t('priceInsights.priceTrend')}</h3>
                                 {isSimulatedData && (
-                                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase tracking-widest border border-amber-200">Simulated</span>
+                                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase tracking-widest border border-amber-200">{t('priceInsights.simulated')}</span>
                                 )}
                             </div>
-                            <p className="text-xs text-accent font-bold uppercase tracking-widest mt-1">Market fluctuations over last {timeFilter} days</p>
+                            <p className="text-xs text-accent font-bold uppercase tracking-widest mt-1">{t('priceInsights.fluctuations', { days: timeFilter })}</p>
                         </div>
 
                         <div className="p-3 bg-neutral-light/30 rounded-2xl">
@@ -610,7 +612,7 @@ const PriceInsights = () => {
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center min-h-[300px] text-accent opacity-60">
                             <BarChart3 className="w-12 h-12 mb-2" />
-                            <p>No historical data available for this range</p>
+                            <p>{t('priceInsights.noHistory')}</p>
                         </div>
                     )}
 
@@ -661,8 +663,8 @@ const PriceInsights = () => {
 
                 <div className="bg-white p-6 rounded-2xl border border-neutral-light shadow-sm flex flex-col h-full">
                     <div className="mb-6">
-                        <h3 className="text-lg font-bold text-[#1a1f1b]">Nearby Mandis</h3>
-                        <p className="text-xs text-accent font-bold uppercase tracking-widest mt-1">Prices in {selectedDistrict}</p>
+                        <h3 className="text-lg font-bold text-[#1a1f1b]">{t('priceInsights.nearbyMandis')}</h3>
+                        <p className="text-xs text-accent font-bold uppercase tracking-widest mt-1">{t('priceInsights.pricesIn')} {selectedDistrict}</p>
                     </div>
 
                     <div className="space-y-4 flex-1 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
@@ -678,7 +680,7 @@ const PriceInsights = () => {
                                         <div className="flex items-center gap-2">
                                             <h4 className="font-black text-text-dark truncate max-w-[150px] md:max-w-full" title={market.mandi}>{market.mandi}</h4>
                                             {isBest && (
-                                                <span className="px-2 py-0.5 bg-primary text-[10px] font-black text-white rounded-full uppercase tracking-widest shrink-0">Best</span>
+                                                <span className="px-2 py-0.5 bg-primary text-[10px] font-black text-white rounded-full uppercase tracking-widest shrink-0">{t('priceInsights.best')}</span>
                                             )}
                                         </div>
                                         <div className="flex items-center text-[10px] text-accent font-bold uppercase tracking-widest truncate">
@@ -688,20 +690,20 @@ const PriceInsights = () => {
                                     </div>
                                     <div className="text-right shrink-0">
                                         <div className="text-lg font-black text-primary">₹{market.pricePerKg}</div>
-                                        <p className="text-[10px] text-accent font-bold uppercase tracking-widest">Per kg</p>
+                                        <p className="text-[10px] text-accent font-bold uppercase tracking-widest">{t('priceInsights.perKg')}</p>
                                     </div>
                                 </div>
                             );
                         }) : (
                             <div className="text-center py-10 text-accent">
-                                <p>No market prices found for {selectedDistrict}.</p>
-                                <p className="text-xs mt-2">Try searching a different district.</p>
+                                <p>{t('priceInsights.noMarketPrices')} {selectedDistrict}.</p>
+                                <p className="text-xs mt-2">{t('priceInsights.tryDifferent')}</p>
                             </div>
                         )}
                     </div>
 
                     <button className="mt-8 w-full flex items-center justify-center gap-2 py-4 bg-text-dark text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-black transition-all group">
-                        Notify me of price jumps
+                        {t('priceInsights.notifyPriceJumps')}
                         <Bell className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                     </button>
                 </div>
@@ -713,14 +715,14 @@ const PriceInsights = () => {
                     <Info className="w-32 h-32" />
                 </div>
                 <div className="relative z-10 max-w-xl">
-                    <h3 className="text-lg font-black uppercase tracking-widest mb-4">Farmer Tips 🌾</h3>
+                    <h3 className="text-lg font-black uppercase tracking-widest mb-4">{t('priceInsights.farmerTips')}</h3>
                     <div className="space-y-4">
                         <div className="flex items-start gap-4">
                             <div className="bg-white/20 p-2 rounded-xl">
                                 <TrendingUp className="w-5 h-5" />
                             </div>
                             <p className="text-sm font-bold opacity-90 leading-relaxed">
-                                Green lines going up means prices are rising. Good time to sell!
+                                {t('priceInsights.tip1')}
                             </p>
                         </div>
                         <div className="flex items-start gap-4">
@@ -728,7 +730,7 @@ const PriceInsights = () => {
                                 <MapPin className="w-5 h-5" />
                             </div>
                             <p className="text-sm font-bold opacity-90 leading-relaxed">
-                                Check the "Best Market" card to see where you can get the most money today.
+                                {t('priceInsights.tip2')}
                             </p>
                         </div>
                     </div>

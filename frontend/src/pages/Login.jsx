@@ -1,6 +1,9 @@
-import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+
 import { motion, AnimatePresence } from "framer-motion";
+
+import { useTranslation } from "react-i18next";
+
 import { Leaf, Phone, Lock, ArrowRight, Loader2 } from "lucide-react";
 import authService from "../services/auth.service";
 import LanguageSelector from "../components/common/LanguageSelector";
@@ -13,12 +16,12 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!phone || !password) {
-      setError("Please fill in all fields");
+      setError(t('common.fillRequired'));
       return;
     }
 
@@ -30,12 +33,12 @@ const Login = () => {
         phoneNumber: phone,
         password: password
       });
-      
+
       // Navigate to OTP page instead of Dashboard, passing phone number
       navigate("/otp", { state: { phoneNumber: phone } });
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Invalid credentials. Please check your details.");
+      setError(err.response?.data?.message || t('auth.invalidCredentials'));
     } finally {
       setIsLoading(false);
     }

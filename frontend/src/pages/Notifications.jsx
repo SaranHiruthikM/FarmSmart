@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, Bell, TrendingUp, Info, CheckCircle2, AlertTriangle, Trash2 } from "lucide-react";
 import notificationService from "../services/notification.service";
 
@@ -20,7 +21,7 @@ const NotificationIcon = ({ type }) => {
 };
 
 const getBgColor = (type, read) => {
-  if (read) return 'bg-gray-100'; // Neutral for read
+  if (read) return 'bg-gray-100';
   switch (type) {
     case 'PRICE': return 'bg-green-100';
     case 'SUCCESS': return 'bg-blue-100';
@@ -30,7 +31,16 @@ const getBgColor = (type, read) => {
   }
 };
 
-const NotificationItem = ({ notification, onRead }) => {
+const NotificationItem = ({ notification, onRead, t }) => {
+  const getTitle = (type) => {
+    switch (type) {
+      case 'PRICE': return t('notifications.newBid');
+      case 'SUCCESS': return t('common.success');
+      case 'WARNING': return t('notifications.alert');
+      default: return t('nav.notifications');
+    }
+  };
+
   return (
     <div
       className={`
@@ -39,7 +49,6 @@ const NotificationItem = ({ notification, onRead }) => {
             `}
       onClick={() => onRead(notification.id)}
     >
-      {/* Unread Indicator Strip */}
       {!notification.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />}
 
       <div className="flex gap-4 items-start">
@@ -52,9 +61,7 @@ const NotificationItem = ({ notification, onRead }) => {
         <div className="flex-1">
           <div className="flex justify-between items-start">
             <h4 className={`text-base font-bold mb-1 ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
-              {notification.type === 'PRICE' ? 'New Bid Received' :
-                notification.type === 'SUCCESS' ? 'Success' :
-                  notification.type === 'WARNING' ? 'Alert' : 'Notification'}
+              {getTitle(notification.type)}
             </h4>
             <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
               {new Date(notification.time).toLocaleString('en-IN', {
@@ -72,9 +79,10 @@ const NotificationItem = ({ notification, onRead }) => {
 };
 
 function Notifications() {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('ALL'); // ALL, UNREAD
+  const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
     fetchNotifications();
@@ -127,9 +135,9 @@ function Notifications() {
             <div className="p-2 md:p-3 bg-green-100 rounded-2xl shrink-0">
               <Bell className="w-6 h-6 md:w-8 md:h-8 text-green-700" />
             </div>
-            <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight">Notifications</h1>
+            <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight">{t('nav.notifications')}</h1>
           </div>
-          <p className="text-gray-500 text-sm md:text-lg font-medium ml-1 md:ml-2">Stay updated with your farm activities</p>
+          <p className="text-gray-500 text-sm md:text-lg font-medium ml-1 md:ml-2">{t('notifications.subtitle')}</p>
         </div>
 
         <div className="flex bg-gray-100 p-1.5 md:p-2 rounded-2xl shadow-sm border border-gray-200 self-start md:self-auto w-full md:w-auto">
@@ -137,7 +145,7 @@ function Notifications() {
             onClick={() => setFilter('ALL')}
             className={`flex-1 md:flex-none px-4 md:px-8 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold transition-all ${filter === 'ALL' ? 'bg-white text-gray-900 shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
           >
-            All
+            {t('notifications.all')}
           </button>
           <button
             onClick={() => setFilter('UNREAD')}
@@ -156,7 +164,7 @@ function Notifications() {
             <div className="flex justify-end mb-4">
               {unreadCount > 0 && (
                 <button onClick={handleMarkAllRead} className="px-4 py-2 rounded-xl text-sm font-bold text-green-700 bg-green-50 hover:bg-green-100 transition-colors flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" /> Mark all as read
+                  <CheckCircle2 className="w-4 h-4" /> {t('notifications.markAllRead')}
                 </button>
               )}
             </div>
@@ -165,6 +173,7 @@ function Notifications() {
                 key={notification.id}
                 notification={notification}
                 onRead={handleRead}
+                t={t}
               />
             ))}
           </div>
@@ -173,11 +182,11 @@ function Notifications() {
             <div className="bg-white p-12 rounded-full shadow-xl shadow-gray-100 mb-10 group-hover:scale-110 transition-transform duration-300">
               <Bell className="w-32 h-32 text-gray-200" />
             </div>
-            <h3 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">No notifications</h3>
+            <h3 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">{t('notifications.none')}</h3>
             <p className="text-gray-400 text-xl max-w-lg font-medium leading-relaxed">
               {filter === 'UNREAD'
-                ? "You're all caught up! Switch to 'All' to view your notification history."
-                : "We'll let you know when something important happens on your farm."}
+                ? t('notifications.allCaughtUp')
+                : t('notifications.willNotify')}
             </p>
           </div>
         )}
