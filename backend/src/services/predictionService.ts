@@ -47,7 +47,7 @@ export const getPricePrediction = async (crop: string, district: string, current
     return prediction;
 };
 
-export const handleChatForecast = async (query: string, currentCrop: string, currentDistrict: string, currentPrice: number) => {
+export const handleChatForecast = async (query: string, currentCrop: string, currentDistrict: string, currentPrice: number, language: string = "English") => {
     const groq = getGroq();
     if (!groq) return "Groq API key missing. Cannot use AI.";
 
@@ -130,11 +130,12 @@ export const handleChatForecast = async (query: string, currentCrop: string, cur
         Month: ${monthName}, Year: ${year}, Crop: ${crop}, District: ${district}
         
         Rules:
-        1. You MUST return ONLY one sentence in this EXACT format: "For [Month Year], the expected price of [Crop] in [District] is ₹[Price]/kg."
+        1. You MUST return ONLY one sentence in this EXACT format (translated to ${language}): "For [Month Year], the expected price of [Crop] in [District] is ₹[Price]/kg."
         2. Do NOT add any advice, greetings, notes, or disclaimers.
         3. Do NOT use bolding or markdown.
-        4. If prediction is missing, return: "Currently, I do not have enough data to predict the price for ${crop} in ${district} for ${monthName} ${year}."
-        5. If the crop is not supported, return: "We only support price predictions for ${VALID_CROPS.join(', ')}."
+        4. If prediction is missing, return (in ${language}): "Currently, I do not have enough data to predict the price for ${crop} in ${district} for ${monthName} ${year}."
+        5. If the crop is not supported, return (in ${language}): "We only support price predictions for ${VALID_CROPS.join(', ')}."
+        6. Respond in ${language} language.
         `;
 
         const finalCompletion = await groq.chat.completions.create({

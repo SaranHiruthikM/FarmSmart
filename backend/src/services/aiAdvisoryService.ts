@@ -11,6 +11,7 @@ export interface DiagnosisRequest {
     symptoms: string;
     crop?: string;
     location?: string;
+    language?: string;
 }
 
 export interface DiagnosisResult {
@@ -28,6 +29,7 @@ export interface DiagnosisResult {
 
 export const getAiDiagnosis = async (data: DiagnosisRequest): Promise<DiagnosisResult> => {
     const groq = getGroq();
+    const language = data.language || "English";
 
     // Smart Fallback for development/offline
     const fallback: DiagnosisResult = {
@@ -56,6 +58,7 @@ export const getAiDiagnosis = async (data: DiagnosisRequest): Promise<DiagnosisR
         Crop: ${data.crop || 'Unknown'}
         Location: ${data.location || 'India'}
         Symptoms: ${data.symptoms}
+        Language: ${language}
         
         Task:
         1. Diagnose the condition (disease, pest, or deficiency).
@@ -65,17 +68,18 @@ export const getAiDiagnosis = async (data: DiagnosisRequest): Promise<DiagnosisR
         5. Assign an urgency level.
 
         CRITICAL: Provide specific chemical/organic names available in India (e.g., Carbendazim, Neem Oil, Verticillium lecanii).
-        
+        CRITICAL: The entire response (diagnosis, causes, actions) MUST be in the requested Language: "${language}". keep the keys in English.
+
         Return internal JSON strictly (no markdown, no extra text):
         {
-            "diagnosis": "Name of disease/pest",
+            "diagnosis": "Name of disease/pest (in ${language})",
             "certainty": "85%",
-            "possibleCauses": ["Cause 1", "Cause 2"],
+            "possibleCauses": ["Cause 1 (in ${language})", "Cause 2 (in ${language})"],
             "treatmentPlan": {
-                "immediateActions": ["Action 1", "Action 2"],
-                "organicOptions": ["Organic 1", "Organic 2"],
-                "chemicalOptions": ["Chemical 1", "Chemical 2"],
-                "prevention": ["Prevention 1", "Prevention 2"]
+                "immediateActions": ["Action 1 (in ${language})", "Action 2"],
+                "organicOptions": ["Organic 1 (in ${language})", "Organic 2"],
+                "chemicalOptions": ["Chemical 1 (in ${language})", "Chemical 2"],
+                "prevention": ["Prevention 1 (in ${language})", "Prevention 2"]
             },
             "urgency": "High"
         }

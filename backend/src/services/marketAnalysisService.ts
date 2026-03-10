@@ -12,7 +12,7 @@ export type MarketDataPoint = {
     price: number;
 };
 
-export const getAiMarketAnalysis = async (crop: string, timeline: string, points: MarketDataPoint[]) => {
+export const getAiMarketAnalysis = async (crop: string, timeline: string, points: MarketDataPoint[], language: string = "English") => {
     const groq = getGroq();
     if (!groq) {
         return "Market analysis is currently unavailable as the AI service is not configured.";
@@ -44,6 +44,7 @@ export const getAiMarketAnalysis = async (crop: string, timeline: string, points
         Focus on the current trend and a brief implication (e.g., good time to sell, wait for better prices, etc.).
         Be professional, actionable, and encouraging.
         Do NOT use markdown headers. Keep it as plain text.
+        Respond in "${language}" language.
         `;
 
         const completion = await groq.chat.completions.create({

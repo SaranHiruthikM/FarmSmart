@@ -13,7 +13,8 @@ export const analyzeImageQuality = async (req: Request, res: Response): Promise<
             return;
         }
 
-        const analysis = await analyzeCropQuality(req.file.buffer, req.file.mimetype);
+        const language = req.body.language || "English";
+        const analysis = await analyzeCropQuality(req.file.buffer, req.file.mimetype, language);
 
         // Fetch Rule for the detected grade
         const rule = await QualityRule.findOne({ grade: analysis.grade });

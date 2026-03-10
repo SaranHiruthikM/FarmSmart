@@ -9,10 +9,12 @@ const aiAdvisoryService = {
      */
     diagnose: async (symptoms, crop = "General", location = "India") => {
         try {
+            const language = localStorage.getItem('i18nextLng') || "en"; // Default to English
             const response = await api.post("/advisory/diagnose", {
                 symptoms,
                 crop,
-                location
+                location,
+                language
             });
             return response.data.data; // Standardized backend response wraps actual data in .data
         } catch (error) {

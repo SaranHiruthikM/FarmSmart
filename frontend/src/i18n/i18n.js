@@ -37,6 +37,7 @@ i18n.use(initReactI18next).init({
           disputes: "Dispute Support",
           adminDisputes: "Admin Disputes",
           sales: "Sales & Revenue",
+          planning: "Crop Planning",
           schemes: "Govt Schemes",
           settings: "Settings",
           profile: "Profile",
@@ -274,6 +275,48 @@ i18n.use(initReactI18next).init({
           enterPrice: "Enter counter price",
           counter: "Counter",
           waitingForUser: "Waiting for {{user}} to respond..."
+        },
+        planning: {
+          pageTitle: "Crop Planning Engine",
+          pageSubtitle: "Get AI-powered recommendations for your upcoming season based on market trends and soil analysis.",
+          sections: {
+            planMySeason: "Plan My Season",
+            results: "Recommended Crops",
+            noPlan: "No Plan Generated Yet",
+            noPlanDesc: "Enter your farm details to get AI-powered crop recommendations.",
+            noCrops: "No suitable crops found",
+            noCropsDesc: "Based on your soil type and the current season, we couldn't find optimal matches. Try changing the date or contact an expert.",
+            aiInsight: "AI Insight"
+          },
+          form: {
+            landSize: "Land Size (Acres)",
+            landSizePlaceholder: "e.g. 5",
+            soilType: "Soil Type",
+            selectSoilType: "Select Soil Type",
+            district: "District",
+            districtPlaceholder: "e.g. Pune",
+            sowingDate: "Planned Sowing Date",
+            sowingDateDesc: "Defaults to today if empty",
+            submitBtn: "Generate Plan",
+            loadingBtn: "Analyzing Market..."
+          },
+          card: {
+            duration: "Duration: {{days}} days",
+            harvest: "Harvest: {{date}}",
+            bestChoice: "Best Choice",
+            topMatch: "Top Match: {{crop}}",
+            predictedProfit: "Predicted Profit",
+            estimatedYield: "Estimated Yield",
+            predictedPrice: "Predicted Price",
+            totalCost: "Total Cost",
+            expectedRevenue: "Expected Revenue"
+          },
+          errors: {
+            landSize: "Land size is required",
+            soilType: "Soil type is required",
+            district: "District is required",
+            general: "Failed to generate plan. Please try again."
+          }
         }
       },
     },
@@ -311,6 +354,7 @@ i18n.use(initReactI18next).init({
           disputes: "சர்ச்சை ஆதரவு",
           adminDisputes: "நிர்வாகி சர்ச்சைகள்",
           sales: "விற்பனை மற்றும் வருவாய்",
+          planning: "பயிர் திட்டமிடல்",
           schemes: "அரசுத் திட்டங்கள்",
           settings: "அமைப்புகள்",
           profile: "சுயவிவரம்",
@@ -544,6 +588,48 @@ i18n.use(initReactI18next).init({
           enterPrice: "மாற்று விலையை உள்ளிடவும்",
           counter: "எதிர் வழங்கு",
           waitingForUser: "பதிலளிக்க {{user}} க்காக காத்திருக்கிறது..."
+        },
+        planning: {
+          pageTitle: "பயிர் திட்டமிடல் இயந்திரம்",
+          pageSubtitle: "சந்தை போக்குகள் மற்றும் மண் பகுப்பாய்வை அடிப்படையாகக் கொண்டு உங்கள் வருங்கால பருவத்திற்கான AI பரிந்துரைகளைப் பெறுங்கள்.",
+          sections: {
+            planMySeason: "எனது பருவத்தைத் திட்டமிடுங்கள்",
+            results: "பரிந்துரைக்கப்பட்ட பயிர்கள்",
+            noPlan: "திட்டம் எதுவும் இன்னும் உருவாக்கப்படவில்லை",
+            noPlanDesc: "உங்கள் விவசாய விவரங்களை உள்ளிட்டு AI பயிர் பரிந்துரைகளைப் பெறுங்கள்.",
+            noCrops: "பொருத்தமான பயிர்கள் காணப்படவில்லை",
+            noCropsDesc: "உங்கள் மண் வகை மற்றும் தற்போதைய பருவத்தின் அடிப்படையில், பொருத்தமான பயிர்களை எங்களால் கண்டறிய முடியவில்லை. தேதியை மாற்ற முயற்சிக்கவும் அல்லது நிபுணரைத் தொடர்பு கொள்ளவும்.",
+            aiInsight: "AI நுண்ணறிவு"
+          },
+          form: {
+            landSize: "நிலத்தின் அளவு (Acres)",
+            landSizePlaceholder: "எ.கா. 5",
+            soilType: "மண் வகை",
+            selectSoilType: "மண் வகையைத் தேர்ந்தெடுக்கவும்",
+            district: "மாவட்டம்",
+            districtPlaceholder: "எ.கா. அரியலூர்",
+            sowingDate: "திட்டமிடப்பட்ட விதைப்பு தேதி",
+            sowingDateDesc: "காலியாக இருந்தால் இன்று இயல்பாக இருக்கும்",
+            submitBtn: "திட்டத்தை உருவாக்கு",
+            loadingBtn: "சந்தையை பகுப்பாய்வு செய்கிறது..."
+          },
+          card: {
+            duration: "கால அளவு: {{days}} நாட்கள்",
+            harvest: "அறுவடை: {{date}}",
+            bestChoice: "சிறந்த தேர்வு",
+            topMatch: "சிறந்த பொருத்தம்: {{crop}}",
+            predictedProfit: "கணிக்கப்பட்ட லாபம்",
+            estimatedYield: "மதிப்பிடப்பட்ட மகசூல்",
+            predictedPrice: "கணிக்கப்பட்ட விலை",
+            totalCost: "மொத்த செலவு",
+            expectedRevenue: "எதிர்பார்க்கப்படும் வருவாய்"
+          },
+          errors: {
+            landSize: "நிலத்தின் அளவு தேவை",
+            soilType: "மண் வகை தேவை",
+            district: "மாவட்டம் தேவை",
+            general: "திட்டத்தை உருவாக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்."
+          },
         }
       },
     },
@@ -581,6 +667,7 @@ i18n.use(initReactI18next).init({
           disputes: "विवाद सहायता",
           adminDisputes: "व्यवस्थापक विवाद",
           sales: "बिक्री और राजस्व",
+          planning: "फसल योजना",
           schemes: "सरकारी योजनाएं",
           settings: "सेटिंग्स",
           profile: "प्रोफ़ाइल",
@@ -717,6 +804,48 @@ i18n.use(initReactI18next).init({
           enterPrice: "जवाबी कीमत दर्ज करें",
           counter: "ऑफर दें",
           waitingForUser: "जवाब देने के लिए {{user}} की प्रतीक्षा कर रहा है..."
+        },
+        planning: {
+          pageTitle: "फसल योजना इंजन",
+          pageSubtitle: "बाजार के रुझान और मिट्टी के विश्लेषण के आधार पर अपने आगामी मौसम के लिए एआई-संचालित सिफारिशें प्राप्त करें।",
+          sections: {
+            planMySeason: "मेरे मौसम की योजना बनाएं",
+            results: "अनुशंसित फसलें",
+            noPlan: "कोई योजना अभी तक तैयार नहीं हुई",
+            noPlanDesc: "एआई फसल सिफारिशें प्राप्त करने के लिए अपने खेत का विवरण दर्ज करें।",
+            noCrops: "कोई उपयुक्त फसल नहीं मिली",
+            noCropsDesc: "आपकी मिट्टी के प्रकार और वर्तमान मौसम के आधार पर, हम इष्टतम मिलान नहीं ढूंढ सके। तारीख बदलने की कोशिश करें या किसी विशेषज्ञ से संपर्क करें।",
+            aiInsight: "एआई इनसाइट"
+          },
+          form: {
+            landSize: "भूमि का आकार (एकर)",
+            landSizePlaceholder: "उदा. 5",
+            soilType: "मिट्टी का प्रकार",
+            selectSoilType: "मिट्टी का प्रकार चुनें",
+            district: "जिला",
+            districtPlaceholder: "उदा. पुणे",
+            sowingDate: "नियोजित बुवाई की तारीख",
+            sowingDateDesc: "यदि खाली है तो आज की तारीख",
+            submitBtn: "योजना तैयार करें",
+            loadingBtn: "बाजार का विश्लेषण..."
+          },
+          card: {
+            duration: "अवधि: {{days}} दिन",
+            harvest: "कटाई: {{date}}",
+            bestChoice: "सर्वोत्तम विकल्प",
+            topMatch: "शीर्ष मिलान: {{crop}}",
+            predictedProfit: "अनुमानित लाभ",
+            estimatedYield: "अनुमानित उपज",
+            predictedPrice: "अनुमानित कीमत",
+            totalCost: "कुल लागत",
+            expectedRevenue: "अपेक्षित राजस्व"
+          },
+          errors: {
+            landSize: "भूमि का आकार आवश्यक है",
+            soilType: "मिट्टी का प्रकार आवश्यक है",
+            district: "जिला आवश्यक है",
+            general: "योजना तैयार करने में विफल। कृपया पुन: प्रयास करें।"
+          }
         }
       }
     },
@@ -754,6 +883,7 @@ i18n.use(initReactI18next).init({
           disputes: "వివాద మద్దతు",
           adminDisputes: "అడ్మిన్ వివాదాలు",
           sales: "అమ్మకాలు & ఆదాయం",
+          planning: "పంట ప్రణాళిక",
           schemes: "ప్రభుత్వ పథకాలు",
           settings: "సెట్టింగ్‌లు",
           profile: "ప్రొఫైల్",
@@ -890,6 +1020,48 @@ i18n.use(initReactI18next).init({
           enterPrice: "కౌంటర్ ధరను నమోదు చేయండి",
           counter: "ఆఫర్ చేయండి",
           waitingForUser: "స్పందించడానికి {{user}} కోసం వేచి ఉంది..."
+        },
+        planning: {
+          pageTitle: "పంట ప్రణాళిక ఇంజిన్",
+          pageSubtitle: "మార్కెట్ ట్రెండ్‌లు మరియు భూమి విశ్లేషణ ఆధారంగా మీ రాబోయే సీజన్‌కు AI ఆధారిత సిఫార్సులను పొందండి.",
+          sections: {
+            planMySeason: "నా సీజన్‌ను ప్లాన్ చేయండి",
+            results: "సిఫార్సు చేయబడిన పంటలు",
+            noPlan: "ఇంకా ప్రణాళిక ఉత్పత్తి కాలేదు",
+            noPlanDesc: "AI పంట సిఫార్సులను పొందడానికి మీ వ్యవసాయ వివరాలను నమోదు చేయండి.",
+            noCrops: "అనుకూలమైన పంటలు కనుగొనబడలేదు",
+            noCropsDesc: "మీ భూమి రకం మరియు ప్రస్తుత సీజన్ ఆధారంగా, మేము సరైన సరిపోలికలను కనుగొనలేకపోయాము. తేదీ మార్చడానికి ప్రయత్నించండి లేదా నిపుణుడిని సంప్రదించండి.",
+            aiInsight: "AI అంతర్దృష్టి"
+          },
+          form: {
+            landSize: "భూమి పరిమాణం (ఎకరాలు)",
+            landSizePlaceholder: "ఉదా. 5",
+            soilType: "నేల రకం",
+            selectSoilType: "నేల రకాన్ని ఎంచుకోండి",
+            district: "జిల్లా",
+            districtPlaceholder: "ఉదా. హైదరాబాద్",
+            sowingDate: "ప్రణాళికాబద్ధమైన విత్తే తేదీ",
+            sowingDateDesc: "ఖాళీగా ఉంటే ఈరోజు డిఫాల్ట్‌గా ఉంటుంది",
+            submitBtn: "ప్రణాళికను రూపొందించండి",
+            loadingBtn: "మార్కెట్‌ను విశ్లేషిస్తోంది..."
+          },
+          card: {
+            duration: "వ్యవధి: {{days}} రోజులు",
+            harvest: "కోత: {{date}}",
+            bestChoice: "ఉత్తమ ఎంపిక",
+            topMatch: "అగ్ర సరిపోలిక: {{crop}}",
+            predictedProfit: "అంచనా వేయబడిన లాభం",
+            estimatedYield: "అంచనా వేయబడిన దిగుబడి",
+            predictedPrice: "అంచనా వేయబడిన ధర",
+            totalCost: "మొత్తం ఖర్చు",
+            expectedRevenue: "ఆశించిన ఆదాయం"
+          },
+          errors: {
+            landSize: "భూమి పరిమాణం అవసరం",
+            soilType: "నేల రకం అవసరం",
+            district: "జిల్లా అవసరం",
+            general: "ప్రణాళికను రూపొందించడంలో విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి."
+          }
         }
       }
     },
@@ -927,6 +1099,7 @@ i18n.use(initReactI18next).init({
           disputes: "ವಿವಾದ ಬೆಂಬಲ",
           adminDisputes: "ನಿರ್ವಾಹಕ ವಿವಾದಗಳು",
           sales: "ಮಾರಾಟ ಮತ್ತು ಆದಾಯ",
+          planning: "ಬೆಳೆ ಯೋಜನೆ",
           schemes: "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು",
           settings: "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
           profile: "ಪ್ರೊಫೈಲ್",
@@ -1063,6 +1236,48 @@ i18n.use(initReactI18next).init({
           enterPrice: "ಕೌಂಟರ್ ಬೆಲೆಯನ್ನು ನಮೂದಿಸಿ",
           counter: "ಕೌಂಟರ್ ಆಫರ್",
           waitingForUser: "ಪ್ರತಿಕ್ರಿಯಿಸಲು {{user}} ಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ..."
+        },
+        planning: {
+          pageTitle: "ಬೆಳೆ ಯೋಜನೆ ಎಂಜಿನ್",
+          pageSubtitle: "ಮಾರುಕಟ್ಟೆ ಪ್ರವೃತ್ತಿಗಳು ಮತ್ತು ಮಣ್ಣಿನ ವಿಶ್ಲೇಷಣೆಯ ಆಧಾರದ ಮೇಲೆ ನಿಮ್ಮ ಮುಂಬರುವ ಋತುವಿಗಾಗಿ AI-ಚಾಲಿತ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ.",
+          sections: {
+            planMySeason: "ನನ್ನ ಋತುವನ್ನು ಯೋಜಿಸಿ",
+            results: "ಶಿಫಾರಸು ಮಾಡಲಾದ ಬೆಳೆಗಳು",
+            noPlan: "ಇನ್ನೂ ಯಾವುದೇ ಯೋಜನೆ ರಚಿಸಲಾಗಿಲ್ಲ",
+            noPlanDesc: "AI-ಚಾಲಿತ ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಲು ನಿಮ್ಮ ಫಾರ್ಮ್ ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ.",
+            noCrops: "ಅನುಕೂಲವಾದ ಬೆಳೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
+            noCropsDesc: "ನಿಮ್ಮ ಮಣ್ಣಿನ ಪ್ರಕಾರ ಮತ್ತು ಪ್ರಸ್ತುತ ಋತುವಿನ ಆಧಾರದ ಮೇಲೆ, ನಾವು ಸೂಕ್ತವಾದ matches ಗಳನ್ನು ಹುಡುಕಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಿನಾಂಕವನ್ನು ಬದಲಾಯಿಸಿ ಅಥವಾ ತಜ್ಞರನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+            aiInsight: "AI ಒಳನೋಟ"
+          },
+          form: {
+            landSize: "ಭೂಮಿಯ ಗಾತ್ರ (ಎಕರೆಗಳು)",
+            landSizePlaceholder: "ಉದಾ. 5",
+            soilType: "ಮಣ್ಣಿನ ವಿಧ",
+            selectSoilType: "ಮಣ್ಣಿನ ವಿಧವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            district: "ಜಿಲ್ಲೆ",
+            districtPlaceholder: "ಉದಾ. ಬೆಂಗಳೂರು",
+            sowingDate: "ಯೋಜಿಸಲಾದ ಬಿತ್ತನೆ ದಿನಾಂಕ",
+            sowingDateDesc: "ಖಾಲಿಯಾಗಿದ್ದರೆ ಇಂದಿನ ದಿನಾಂಕಕ್ಕೆ ಡೀಫಾಲ್ಟ್",
+            submitBtn: "ಯೋಜನೆಯನ್ನು ರಚಿಸಿ",
+            loadingBtn: "ಮಾರುಕಟ್ಟೆಯ ವಿಶ್ಲೇಷಣೆ..."
+          },
+          card: {
+            duration: "ಅವಧಿ: {{days}} ದಿನಗಳು",
+            harvest: "ಕೊಯ್ಲು: {{date}}",
+            bestChoice: "ಅತ್ಯುತ್ತಮ ಆಯ್ಕೆ",
+            topMatch: "ಟಾಪ್ ಮ್ಯಾಚ್: {{crop}}",
+            predictedProfit: "ಅಂದಾಜು ಲಾಭ",
+            estimatedYield: "ಅಂದಾಜು ಇಳುವರಿ",
+            predictedPrice: "ಅಂದಾಜು ಬೆಲೆ",
+            totalCost: "ಒಟ್ಟು ವೆಚ್ಚ",
+            expectedRevenue: "ನಿರೀಕ್ಷಿತ ಆದಾಯ"
+          },
+          errors: {
+            landSize: "ಭೂಮಿಯ ಗಾತ್ರ ಅಗತ್ಯ",
+            soilType: "ಮಣ್ಣಿನ ವಿಧ ಅಗತ್ಯ",
+            district: "ಜಿಲ್ಲೆ ಅಗತ್ಯ",
+            general: "ಯೋಜನೆಯನ್ನು ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
+          }
         }
       }
     },
@@ -1100,6 +1315,7 @@ i18n.use(initReactI18next).init({
           disputes: "തർക്ക പരിഹារ പിന്തുണ",
           adminDisputes: "അഡ്മിൻ തർക്കങ്ങൾ",
           sales: "വിൽപ്പനയും വരുമാനവും",
+          planning: "വിള ആസൂത്രണം",
           schemes: "സർക്കാർ പദ്ധതികൾ",
           settings: "സെറ്റിംഗ്സ്",
           profile: "പ്രൊഫൈൽ",
@@ -1236,6 +1452,48 @@ i18n.use(initReactI18next).init({
           enterPrice: "കൌണ്ടർ വില നൽകുക",
           counter: "ഓഫർ നൽകുക",
           waitingForUser: "പ്രതികരിക്കാൻ {{user}} നായി കാത്തിരിക്കുന്നു..."
+        },
+        planning: {
+          pageTitle: "വിള ആസൂത്രണ യന്ത്രം",
+          pageSubtitle: "വിപണി പ്രവണതകളും മണ്ണിന്റെ വിശകലനവും അടിസ്ഥാനമാക്കി നിങ്ങളുടെ അടുത്ത സീസണിലെക്കുള്ള AI-അധിഷ്ഠിത ശുപാർശകൾ നേടുക.",
+          sections: {
+            planMySeason: "എന്റെ സീസൺ ആസൂത്രണം",
+            results: "ശുപാർശ ചെയ്യുന്ന വിളകൾ",
+            noPlan: "ഇതുവരെ ഒരു പ്ലാനും തയ്യാറാക്കിയിട്ടില്ല",
+            noPlanDesc: "വിള ശുപാർശകൾ ലഭിക്കാൻ നിങ്ങളുടെ ഫാം വിവരങ്ങൾ നൽകുക.",
+            noCrops: "അനുയോജ്യമായ വിളകൾ കണ്ടെത്തിയില്ല",
+            noCropsDesc: "നിങ്ങളുടെ മണ്ണ് തരവും നിലവിലെ സീസണും അടിസ്ഥാനമാക്കി, അനുയോജ്യമായ വിളകൾ ഞങ്ങൾക്ക് കണ്ടെത്താനായില്ല. തീയതി മാറ്റി നോക്കുകയോ വിദഗ്ദ്ധനെ സമീപിക്കുകയോ ചെയ്യുക.",
+            aiInsight: "AI ഇൻസൈറ്റ്"
+          },
+          form: {
+            landSize: "ഭൂമിയുടെ വലിപ്പം (ഏക്കർ)",
+            landSizePlaceholder: "ഉദാ. 5",
+            soilType: "മണ്ണിന്റെ തരം",
+            selectSoilType: "മണ്ണിന്റെ തരം തിരഞ്ഞെടുക്കുക",
+            district: "ജില്ല",
+            districtPlaceholder: "ഉദാ. തൃശൂർ",
+            sowingDate: "ആസൂത്രണം ചെയ്ത വിതയ്ക്കൽ തീയതി",
+            sowingDateDesc: "കാലിയാണെങ്കിൽ ഇന്നത്തെ തീയതി",
+            submitBtn: "പ്ലാൻ തയ്യാറാക്കുക",
+            loadingBtn: "വിപണി വിശകലനം ചെയ്യുന്നു..."
+          },
+          card: {
+            duration: "ദൈർഘ്യം: {{days}} ദിവസം",
+            harvest: "വിളവെടുപ്പ്: {{date}}",
+            bestChoice: "മികച്ച തിരഞ്ഞെടുപ്പ്",
+            topMatch: "മികച്ച പൊരുത്തം: {{crop}}",
+            predictedProfit: "പ്രവചിച്ച ലാഭം",
+            estimatedYield: "കണക്കാക്കിയ വിളവ്",
+            predictedPrice: "പ്രവചിച്ച വില",
+            totalCost: "ആകെ ചെലവ്",
+            expectedRevenue: "പ്രതീക്ഷിക്കുന്ന വരുമാനം"
+          },
+          errors: {
+            landSize: "ഭൂമിയുടെ വലിപ്പം നിർബന്ധമാണ്",
+            soilType: "മണ്ണിന്റെ തരം നിർബന്ധമാണ്",
+            district: "ജില്ല നിർബന്ധമാണ്",
+            general: "പ്ലാൻ തയ്യാറാക്കുന്നതിൽ പരാജയപ്പെട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കുക."
+          }
         }
       }
     },

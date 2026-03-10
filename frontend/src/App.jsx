@@ -27,6 +27,7 @@ import DisputeDetails from "./pages/orders/DisputeDetails";
 import AdminDisputes from "./pages/admin/AdminDisputes";
 import SalesRevenue from "./pages/SalesRevenue";
 import Profile from "./pages/Profile";
+import CropPlanning from "./pages/CropPlanning";
 
 import GlobalVoiceButton from "./components/common/GlobalVoiceButton";
 
@@ -103,6 +104,7 @@ function App() {
           <Route path="schemes" element={<SchemesPage />} />
           {/* Notifications & Settings */}
           <Route path="notifications" element={<Notifications />} />
+          <Route path="planning" element={<CropPlanning />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
           {/* Orders */}

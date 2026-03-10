@@ -29,9 +29,9 @@ const qualityService = {
     },
 
     // Verify quality impact
-    evaluateQuality: async (data) => {
+    evaluateQuality: async (data, language = "English") => {
         try {
-            const response = await api.post("/quality/evaluate", data);
+            const response = await api.post("/quality/evaluate", { ...data, language });
             return response.data;
         } catch (error) {
             console.error("Error evaluating quality:", error);
@@ -44,6 +44,7 @@ const qualityService = {
         try {
             const formData = new FormData();
             formData.append('image', imageFile);
+            formData.append('language', localStorage.getItem('i18nextLng') || 'en');
             
             const response = await api.post("/quality/analyze", formData, {
                 headers: {

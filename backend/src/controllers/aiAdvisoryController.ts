@@ -11,7 +11,7 @@ export const diagnoseSymptoms = async (req: Request, res: Response): Promise<voi
             return;
         }
 
-        const diagnosis = await getAiDiagnosis({ symptoms, crop, location });
+        const diagnosis = await getAiDiagnosis({ symptoms, crop, location, language: req.body.language || "English" });
 
         sendResponse(res, 200, "AI Diagnosis complete", diagnosis);
     } catch (error) {

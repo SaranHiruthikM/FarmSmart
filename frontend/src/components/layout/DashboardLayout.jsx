@@ -17,6 +17,7 @@ const DashboardLayout = () => {
         if (pathname.includes("/dashboard/negotiations")) return t('nav.negotiations');
         if (pathname.includes("/dashboard/orders")) return t('nav.orders');
         if (pathname.includes("/dashboard/sales")) return t('nav.sales');
+        if (pathname.includes("/dashboard/planning")) return t('nav.planning');
         if (pathname.includes("/dashboard/profile")) return t('nav.profile');
         if (pathname.includes("/dashboard/settings")) return t('nav.settings');
         return t('nav.dashboard');

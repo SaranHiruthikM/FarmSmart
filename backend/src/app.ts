@@ -14,6 +14,7 @@ import disputeRoutes from './routes/disputeRoutes';
 import demandRoutes from './routes/demandRoutes';
 import adminRoutes from './routes/adminRoutes';
 import poolingRoutes from './routes/pooling.routes';
+import planningRoutes from './routes/planningRoutes';
 import { sendResponse } from './utils/response';
 
 const app = express();
@@ -41,6 +42,7 @@ app.use('/advisory', advisoryRoutes);
 app.use('/disputes', disputeRoutes);
 app.use('/demand', demandRoutes);
 app.use('/pooling', poolingRoutes);
+app.use('/planning', planningRoutes);
 
 /**
  * Price Comparison & Market Insights
