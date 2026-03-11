@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   NODE_VERSION: '18.x'
@@ -34,8 +35,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # - name: Run Tests (Jest)
-      #   run: npm test -- --passWithNoTests
+      #- name: Run Tests (Jest)
+      #  run: npm test -- --passWithNoTests
 
       - name: Build / Type Check (TypeScript)
         run: npm run build
@@ -82,9 +83,9 @@ jobs:
 
     steps:
       - name: Trigger Render Deploy (Backend)
-        if: env.RENDER_DEPLOY_HOOK_BACKEND != ''
+        if: "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND != '' }}"
         run: curl "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
       
       - name: Trigger Render Deploy (Frontend)
-        if: env.RENDER_DEPLOY_HOOK_FRONTEND != ''
+        if: "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND != '' }}"
         run: curl "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}"
