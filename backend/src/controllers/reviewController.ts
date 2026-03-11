@@ -16,6 +16,12 @@ export const createReview = async (req: AuthRequest, res: Response): Promise<any
 
     if (!reviewerId) return res.status(401).json({ message: "Unauthorized" });
 
+    // Verify KYC status from DB
+    const reviewer = await User.findById(reviewerId);
+    if (!reviewer || reviewer.kycStatus !== 'APPROVED') {
+        return res.status(403).json({ message: "Only verified users can leave reviews." });
+    }
+
     if (!rating) {
       return res.status(400).json({ message: "Rating is required" });
     }

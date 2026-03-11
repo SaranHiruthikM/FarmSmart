@@ -7,6 +7,7 @@ import {
   getAvailableOrdersForLogistics,
   acceptOrder,
   updateLogisticsDetails,
+  claimPayment
 } from "../controllers/orderController";
 import { instantBuy } from "../controllers/instantBuyController";
 import { authenticate } from "../middleware/authMiddleware";
@@ -20,6 +21,7 @@ router.get("/available", authenticate, getAvailableOrdersForLogistics); // Logis
 
 router.get("/:id", authenticate, getOrderById);
 router.patch("/:id/status", authenticate, updateOrderStatus);
+router.post("/:id/claim", authenticate, claimPayment); // Farmer claims payment
 router.put("/:id/accept", authenticate, acceptOrder);
 router.patch("/:id/logistics", authenticate, updateLogisticsDetails);
 

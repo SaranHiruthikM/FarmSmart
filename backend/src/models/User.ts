@@ -28,6 +28,9 @@ export interface IUser extends Document {
   district: string;
   address?: string;
 
+  // Financial
+  walletBalance?: number;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -62,6 +65,9 @@ const UserSchema: Schema = new Schema(
     // Reputation Fields
     averageRating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
+    
+    // Financial
+    walletBalance: { type: Number, default: 0 },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt

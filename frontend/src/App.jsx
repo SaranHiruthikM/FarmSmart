@@ -4,7 +4,7 @@ import i18n from "./i18n/i18n";
 import authService from "./services/auth.service";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Otp from "./pages/Otp";
+
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import Marketplace from "./pages/Marketplace";
@@ -28,6 +28,7 @@ import AdminDisputes from "./pages/admin/AdminDisputes";
 import SalesRevenue from "./pages/SalesRevenue";
 import Profile from "./pages/Profile";
 import CropPlanning from "./pages/CropPlanning";
+import LogisticsDashboard from "./pages/logistics/LogisticsDashboard";
 
 import GlobalVoiceButton from "./components/common/GlobalVoiceButton";
 
@@ -52,7 +53,7 @@ const PublicRoute = ({ children }) => {
 
 function App() {
   const location = useLocation();
-  const isPublicRoute = (location.pathname === '/' || location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/otp');
+  const isPublicRoute = (location.pathname === '/' || location.pathname === '/login' || location.pathname === '/register');
 
   useEffect(() => {
     const initLanguage = async () => {
@@ -82,7 +83,7 @@ function App() {
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/admin-login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-        <Route path="/otp" element={<PublicRoute><Otp /></PublicRoute>} />
+
 
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
@@ -114,6 +115,7 @@ function App() {
           {/* Notifications & Settings */}
           <Route path="notifications" element={<Notifications />} />
           <Route path="planning" element={<CropPlanning />} />
+          <Route path="logistics" element={<LogisticsDashboard />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
           {/* Orders */}

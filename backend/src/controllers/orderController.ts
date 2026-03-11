@@ -77,8 +77,8 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<any>
     // Populate Response Data immediatly so UI doesn't flicker "Unknown Crop"
     const populatedOrder = await Order.findById(order._id)
       .populate("cropId", "name")
-      .populate("buyerId", "fullName role phoneNumber")
-      .populate("farmerId", "fullName role phoneNumber");
+      .populate("buyerId", "fullName role phoneNumber address district state")
+      .populate("farmerId", "fullName role phoneNumber address district state");
 
     // NOTIFICATION: Send SMS to Farmer (New Order)
     try {
@@ -124,8 +124,8 @@ export const getOrderById = async (req: AuthRequest, res: Response): Promise<any
 
     const order = await Order.findById(id)
       .populate("cropId", "name")
-      .populate("buyerId", "fullName role phoneNumber")
-      .populate("farmerId", "fullName role phoneNumber")
+      .populate("buyerId", "fullName role phoneNumber address district state")
+      .populate("farmerId", "fullName role phoneNumber address district state")
       .populate("logisticsProviderId", "fullName role phoneNumber");
 
     if (!order) {
@@ -158,8 +158,8 @@ export const getMyOrders = async (req: AuthRequest, res: Response): Promise<any>
 
     const orders = await Order.find(filter)
       .populate("cropId", "name")
-      .populate("buyerId", "fullName role phoneNumber")
-      .populate("farmerId", "fullName role phoneNumber")
+      .populate("buyerId", "fullName role phoneNumber address district state")
+      .populate("farmerId", "fullName role phoneNumber address district state")
       .populate("logisticsProviderId", "fullName role phoneNumber")
       .sort({ createdAt: -1 });
 
@@ -184,8 +184,8 @@ export const getAvailableOrdersForLogistics = async (req: AuthRequest, res: Resp
       ]
     })
       .populate("cropId", "name")
-      .populate("buyerId", "fullName role phoneNumber")
-      .populate("farmerId", "fullName role phoneNumber")
+      .populate("buyerId", "fullName role phoneNumber address district state")
+      .populate("farmerId", "fullName role phoneNumber address district state")
       .sort({ createdAt: -1 });
 
     return res.json(orders);
@@ -221,8 +221,8 @@ export const acceptOrder = async (req: AuthRequest, res: Response): Promise<any>
     // Return populated order
     const populated = await Order.findById(order._id)
        .populate("cropId", "name")
-       .populate("buyerId", "fullName role phoneNumber")
-       .populate("farmerId", "fullName role phoneNumber")
+       .populate("buyerId", "fullName role phoneNumber address district state")
+       .populate("farmerId", "fullName role phoneNumber address district state")
        .populate("logisticsProviderId", "fullName role phoneNumber");
 
     // NOTIFICATION: Send SMS to Farmer and Buyer (Order Accepted)
@@ -310,23 +310,34 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response): Promis
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // Logic: Only Logistics provider (who accepted the order) can update status.
-    // ALSO: Admin can probably update status? I'll stick to user requirement: "Logistics provideder... They should be the ones be able to change the order status"
-    // User requested removal of farmer capability.
 
     const isLogistics = req.user?.role === "LOGISTICS";
+    const isBuyer = req.user?.role === "BUYER";
     const isAdmin = req.user?.role === "ADMIN";
 
-    if (!isLogistics && !isAdmin) {
-       return res.status(403).json({ message: "Only Logistics Provider can update status" });
+    // Permission Logic
+    if (nextStatus === "DELIVERED") {
+        // ONLY Buyer can mark as DELIVERED
+        if (!isBuyer || order.buyerId?.toString() !== req.user?.id) {
+             return res.status(403).json({ message: "Only the Buyer can confirm delivery." });
+        }
+    } else if (nextStatus === "SHIPPED") {
+        // Logistics marks as SHIPPED
+        if (!isLogistics || order.logisticsProviderId?.toString() !== req.user?.id) {
+             return res.status(403).json({ message: "Only Logistics Provider can update shipment status." });
+        }
+    } else {
+        // Default Fallback
+        if (!isLogistics && !isAdmin) {
+            return res.status(403).json({ message: "Unauthorized status update." });
+        }
     }
 
-    if (isLogistics && order.logisticsProviderId?.toString() !== req.user?.id) {
-       return res.status(403).json({ message: "You are not the designated logistics provider" });
-    }
-
+    // Previous Logic was: order.status.push...
+    // Now just execute update
     order.currentStatus = nextStatus as OrderStatus;
     order.status.push({ status: nextStatus, timestamp: new Date() });
+
 
     await order.save();
 
@@ -363,6 +374,41 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response): Promis
 
     return res.json(order);
   } catch {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const claimPayment = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Ensure user is the Farmer
+    if (order.farmerId?.toString() !== req.user?.id) {
+        return res.status(403).json({ message: "Only the Farmer can claim payment." });
+    }
+
+    // Must be DELIVERED to claim
+    if (order.currentStatus !== "DELIVERED") {
+        return res.status(400).json({ message: "Order must be DELIVERED by Buyer to claim payment." });
+    }
+
+    // Add to Farmer Wallet
+    const farmer = await User.findById(req.user.id);
+    if (farmer) {
+        farmer.walletBalance = (farmer.walletBalance || 0) + (order.totalAmount || 0);
+        await farmer.save();
+    }
+
+    // Update Order to COMPLETED
+    order.currentStatus = "COMPLETED";
+    order.status.push({ status: "COMPLETED", timestamp: new Date() });
+    await order.save();
+
+    return res.json({ message: "Payment Claimed Successfully", newBalance: farmer?.walletBalance, order });
+  } catch (err) {
     return res.status(500).json({ message: "Server error" });
   }
 };

@@ -4,50 +4,37 @@ import authService from "../services/auth.service";
 import reviewService from "../services/review.service";
 
 const ReviewsAndTrust = () => {
-    const user = authService.getCurrentUser();
+    const [user, setUser] = useState(authService.getCurrentUser());
     const isFarmer = user?.role?.toLowerCase() === "farmer";
     const [reviews, setReviews] = useState([]);
     const [avgRating, setAvgRating] = useState(0);
 
     useEffect(() => {
-        const fetchReputation = async () => {
-             // If farmer, get reviews about me. If buyer, get reviews I wrote? 
-             // The original mock logic was: getReviewsByUserId(userId). Assuming this page shows "My Public Profile Reviews".
-             // reviewService.getReviewsByUserId retrieves reviews *for* a target user. 
-             // reviewService.getMyReputation retrieves reviews for the *logged in* user.
-             
+        const fetchData = async () => {
              try {
-                // Determine what to show. The UI says "Manage your reputation" for farmer.
-                // So we want reviews WHERE targetId = me.
-                // reviewService.getMyReputation() calls GET /reviews/my which does exactly that.
+                // Fetch fresh profile
+                const freshUser = await authService.getProfile();
+                setUser(freshUser);
+
+                const myReviews = await reviewService.getMyReputation();
+                setReviews(myReviews);
                 
-                if (isFarmer) {
-                     const myReviews = await reviewService.getMyReputation();
-                     // Backend returns raw array. We need to transform if needed OR the service should verify data.
-                     // IMPORTANT: createReview (backend) might not populate reviewerId in getMyReputation?
-                     // Let's check backend controller for getMyReputation.
-                     setReviews(myReviews);
-                     
-                     // Calculate avg
-                     const avg = reviewService.calculateAverage(myReviews);
-                     setAvgRating(avg);
-                } else {
-                     // If buyer, "Track feedback you've shared". 
-                     // This means reviews WHERE reviewerId = me.
-                     // Do we have an endpoint for that? mocked service had getReviewsByUserId?
-                     // Let's assume for now we just show "Reviews about me" (which might be 0 for buyer).
-                     
-                     const myReviews = await reviewService.getMyReputation();
-                     setReviews(myReviews);
-                      const avg = reviewService.calculateAverage(myReviews);
-                     setAvgRating(avg);
-                }
+                const avg = reviewService.calculateAverage(myReviews);
+                setAvgRating(avg);
              } catch (err) {
                  console.error("Failed to load reputation", err);
              }
         };
-        fetchReputation();
-    }, [isFarmer, user?.id]);
+        fetchData();
+    }, []);
+
+
+    // Calculate Trust Score
+    // Logic: 0% if not verified. If verified, based on rating (out of 100). 
+    // If no reviews yet but verified, default to 50% (New Member Trust).
+    const trustScore = user?.kycStatus === 'APPROVED' 
+        ? (reviews.length > 0 ? Math.round((avgRating / 5) * 100) : 50) 
+        : 0;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-12">
@@ -55,7 +42,7 @@ const ReviewsAndTrust = () => {
             <div>
                 <h1 className="text-4xl font-black text-text-dark tracking-tight leading-none mb-2">Ratings, Reviews & Trust</h1>
                 <p className="text-secondary font-bold uppercase tracking-widest text-xs">
-                    {isFarmer ? "Manage your reputation and seller credentials" : "Track the feedback you've shared with the community"}
+                    {isFarmer ? "Manage your reputation and seller credentials" : "Track your community standing"}
                 </p>
             </div>
 
@@ -68,12 +55,19 @@ const ReviewsAndTrust = () => {
                                 {user?.fullName?.[0] || 'U'}
                             </div>
                             <div>
-                                <h2 className="text-2xl font-black text-text-dark">{user?.fullName || "Mock User"}</h2>
+                                <h2 className="text-2xl font-black text-text-dark">{user?.fullName || "User"}</h2>
                                 <p className="text-accent font-medium uppercase tracking-widest text-xs">{user?.role || "FARMER"}</p>
                                 <div className="flex gap-2 mt-2">
-                                    <div className="flex items-center bg-green-50 text-green-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-100">
-                                        <CheckCircle className="w-3 h-3 mr-1.5" /> ID Verified
-                                    </div>
+                                    {user?.kycStatus === 'APPROVED' ? (
+                                        <div className="flex items-center bg-green-50 text-green-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-100">
+                                            <CheckCircle className="w-3 h-3 mr-1.5" /> ID Verified
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center bg-red-50 text-red-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-100">
+                                            <User className="w-3 h-3 mr-1.5" /> ID Not Verified
+                                        </div>
+                                    )}
+                                    
                                     {isFarmer && avgRating >= 4.0 && (
                                         <div className="flex items-center bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
                                             <Award className="w-3 h-3 mr-1.5" /> Top Rated
@@ -101,16 +95,29 @@ const ReviewsAndTrust = () => {
                             </div>
                             <div className="space-y-1">
                                 <p className="text-[10px] font-black text-accent uppercase tracking-widest">Trust Score</p>
-                                <p className="text-3xl font-black text-primary">98%</p>
+                                <p className={`text-3xl font-black ${trustScore > 0 ? "text-primary" : "text-red-500"}`}>{trustScore}%</p>
                             </div>
                         </div>
                     </div>
+                    
                     <div className="bg-neutral-light/30 p-8 md:p-12 w-full md:w-80 border-t md:border-t-0 md:border-l border-neutral-light flex flex-col justify-center items-center text-center space-y-4">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-primary shadow-sm">
-                            <ShieldCheck className="w-8 h-8" />
-                        </div>
-                        <h3 className="font-black text-text-dark uppercase tracking-tight italic">Verified Seller Status</h3>
-                        <p className="text-xs text-accent font-medium leading-relaxed">Your profile meets all FarmSmart security standards for transparent trading.</p>
+                        {user?.kycStatus === 'APPROVED' ? (
+                            <>
+                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-primary shadow-sm">
+                                    <ShieldCheck className="w-8 h-8" />
+                                </div>
+                                <h3 className="font-black text-text-dark uppercase tracking-tight italic">Verified {isFarmer ? "Seller" : "Buyer"} Status</h3>
+                                <p className="text-xs text-accent font-medium leading-relaxed">Your profile meets all FarmSmart security standards for transparent trading.</p>
+                            </>
+                        ) : (
+                             <>
+                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-red-500 shadow-sm">
+                                    <User className="w-8 h-8" />
+                                </div>
+                                <h3 className="font-black text-text-dark uppercase tracking-tight italic">Verification Pending</h3>
+                                <p className="text-xs text-accent font-medium leading-relaxed">Complete KYC verification to unlock Trust Score and Verified badges.</p>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -169,7 +176,7 @@ const ReviewsAndTrust = () => {
                         <div className="space-y-4">
                             <div className="flex justify-between items-center py-2 border-b border-white/10">
                                 <span className="text-white/60 text-xs font-black uppercase tracking-widest">Quality score</span>
-                                <span className="font-bold">4.9 / 5</span>
+                                <span className="font-bold">{avgRating} / 5</span>
                             </div>
                             <div className="flex justify-between items-center py-2 border-b border-white/10">
                                 <span className="text-white/60 text-xs font-black uppercase tracking-widest">Delivery time</span>
@@ -177,7 +184,11 @@ const ReviewsAndTrust = () => {
                             </div>
                             <div className="flex justify-between items-center pt-2">
                                 <span className="text-white/60 text-xs font-black uppercase tracking-widest">Recommended</span>
-                                <span className="text-2xl font-black font-sans">100%</span>
+                                <span className="text-2xl font-black font-sans">
+                                    {reviews.length > 0 
+                                        ? Math.round((reviews.filter(r => r.rating >= 4).length / reviews.length) * 100) 
+                                        : 0}%
+                                </span>
                             </div>
                         </div>
                     </div>

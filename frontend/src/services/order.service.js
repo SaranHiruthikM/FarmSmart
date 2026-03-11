@@ -102,6 +102,12 @@ const OrderService = {
     // details: { driverName, vehicleNumber, contactNumber, estimatedDelivery }
     const response = await api.patch(`/orders/${id}/logistics`, details);
     return transformOrder(response.data);
+  },
+
+  // Farmer: Claim Payment
+  claimPayment: async (id) => {
+    const response = await api.post(`/orders/${id}/claim`);
+    return response.data; // { message, newBalance, order }
   }
 };
 

@@ -33,6 +33,22 @@ const OrderHistory = () => {
         fetchOrders();
     }, []);
 
+    const handleClaimPayment = async (orderId) => {
+        if (!window.confirm("Are you sure you want to claim payment for this order?")) return;
+        
+        try {
+            await orderService.claimPayment(orderId);
+            // Update local state to reflect COMPLETED
+            setOrders(prev => prev.map(o => 
+                o.id === orderId ? { ...o, status: "COMPLETED" } : o
+            ));
+            alert("Payment added to your wallet successfully!");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to claim payment: " + (err.response?.data?.message || err.message));
+        }
+    };
+
     const filteredOrders = orders.filter((order) => {
         const matchesSearch =
             order.crop?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -193,9 +209,24 @@ const OrderHistory = () => {
                                     </div>
                                     <div className="col-span-2 md:col-span-1">
                                         <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1.5">Status</p>
-                                        <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black border-2 ${getStatusColor(order.status)} uppercase tracking-wider`}>
-                                            {t(`dynamic.status.${order.status.toLowerCase()}`, order.status)}
-                                        </span>
+                                        <div className="flex flex-col gap-2 items-start">
+                                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black border-2 ${getStatusColor(order.status)} uppercase tracking-wider`}>
+                                                {t(`dynamic.status.${order.status.toLowerCase()}`, order.status)}
+                                            </span>
+                                            
+                                            {isFarmer && order.status === 'DELIVERED' && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleClaimPayment(order.id);
+                                                    }}
+                                                    className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 animate-pulse"
+                                                >
+                                                    Get Amount
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 

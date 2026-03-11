@@ -15,10 +15,31 @@ import {
     Filter,
     ArrowRight,
     Loader2,
-    CalendarClock
+    CalendarClock,
+    TrendingUp
 } from "lucide-react";
-import {  AnimatePresence } from "framer-motion";
+import {  AnimatePresence, motion } from "framer-motion";
 import orderService from "../../services/order.service";
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 
 const LogisticsDashboard = () => {
     const [activeTab, setActiveTab] = useState("marketplace");
@@ -34,9 +55,54 @@ const LogisticsDashboard = () => {
         estimatedDelivery: ""
     });
 
+    const [revenueData, setRevenueData] = useState({
+        labels: [],
+        datasets: []
+    });
+    const [totalRevenue, setTotalRevenue] = useState(0);
+
     useEffect(() => {
         fetchData();
     }, [activeTab]);
+
+    useEffect(() => {
+        if (myDeliveries.length > 0) {
+            calculateRevenue();
+        }
+    }, [myDeliveries]);
+
+    const calculateRevenue = () => {
+        const deliveredOrders = myDeliveries.filter(order => order.status === 'DELIVERED');
+        const revenueByDate = {};
+        let total = 0;
+
+        deliveredOrders.forEach(order => {
+            const date = new Date(order.date).toLocaleDateString();
+            const revenue = (Number(order.totalPrice) || 0) * 0.10;
+            total += revenue;
+            revenueByDate[date] = (revenueByDate[date] || 0) + revenue;
+        });
+
+        setTotalRevenue(total);
+
+        const labels = Object.keys(revenueByDate);
+        const data = Object.values(revenueByDate);
+
+        setRevenueData({
+            labels,
+            datasets: [
+                {
+                    label: 'Revenue (10% Commission)',
+                    data,
+                    backgroundColor: 'rgba(16, 185, 129, 0.6)', 
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                },
+            ],
+        });
+    };
+
 
     const fetchData = async () => {
         setLoading(true);
@@ -55,33 +121,44 @@ const LogisticsDashboard = () => {
         }
     };
 
-    const handleAcceptOrder = async (orderId) => {
-        setActionLoading(orderId);
-        try {
-            await orderService.acceptOrder(orderId);
-            setAvailableOrders(availableOrders.filter(o => o.id !== orderId));
-            alert("Order accepted successfully!");
-        } catch (error) {
-            console.log(error)
-            alert("Failed to accept order");
-        } finally {
-            setActionLoading(null);
-        }
+    // Renamed handleAcceptOrder to openAcceptModal, now it just opens modal
+    const openAcceptModal = (order) => {
+        setShowEditModal({ ...order, isAccepting: true });
+        setDetailsForm({
+            driverName: "",
+            vehicleNumber: "",
+            contactNumber: "",
+            estimatedDelivery: ""
+        });
     };
 
-    const handleUpdateDetails = async (e) => {
+    const handleModalSubmit = async (e) => {
         e.preventDefault();
         if (!showEditModal) return;
 
         setActionLoading(showEditModal.id);
+        const orderId = showEditModal.id;
+        const isAccepting = showEditModal.isAccepting;
+
         try {
-            await orderService.updateLogisticsDetails(showEditModal.id, detailsForm);
-            alert("Delivery details updated!");
+            if (isAccepting) {
+                 // Accept Flow
+                 await orderService.acceptOrder(orderId);
+                 // Then update details
+                 await orderService.updateLogisticsDetails(orderId, detailsForm);
+                 
+                 setAvailableOrders(prev => prev.filter(o => o.id !== orderId));
+                 alert("Order accepted and details submitted!");
+            } else {
+                 // Update Flow
+                 await orderService.updateLogisticsDetails(orderId, detailsForm);
+                 alert("Delivery details updated!");
+                 fetchData();
+            }
             setShowEditModal(null);
-            fetchData();
         } catch (error) {
-            console.log(error)
-            alert("Failed to update details");
+            console.error(error);
+            alert("Failed to process request");
         } finally {
             setActionLoading(null);
         }
@@ -101,7 +178,7 @@ const LogisticsDashboard = () => {
     };
 
     const openEditModal = (order) => {
-        setShowEditModal(order);
+        setShowEditModal({ ...order, isAccepting: false });
         setDetailsForm({
             driverName: order.logisticsDetails?.driverName || "",
             vehicleNumber: order.logisticsDetails?.vehicleNumber || "",
@@ -150,6 +227,12 @@ const LogisticsDashboard = () => {
                         className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === "deliveries" ? "bg-white text-primary shadow-sm" : "text-accent hover:text-text-dark"}`}
                     >
                         My Deliveries
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("revenue")}
+                        className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === "revenue" ? "bg-white text-primary shadow-sm" : "text-accent hover:text-text-dark"}`}
+                    >
+                        Revenue
                     </button>
                 </div>
             </div>
@@ -211,7 +294,7 @@ const LogisticsDashboard = () => {
                                     </div>
 
                                     <button
-                                        onClick={() => handleAcceptOrder(order.id)}
+                                        onClick={() => openAcceptModal(order)}
                                         disabled={actionLoading === order.id}
                                         className="w-full py-4 bg-primary text-white rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-green-600 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group/btn"
                                     >
@@ -234,6 +317,58 @@ const LogisticsDashboard = () => {
                                 <p className="text-accent font-medium">Check back later for new delivery opportunities.</p>
                             </div>
                         )
+                    ) : activeTab === "revenue" ? (
+                         <div className="bg-white p-8 rounded-[2.5rem] border-2 border-neutral-light shadow-sm">
+                             <div className="flex items-center gap-4 mb-8">
+                                 <div className="p-4 bg-emerald-50 rounded-2xl text-emerald-600">
+                                     <TrendingUp className="w-8 h-8" />
+                                 </div>
+                                 <div>
+                                     <h2 className="text-2xl font-black text-text-dark">Total Revenue</h2>
+                                     <p className="text-3xl font-black text-emerald-600">₹{totalRevenue.toLocaleString()}</p>
+                                     <p className="text-sm font-bold text-accent">10% commission on completed deliveries</p>
+                                 </div>
+                             </div>
+                             
+                             {revenueData.labels && revenueData.labels.length > 0 && revenueData.datasets && revenueData.datasets.length > 0 ? (
+                                <div className="h-96 w-full">
+                                     <Bar 
+                                         data={{
+                                             labels: revenueData.labels,
+                                             datasets: [{
+                                                 label: "Revenue (₹)",
+                                                 data: revenueData.datasets[0].data,
+                                                 backgroundColor: "rgba(16, 185, 129, 0.8)",
+                                                 borderRadius: 8,
+                                             }]
+                                         }}
+                                         options={{
+                                             responsive: true,
+                                             maintainAspectRatio: false,
+                                             plugins: {
+                                                 legend: { display: false },
+                                                 title: { display: false }
+                                             },
+                                             scales: {
+                                                 y: {
+                                                     beginAtZero: true,
+                                                     grid: { color: "#f3f4f6" },
+                                                     ticks: { font: { weight: "bold" } }
+                                                 },
+                                                 x: {
+                                                     grid: { display: false },
+                                                     ticks: { font: { weight: "bold" } }
+                                                 }
+                                             }
+                                         }} 
+                                     />
+                                </div>
+                             ) : (
+                                 <div className="py-20 text-center border-4 border-dashed border-neutral-light rounded-3xl bg-neutral-light/20">
+                                     <p className="text-accent font-bold">No revenue data available yet.</p>
+                                 </div>
+                             )}
+                         </div>
                     ) : (
                         myDeliveries.length > 0 ? (
                             myDeliveries.map((order) => (
@@ -339,7 +474,9 @@ const LogisticsDashboard = () => {
                                     <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                                         <Truck className="w-6 h-6" />
                                     </div>
-                                    <h2 className="text-2xl font-black text-text-dark tracking-tight">Delivery Details</h2>
+                                    <h2 className="text-2xl font-black text-text-dark tracking-tight">
+                                        {showEditModal?.isAccepting ? "Accept Order & Assign Details" : "Delivery Details"}
+                                    </h2>
                                 </div>
                                 <button
                                     onClick={() => setShowEditModal(null)}
@@ -349,7 +486,7 @@ const LogisticsDashboard = () => {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleUpdateDetails} className="p-8 space-y-5">
+                            <form onSubmit={handleModalSubmit} className="p-8 space-y-5">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-accent uppercase tracking-widest ml-1">Driver Name</label>
@@ -423,7 +560,11 @@ const LogisticsDashboard = () => {
                                         disabled={actionLoading === showEditModal.id}
                                         className="flex-3 py-4 bg-primary text-white rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-green-600 transition-all shadow-lg shadow-primary/20"
                                     >
-                                        {actionLoading === showEditModal.id ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "SAVE DETAILS"}
+                                        {actionLoading === showEditModal.id ? (
+                                            <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                        ) : (
+                                            showEditModal.isAccepting ? "CONFIRM & ACCEPT" : "SAVE DETAILS"
+                                        )}
                                     </button>
                                 </div>
                             </form>

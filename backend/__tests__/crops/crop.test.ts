@@ -35,6 +35,8 @@ const validCrop = {
   quantity: 100,
   unit: 'kg',
   basePrice: 25.50,
+  finalPrice: 25.50,
+  imageUrl: 'https://example.com/tomato.jpg',
   qualityGrade: 'A',
   location: {
     state: 'Maharashtra',
@@ -48,6 +50,8 @@ const invalidCrop = {
   quantity: -50,  // INVALID: Negative quantity
   unit: 'kg',
   basePrice: -100,  // INVALID: Negative price
+  finalPrice: 100,
+  imageUrl: 'img',
   qualityGrade: 'A',
   location: {
     state: 'Punjab',
@@ -69,6 +73,8 @@ const cropEmptyName = {
   quantity: 50,
   unit: 'kg',
   basePrice: 20,
+  finalPrice: 20,
+  imageUrl: 'img',
   qualityGrade: 'B',
   location: {
     state: 'Madhya Pradesh',
@@ -81,6 +87,8 @@ const cropInvalidUnit = {
   quantity: 75,
   unit: 'bags',  // INVALID: Only kg, quintal, ton allowed
   basePrice: 30,
+  finalPrice: 30,
+  imageUrl: 'img',
   qualityGrade: 'B',
   location: {
     state: 'Rajasthan',
@@ -93,6 +101,8 @@ const cropInvalidGrade = {
   quantity: 60,
   unit: 'quintal',
   basePrice: 28,
+  finalPrice: 28,
+  imageUrl: 'img',
   qualityGrade: 'D',  // INVALID: Only A, B, C allowed
   location: {
     state: 'Telangana',
@@ -105,6 +115,8 @@ const zeroQuantityCrop = {
   quantity: 0,
   unit: 'ton',
   basePrice: 15,
+  finalPrice: 15,
+  imageUrl: 'http://img.com/barley.jpg',
   qualityGrade: 'C',
   location: {
     state: 'Uttarakhand',
@@ -117,6 +129,8 @@ const zeroPrice = {
   quantity: 200,
   unit: 'kg',
   basePrice: 0,  // EDGE CASE: Zero price
+  finalPrice: 0,
+  imageUrl: 'http://img.com/soy.jpg',
   qualityGrade: 'B',
   location: {
     state: 'Madhya Pradesh',
@@ -129,6 +143,8 @@ const largeQuantity = {
   quantity: 999999999,  // EDGE CASE: Very large number
   unit: 'ton',
   basePrice: 3.50,
+  finalPrice: 3.50,
+  imageUrl: 'http://img.com/cane.jpg',
   qualityGrade: 'A',
   location: {
     state: 'Uttar Pradesh',
@@ -141,6 +157,8 @@ const duplicateCrop = {
   quantity: 150,
   unit: 'quintal',
   basePrice: 35,
+  finalPrice: 35,
+  imageUrl: 'http://img.com/potatoes.jpg',
   qualityGrade: 'B',
   location: {
     state: 'Karnataka',
@@ -212,6 +230,8 @@ describe('CROP CONTROLLER - COMPREHENSIVE TEST SUITE', () => {
         quantity: 500,
         unit: 'kg',
         basePrice: 40,
+        finalPrice: 40,
+        imageUrl: 'http://img.com/rice.jpg',
         qualityGrade: 'A',
         location: {
           state: 'Punjab',

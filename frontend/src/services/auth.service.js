@@ -34,23 +34,8 @@ const authService = {
     return response.data;
   },
 
-  // Verify OTP (Check code and get token)
-  verify: async (verifyData) => {
-    // verifyData: { contact, code }
-    const response = await api.post("/auth/verify", verifyData);
-    if (response.data.data && response.data.data.token) {
-      localStorage.setItem("token", response.data.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
-    }
-    return response.data;
-  },
 
-  // Resend OTP
-  resend: async (resendData) => {
-    // resendData: { contact }
-    const response = await api.post("/auth/resend", resendData);
-    return response.data;
-  },
+
 
   // Upload KYC
   uploadKYC: async (formData) => {

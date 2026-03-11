@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TrendingUp, Users, DollarSign, ShoppingBag, Loader2, Truck, CheckCircle2 } from "lucide-react";
+import { TrendingUp, Users, DollarSign, ShoppingBag, Loader2, Truck, CheckCircle2, Package, Clock, Activity } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import DynamicText from "../components/common/DynamicText"; // Import DynamicText
 import authService from "../services/auth.service";
@@ -8,6 +8,31 @@ import salesService from "../services/sales.service";
 import cropService from "../services/crop.service";
 import orderService from "../services/order.service";
 import poolingService from "../services/pooling.service";
+import { Line, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 // import { Globe, Users2, ChevronRight, LayoutDashboard, Search, HandCoins } from "lucide-react";
 // import RotationAdvisoryCard from "../components/dashboard/RotationAdvisoryCard";
 
@@ -24,7 +49,12 @@ const Dashboard = () => {
     activeBids: 0,
     marketTrends: "+15%"
   });
+  const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState({
+      labels: [],
+      datasets: []
+  });
   // const [activePools, setActivePools] = useState([]);
   // const [myCrops, setMyCrops] = useState([]);
 
@@ -47,6 +77,95 @@ const Dashboard = () => {
 
         const activeCount = myOrders.filter(o => ["CONFIRMED", "SHIPPED"].includes(o.status)).length;
         const completedCount = myOrders.filter(o => ["DELIVERED", "COMPLETED"].includes(o.status)).length;
+        
+        // Logistics Activity Logs
+        let newActivities = [];
+
+        // 1. New Available Requests
+        if (availableOrders.length > 0) {
+            newActivities = [...newActivities, ...availableOrders.map(order => ({
+                id: `new-${order.id}`,
+                 type: 'new_request',
+                 title: 'New Service Request',
+                 message: `${order.crop} (${order.quantity}kg) from ${order.farmerName}`,
+                 date: new Date(order.date),
+                 icon: Package,
+                 color: 'text-blue-500 bg-blue-50'
+            }))];
+        }
+
+        // 2. My Order Status Updates
+        if (myOrders.length > 0) {
+            myOrders.forEach(order => {
+                // If timeline exists, use it for granular updates
+                if (order.timeline && Array.isArray(order.timeline) && order.timeline.length > 0) {
+                     order.timeline.forEach(event => {
+                         newActivities.push({
+                             id: `status-${order.id}-${event.status}`,
+                             type: 'status_change',
+                             title: `Order Status Updated`, 
+                             message: `Order #${order.id.slice(-4)} is now ${event.status}`,
+                             date: new Date(event.timestamp || order.date), // Fallback to order date if timestamp missing
+                             icon: event.status === 'DELIVERED' ? CheckCircle2 : Truck,
+                             color: event.status === 'DELIVERED' ? 'text-green-500 bg-green-50' : 'text-orange-500 bg-orange-50'
+                         });
+                     });
+                } else {
+                     // Fallback: Just show current status as "Latest Update"
+                     newActivities.push({
+                         id: `update-${order.id}`,
+                         type: 'status_change',
+                         title: `Order Update`,
+                         message: `Order #${order.id.slice(-4)}: ${order.status}`,
+                         date: new Date(order.date),
+                         icon: order.status === 'DELIVERED' ? CheckCircle2 : Truck,
+                         color: 'text-nature-600 bg-nature-50'
+                     });
+                }
+            });
+        }
+
+        // Sort by date (newest first) and take top 5
+        newActivities.sort((a, b) => b.date - a.date);
+        setActivities(newActivities.slice(0, 5));
+
+        // Calculate Revenue for Chart
+        const revenueByDate = {};
+        myOrders.forEach(order => {
+             if(["DELIVERED", "COMPLETED"].includes(order.status)){
+                 const dateObj = new Date(order.date);
+                 const dateKey = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                 const revenue = (Number(order.totalPrice) || 0) * 0.10;
+                 revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + revenue;
+             }
+        });
+
+        // Ensure at least some dummy data if empty to show the chart structure
+        const labels = Object.keys(revenueByDate).length > 0 ? Object.keys(revenueByDate) : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+        const data = Object.keys(revenueByDate).length > 0 ? Object.values(revenueByDate) : [0, 0, 0, 0];
+
+        setChartData({
+            labels: labels,
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: data,
+                backgroundColor: (context) => {
+                    const ctx = context.chart.ctx;
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+                    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+                    return gradient;
+                },
+                borderColor: '#10b981',
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#10b981',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4
+            }]
+        });
 
         setStats({
           activeDeliveries: activeCount,
@@ -92,6 +211,36 @@ const Dashboard = () => {
             await poolingService.getActivePools(district);
           }
         }
+        
+        // Farmer Chart Data
+        const revenueByDate = {};
+        const revenueSales = sales.filter(order => order.currentStatus !== 'CANCELLED');
+        revenueSales.forEach(order => {
+             const dateObj = new Date(order.createdAt); // user order.createdAt from backend
+             const dateKey = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+             revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + (order.totalAmount || 0);
+        });
+        
+        const labels = Object.keys(revenueByDate);
+        const data = Object.values(revenueByDate);
+
+        setChartData({
+            labels: labels.length > 0 ? labels : ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: data.length > 0 ? data : [0, 0, 0, 0],
+                // Simple color fallback if context unavailable during init
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                borderColor: '#10b981',
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#10b981',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4
+            }]
+        });
       }
 
       setStats(prev => ({
@@ -226,49 +375,90 @@ const Dashboard = () => {
                 </div>
             </div>
           
-            {/* Future: Chart Placeholder with improved look */}
-            <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60 group-hover:opacity-100 transition-opacity">
-                <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
-                    <TrendingUp className="w-12 h-12 text-nature-300" />
-                </div>
-                <DynamicText 
-                    text={t('dashboard.analyticsLoading')} 
-                    as="p" 
-                    className="text-nature-800 font-bold"
-                />
-                <DynamicText 
-                    text={t('dashboard.detailedCharts')} 
-                    as="p" 
-                    className="text-nature-500 text-sm mt-1"
-                />
-            </div>
-            
-            {/* Fake chart lines for visual fill */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 opacity-10 pointer-events-none flex items-end justify-around px-8">
-                {[40, 70, 45, 90, 60, 80, 50, 75, 60].map((h, i) => (
-                    <div key={i} style={{ height: `${h}%` }} className="w-8 bg-nature-600 rounded-t-lg mx-1"></div>
-                ))}
+            <div className="w-full h-80 relative z-10 mt-4">
+                {chartData && chartData.datasets && chartData.datasets.length > 0 ? (
+                    <Line 
+                        data={chartData} 
+                        options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: '#fff',
+                                    titleColor: '#1f2937',
+                                    bodyColor: '#1f2937',
+                                    borderColor: '#e5e7eb',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    displayColors: false,
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { font: { family: "sans-serif", size: 10 }, color: '#9ca3af' }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: '#f3f4f6' },
+                                    ticks: { font: { family: "sans-serif", size: 10 }, color: '#9ca3af', callback: (value) => '₹' + value }
+                                }
+                            }
+                        }}
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
+                        <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
+                           <TrendingUp className="w-12 h-12 text-nature-300 mb-4" />
+                        </div>
+                        <p className="text-nature-800 font-bold">{t('dashboard.analyticsLoading')}</p>
+                    </div>
+                )}
             </div>
         </div>
 
         <div className="glass-panel p-8 rounded-3xl min-h-[400px] relative overflow-hidden">
             <h3 className="font-bold text-xl text-nature-800 mb-6">{t('dashboard.recentActivity')}</h3>
             
-            <div className="flex-1 flex flex-col items-center justify-center text-center h-64">
-                <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
-                    <Users className="w-12 h-12 text-nature-300" />
+            {activities.length > 0 ? (
+                <div className="space-y-6">
+                    {activities.map((activity, index) => {
+                        const Icon = activity.icon || Activity;
+                        return (
+                            <div key={index} className="flex gap-4 items-start group">
+                                <div className={`p-3 rounded-xl ${activity.color || 'bg-nature-50 text-nature-600'} shrink-0 group-hover:scale-110 transition-transform`}>
+                                    <Icon className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-nature-800 text-sm truncate">{activity.title}</p>
+                                    <p className="text-nature-500 text-xs mt-0.5 line-clamp-1">{activity.message}</p>
+                                    <div className="flex items-center gap-1 mt-1 text-[10px] text-nature-400 font-medium uppercase tracking-wider">
+                                        <Clock className="w-3 h-3" />
+                                        <span>{new Date(activity.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
-                <DynamicText 
-                    text={t('dashboard.noRecentActivity')} 
-                    as="p" 
-                    className="text-nature-800 font-bold"
-                />
-                <DynamicText 
-                    text={t('dashboard.latestActions')} 
-                    as="p" 
-                    className="text-nature-500 text-sm mt-1"
-                />
-            </div>
+            ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center h-64">
+                    <div className="bg-nature-50 p-6 rounded-full mb-4 shadow-inner">
+                        <Users className="w-12 h-12 text-nature-300" />
+                    </div>
+                    <DynamicText 
+                        text={t('dashboard.noRecentActivity')} 
+                        as="p" 
+                        className="text-nature-800 font-bold"
+                    />
+                    <DynamicText 
+                        text={t('dashboard.latestActions')} 
+                        as="p" 
+                        className="text-nature-500 text-sm mt-1"
+                    />
+                </div>
+            )}
         </div>
       </div>
     </div>

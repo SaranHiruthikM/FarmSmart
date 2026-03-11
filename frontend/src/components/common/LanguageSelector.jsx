@@ -1,8 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Globe, Check } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-// import { motion, AnimatePresence } from "framer-motion";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 function LanguageSelector() {
   const { i18n } = useTranslation();
