@@ -1,6 +1,6 @@
 import React from 'react';
 import { Mic, AlertCircle } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import useVoiceNavigation from '../../hooks/useVoiceNavigation';
 

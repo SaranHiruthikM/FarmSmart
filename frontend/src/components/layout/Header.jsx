@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Bell, User, ChevronRight, LogOut, MessageSquare, Gavel, AlertCircle } from "lucide-react";
-import {  AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";

@@ -1,4 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Leaf, User, Phone, Lock, ArrowRight, Loader2, Sprout, MapPin, Home, Languages } from "lucide-react";
 import authService from "../services/auth.service";// Keeping for reference if needed elsewhere, but not using here.

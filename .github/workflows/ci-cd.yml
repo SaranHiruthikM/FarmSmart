@@ -1,20 +1,17 @@
 name: FarmSmart CI/CD Pipeline
 
-# Trigger the workflow on pushes and pull requests to the main branch
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
-# Define environment variables if needed
 env:
   NODE_VERSION: '18.x'
 
 jobs:
-  # ------------------------------------------------------------------
+
   # JOB 1: BACKEND CI (Test & Build)
-  # ------------------------------------------------------------------
   backend-ci:
     name: Backend CI (Test & Build)
     runs-on: ubuntu-latest
@@ -40,15 +37,13 @@ jobs:
       # - name: Run Tests (Jest)
       #   run: npm test -- --passWithNoTests
 
-      # - name: Build / Type Check (TypeScript)
-      #   run: npm run build
+      - name: Build / Type Check (TypeScript)
+        run: npm run build
 
       - name: Build Project (Simulated)
         run: echo "Build successful"
 
-  # ------------------------------------------------------------------
   # JOB 2: FRONTEND CI (Lint & Build)
-  # ------------------------------------------------------------------
   frontend-ci:
     name: Frontend CI (Lint & Build)
     runs-on: ubuntu-latest
@@ -78,9 +73,7 @@ jobs:
       - name: Build Project (Vite)
         run: npm run build
 
-  # ------------------------------------------------------------------
   # JOB 3: DEPLOY TO RENDER (CD)
-  # ------------------------------------------------------------------
   deploy:
     name: Deploy to Render
     needs: [backend-ci, frontend-ci] # Only deploy if CI passes
