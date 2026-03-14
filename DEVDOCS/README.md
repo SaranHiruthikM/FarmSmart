@@ -90,7 +90,7 @@ npm run dev
 Verified from route/controller/service code:
 
 - **OTP-based authentication**: register, login, OTP verify, resend
-- **Role-aware access**: FARMER, BUYER, ADMIN checks in middleware
+- **Role-aware access**: FARMER, BUYER, COOPERATIVE, LOGISTICS, ADMIN checks in middleware
 - **Crop marketplace**: create/list/update/delete crops, own listings endpoint
 - **Negotiation workflow**: buyer starts negotiation, both sides counter/respond
 - **Order workflow**: create from accepted negotiation or use instant buy
@@ -100,6 +100,13 @@ Verified from route/controller/service code:
 - **Quality pricing**: grade-based price impact using `QualityRule`
 - **Schemes and advisories**: scheme listing + eligibility + advisory feed
 - **Market price insights**: current/history/compare APIs with cache + provider fallback
+- **AI crop vision grading**: image-based quality detection with pricing impact
+- **AI crop doctor**: symptom diagnosis and structured treatment guidance
+- **Demand forecasting**: sell-now vs wait guidance with AI and ML signals
+- **Season planning**: crop recommendations with profit projection
+- **Cooperative pooling**: pooled batches for institutional buyers
+- **Logistics hub**: provider acceptance and delivery detail tracking
+- **Price forecasting**: ML-backed forecasts and AI market analysis
 - **Frontend i18n scaffold**: English + Tamil resource initialization
 
 ---
@@ -146,6 +153,7 @@ FarmSmart/
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | Full setup and environment guide |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System design and data flow |
 | [API.md](./API.md) | Route-level API contract |
+| [FEATURES.md](./FEATURES.md) | New feature deep dive and developer notes |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution workflow and standards |
 | [BRANCH_PLAN.md](./BRANCH_PLAN.md) | Branching strategy and implementation plan |
 | [TEAM_SETUP_GUIDE.md](./TEAM_SETUP_GUIDE.md) | New teammate onboarding |

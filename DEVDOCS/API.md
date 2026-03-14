@@ -110,6 +110,9 @@ Common status codes seen in controllers: `200`, `201`, `400`, `401`, `403`, `404
 | `POST` | `/auth/login` | No | Validate credentials and generate OTP |
 | `POST` | `/auth/verify` | No | Verify OTP and issue JWT |
 | `POST` | `/auth/resend` | No | Resend OTP to contact |
+| `GET` | `/auth/me` | Yes | Get current user profile |
+| `PATCH` | `/auth/profile` | Yes | Update user profile fields |
+| `POST` | `/auth/kyc` | Yes | Upload KYC document (multipart form-data) |
 
 #### Example: Verify OTP
 
@@ -139,6 +142,15 @@ Example success contract:
   }
 }
 ```
+
+### Admin Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/admin/login` | No | Admin/cooperative bypass login |
+| `GET` | `/admin/dashboard` | Yes (`ADMIN`/`COOPERATIVE`) | Platform dashboard stats |
+| `GET` | `/admin/kyc/pending` | Yes (`ADMIN`/`COOPERATIVE`) | List pending KYC verifications |
+| `PUT` | `/admin/kyc/:userId` | Yes (`ADMIN`/`COOPERATIVE`) | Approve or reject KYC |
 
 ### Crop Endpoints
 
@@ -172,8 +184,11 @@ Request fields used by start endpoint: `cropId`, `farmerId`, `pricePerUnit`, `qu
 | `POST` | `/orders/instant-buy` | Yes | Direct purchase flow |
 | `POST` | `/orders` | Yes | Create order from accepted negotiation |
 | `GET` | `/orders/my` | Yes | Get orders for logged-in role |
+| `GET` | `/orders/available` | Yes (`LOGISTICS`) | List unassigned orders for pickup |
 | `GET` | `/orders/:id` | Yes | Get order details |
-| `PATCH` | `/orders/:id/status` | Yes (`FARMER`) | Update order lifecycle status |
+| `PUT` | `/orders/:id/accept` | Yes (`LOGISTICS`) | Accept an order for delivery |
+| `PATCH` | `/orders/:id/logistics` | Yes (`LOGISTICS`) | Update driver and delivery details |
+| `PATCH` | `/orders/:id/status` | Yes (`LOGISTICS`/`ADMIN`) | Update order lifecycle status |
 
 Valid status values in controller/model:
 
@@ -195,8 +210,11 @@ Valid status values in controller/model:
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
+| `POST` | `/quality/analyze` | Yes | Analyze image quality with AI vision |
 | `POST` | `/quality/evaluate` | Yes | Evaluate final price for grade + base price |
 | `GET` | `/quality/price-impact` | No | Preview final price impact |
+| `GET` | `/quality` | Yes (`ADMIN`/`COOPERATIVE`) | List all quality rules |
+| `PUT` | `/quality/:id` | Yes (`ADMIN`/`COOPERATIVE`) | Update a quality rule |
 
 ### Scheme and Advisory Endpoints
 
@@ -205,6 +223,35 @@ Valid status values in controller/model:
 | `GET` | `/schemes` | No | List all schemes |
 | `GET` | `/schemes/eligible` | Yes | List eligible schemes for logged user state |
 | `GET` | `/advisory` | No | Get advisory feed |
+| `GET` | `/advisory/admin/all` | Yes (`ADMIN`/`COOPERATIVE`) | Get all advisories |
+| `POST` | `/advisory` | Yes (`ADMIN`/`COOPERATIVE`) | Create advisory |
+| `POST` | `/advisory/diagnose` | Yes | AI crop doctor diagnosis |
+| `GET` | `/advisory/rotation-suggestion` | Yes | AI rotation suggestion |
+| `POST` | `/schemes` | Yes (`ADMIN`/`COOPERATIVE`) | Create scheme |
+| `PUT` | `/schemes/:id` | Yes (`ADMIN`/`COOPERATIVE`) | Update scheme |
+| `DELETE` | `/schemes/:id` | Yes (`ADMIN`/`COOPERATIVE`) | Delete scheme |
+
+### Demand Forecasting Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/demand/forecast` | Yes | Demand forecast and sell-now guidance |
+| `GET` | `/demand/recommendations` | Yes | Crop recommendations by location |
+
+### Crop Planning Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/planning/plan` | Yes | Season plan with ML profit projection |
+
+### Cooperative Pooling Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/pooling/active` | Yes | List active pools |
+| `POST` | `/pooling/join` | Yes | Join a pool and contribute quantity |
+| `POST` | `/pooling/create` | Yes | Create a new pool (intended for admin/cooperative) |
+| `GET` | `/pooling/institutional-batches` | Yes | List institutional batches |
 
 ### Dispute Endpoints
 
@@ -214,8 +261,8 @@ Valid status values in controller/model:
 | `GET` | `/disputes/my` | Yes | Get user disputes |
 | `GET` | `/disputes/:id` | Yes | Get dispute details |
 | `PATCH` | `/disputes/:id/resolve` | Yes | Farmer resolves dispute |
-| `GET` | `/disputes/admin/all` | Yes (`ADMIN`) | List all disputes |
-| `PATCH` | `/disputes/admin/:id` | Yes (`ADMIN`) | Update dispute status + admin remark |
+| `GET` | `/disputes/admin/all` | Yes (`ADMIN`/`COOPERATIVE`) | List all disputes |
+| `PATCH` | `/disputes/admin/:id` | Yes (`ADMIN`/`COOPERATIVE`) | Update dispute status + admin remark |
 
 ### Price Insight Endpoints
 
@@ -224,6 +271,12 @@ Valid status values in controller/model:
 | `GET` | `/prices/current?crop=` | No | Current price snapshot |
 | `GET` | `/prices/history?crop=&location=&days=` | No | Price history |
 | `GET` | `/prices/compare?crop=&location=` | No | Multi-mandi comparison |
+| `GET` | `/prices/states` | No | List available states |
+| `GET` | `/prices/districts?state=` | No | List districts for a state |
+| `GET` | `/prices/crops?location=` | No | List crops for a district |
+| `GET` | `/prices/csv-trends?crop=&range=` | No | CSV-based or simulated trends |
+| `POST` | `/prices/ai-analysis` | No | AI market analysis from trend points |
+| `POST` | `/prices/forecast` | No | ML forecast with optional chat query |
 
 These are also mounted under `/api/prices/*`.
 
